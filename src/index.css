@@ -1,0 +1,387 @@
+/* Importar Google Fonts + Material Icons */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0&display=swap");
+
+/* Reset básico */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Base Styles */
+html {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background-color: var(--background);
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+}
+
+/* Reset typography for common elements */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Icon settings */
+.material-symbols-rounded {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+:root {
+  /* Color Primario - Marrón cálido (ajustado para tema oscuro) */
+  --primary-50: #2d1f16;
+  --primary-100: #3a2b20;
+  --primary-200: #4a3628;
+  --primary-300: #5c4433;
+  --primary-400: #775e41;
+  --primary-500: #bb8c5f; /* Color principal más claro */
+  --primary-600: #d1ad85;
+  --primary-700: #e2cdb3;
+  --primary-800: #f0e6d8;
+  --primary-900: #faf6f1;
+
+  /* Color Secundario - Azul Navy (ajustado) */
+  --secondary-50: #1b263b;
+  --secondary-100: #233144;
+  --secondary-200: #2d3f55;
+  --secondary-300: #374d66;
+  --secondary-400: #415a77;
+  --secondary-500: #718ab3; /* Color secundario más claro */
+  --secondary-600: #a3b8d4;
+  --secondary-700: #d0d9e7;
+  --secondary-800: #ebeef4;
+  --secondary-900: #f5f7fa;
+
+  /* Neutrales para tema oscuro */
+  --neutral-50: #0a0b0c;
+  --neutral-100: #1a1d21;
+  --neutral-200: #2d3339;
+  --neutral-300: #3f4651;
+  --neutral-400: #5c6670;
+  --neutral-500: #9ca3af;
+  --neutral-600: #d1d5db;
+  --neutral-700: #e5e7eb;
+  --neutral-800: #f3f4f6;
+  --neutral-900: #f9fafb;
+
+  /* Semánticos (ajustados para tema oscuro) */
+  --success-light: #064e3b;
+  --success: #10b981;
+  --success-dark: #34d399;
+
+  --warning-light: #78350f;
+  --warning: #f59e0b;
+  --warning-dark: #fbbf24;
+
+  --error-light: #7f1d1d;
+  --error: #ef4444;
+  --error-dark: #f87171;
+
+  --info-light: #0c4a6e;
+  --info: #06b6d4;
+  --info-dark: #38bdf8;
+
+  /* Superficies tema oscuro */
+  --background: var(--neutral-100);
+  --surface: var(--neutral-200);
+  --surface-hover: var(--neutral-300);
+  --surface-active: var(--neutral-400);
+
+  /* Bordes y Sombras */
+  --border: var(--neutral-300);
+  --border-focus: var(--primary-500);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+  /* Tipografía tema oscuro */
+  --text-primary: var(--neutral-900);
+  --text-secondary: var(--neutral-700);
+  --text-muted: var(--neutral-600);
+  --text-on-primary: var(--neutral-100);
+  --text-on-secondary: var(--neutral-100);
+
+  /* Radios */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+
+  /* Line Heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Font Weights */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+}
+
+/* Ejemplo de uso en botones */
+.btn-primary {
+  background: var(--color-primary-600);
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--color-secondary-600);
+  color: #fff;
+  border: none;
+}
+.btn-secondary:hover {
+  background: var(--secondary-hover);
+}
+.btn-outline-primary {
+  background: transparent;
+  color: var(--color-primary-600);
+  border: 1px solid var(--color-primary-600);
+}
+.btn-outline-primary:hover {
+  background: var(--color-primary-600);
+  color: #fff;
+}
+
+/* Ejemplo de uso en toasts */
+.toast-success {
+  background: var(--color-success);
+  color: #fff;
+}
+.toast-error {
+  background: var(--color-error);
+  color: #fff;
+}
+.toast-warning {
+  background: var(--color-warning);
+  color: #222;
+}
+.toast-info {
+  background: var(--color-info);
+  color: #fff;
+}
+
+/* Button System 2.0 - Advanced Component Architecture */
+.btn {
+  /* Smart Default System */
+  --_hue: var(--button-hue, 30); /* Brown base hue */
+  --_sat: var(--button-sat, 25%);
+  --_light: var(--button-light, 36%);
+  --_alpha: var(--button-alpha, 1);
+
+  /* Dynamic Color Generation */
+  --_base: hsl(var(--_hue) var(--_sat) var(--_light) / var(--_alpha));
+  --_light-bg: hsl(var(--_hue) var(--_sat) 96%);
+  --_darker: hsl(var(--_hue) var(--_sat) calc(var(--_light) - 10%));
+  --_darkest: hsl(var(--_hue) var(--_sat) calc(var(--_light) - 20%));
+
+  /* Adaptive Properties */
+  --_padding-ratio: var(--button-padding-ratio, 1);
+  --_size-factor: var(--button-size-factor, 1);
+  --_radius-scale: var(--button-radius-scale, 1);
+
+  /* Computed Dimensions */
+  --_block-padding: calc(0.625rem * var(--_padding-ratio));
+  --_inline-padding: calc(1rem * var(--_padding-ratio));
+  --_font-size: calc(0.875rem * var(--_size-factor));
+  --_radius: calc(var(--radius-md) * var(--_radius-scale));
+
+  /* Smart Defaults */
+  --_bg: var(--_base);
+  --_fg: var(--text-on-primary);
+  --_border: var(--_darker);
+  --_shadow: var(--shadow-sm);
+  --_transform: -1px;
+
+  /* Core Styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--_block-padding) var(--_inline-padding);
+  font-size: var(--_font-size);
+  font-weight: 500;
+  line-height: 1.5;
+  border-radius: var(--_radius);
+  background: var(--_bg);
+  color: var(--_fg);
+  border: 1px solid var(--_border);
+  box-shadow: var(--_shadow);
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Intrinsic States */
+  &:where(:hover:not(:disabled)) {
+    --_transform: -2px;
+    --_bg: var(--_darker);
+    --_border: var(--_darkest);
+  }
+
+  &:where(:active:not(:disabled)) {
+    --_transform: 0px;
+    --_bg: var(--_darkest);
+  }
+
+  &:where(:disabled) {
+    --_alpha: 0.5;
+    cursor: not-allowed;
+  }
+
+  transform: translateY(var(--_transform));
+}
+
+/* Variant Tokens */
+.btn:where([data-variant="primary"]) {
+  --_hue: 30;
+  --_sat: 25%;
+  --_light: 36%;
+}
+.btn:where([data-variant="secondary"]) {
+  --_hue: 215;
+  --_sat: 30%;
+  --_light: 36%;
+}
+.btn:where([data-variant="success"]) {
+  --_hue: 142;
+  --_sat: 70%;
+  --_light: 35%;
+}
+.btn:where([data-variant="error"]) {
+  --_hue: 0;
+  --_sat: 84%;
+  --_light: 60%;
+}
+
+/* Visual Variants */
+.btn:where([data-visual="outline"]) {
+  --_bg: transparent;
+  --_fg: var(--_base);
+
+  &:hover:not(:disabled) {
+    --_bg: var(--_light-bg);
+    --_fg: var(--_darker);
+  }
+}
+
+.btn:where([data-visual="ghost"]) {
+  --_bg: transparent;
+  --_fg: var(--_base);
+  --_border: transparent;
+  --_shadow: none;
+
+  &:hover:not(:disabled) {
+    --_bg: var(--_light-bg);
+  }
+}
+
+.btn:where([data-visual="soft"]) {
+  --_bg: var(--_light-bg);
+  --_fg: var(--_base);
+  --_border: transparent;
+  --_shadow: none;
+}
+
+/* Size Modifiers */
+.btn:where([data-size="sm"]) {
+  --_size-factor: 0.875;
+  --_padding-ratio: 0.8;
+}
+.btn:where([data-size="lg"]) {
+  --_size-factor: 1.125;
+  --_padding-ratio: 1.2;
+}
+
+/* Shape Modifiers */
+.btn:where([data-shape="pill"]) {
+  --_radius-scale: 999;
+}
+.btn:where([data-shape="square"]) {
+  --_inline-padding: var(--_block-padding);
+  aspect-ratio: 1;
+  padding: var(--_block-padding);
+}
+
+.btn:where([data-loading="true"]) {
+  color: transparent;
+  pointer-events: none;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: calc(var(--_font-size) * 1.2);
+    height: calc(var(--_font-size) * 1.2);
+    border: 2px solid var(--_fg);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+}
+
+.btn:where([data-full="true"]) {
+  width: 100%;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--_base);
+  outline-offset: 2px;
+}
+
+.btn:where([style*="--custom-width"]) {
+  width: var(--custom-width);
+}
+
+.btn:where([style*="--custom-height"]) {
+  height: var(--custom-height);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-outline-primary,
+.btn-danger {
+  cursor: pointer;
+}
