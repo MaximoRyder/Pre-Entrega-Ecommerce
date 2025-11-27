@@ -18,12 +18,28 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
         price: fullProduct.price != null ? `$${fullProduct.price}` : price,
         imageUrl: fullProduct.image || imageUrl,
         category: fullProduct.category,
-        stock: fullProduct.rating?.count || 0,
+        stock: Number(
+          fullProduct?.rating?.count ??
+            fullProduct?.quantity ??
+            fullProduct?.stock ??
+            0
+        ),
       }
     : { id, name, price, imageUrl };
 
   const productInCart = cart.find((item) => item.id === id);
   const qty = productInCart ? productInCart.quantity : 1;
+  const rawStock = fullProduct
+    ? fullProduct?.rating?.count ??
+      fullProduct?.quantity ??
+      fullProduct?.stock ??
+      fullProduct?.count ??
+      null
+    : null;
+  const availableStock = typeof rawStock === "number" ? Number(rawStock) : null;
+  const existingQty = productInCart ? productInCart.quantity : 0;
+  const remainingStock =
+    availableStock == null ? null : Math.max(0, availableStock - existingQty);
 
   return (
     <div className="product-card">
@@ -39,7 +55,15 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
           <div className="pc-price-stock">
             <div className="pc-price">{price}</div>
             <div className="pc-stock">
-              {fullProduct?.rating?.count || "No"} disponibles
+              {(() => {
+                const s =
+                  fullProduct &&
+                  (fullProduct.rating?.count ??
+                    fullProduct.quantity ??
+                    fullProduct.stock);
+                if (s == null) return "Sin información";
+                return `${s} disponibles`;
+              })()}
             </div>
           </div>
           {productInCart ? (
@@ -48,15 +72,32 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                 value={qty}
                 onChange={(v) => {
                   if (!v || Number(v) < 1) return removeFromCart(id);
-                  const diff = Number(v) - (productInCart.quantity || 0);
-                  if (diff > 0) addToCart({ ...product, quantity: diff });
+                  const desired = Number(v);
+                  const stock = availableStock;
+                  if (typeof stock === "number" && desired > stock) {
+                    showToast(
+                      `No hay stock suficiente. Máximo: ${stock}`,
+                      2000,
+                      "info"
+                    );
+                    return;
+                  }
+                  const diff = desired - (productInCart.quantity || 0);
+                  if (diff > 0) {
+                    const canAdd = Math.min(
+                      diff,
+                      Math.max(0, stock - productInCart.quantity)
+                    );
+                    if (canAdd > 0) addToCart({ ...product, quantity: canAdd });
+                  }
                   if (diff < 0)
                     Array.from({ length: Math.abs(diff) }).forEach(() =>
                       decreaseQuantity(id)
                     );
                 }}
                 min={1}
-                max={product?.rating?.count ?? 9999}
+                stock={availableStock}
+                existing={0}
                 onDelete={() => setShowConfirm(true)}
                 deleteLabel="Eliminar producto"
               />
@@ -68,8 +109,28 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                 data-variant="primary"
                 data-visual="soft"
                 data-size="sm"
+                disabled={
+                  typeof availableStock === "number"
+                    ? availableStock <= 0
+                    : false
+                }
                 onClick={() => {
-                  addToCart(product);
+                  if (
+                    typeof availableStock === "number" &&
+                    availableStock <= 0
+                  ) {
+                    showToast("Producto agotado", 1800, "info");
+                    return;
+                  }
+                  const toAdd = Math.min(
+                    1,
+                    remainingStock == null ? 1 : remainingStock
+                  );
+                  if (toAdd <= 0) {
+                    showToast("No hay stock disponible", 1800, "info");
+                    return;
+                  }
+                  addToCart({ ...product, quantity: toAdd });
                   showToast(`${product.name || name} añadido al carrito`);
                 }}
                 style={{
