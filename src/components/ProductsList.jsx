@@ -24,10 +24,12 @@ const ProductsList = () => {
     setLoading(true);
 
     Promise.all([
-      fetch("https://fakestoreapi.com/products").then((res) => {
-        if (!res.ok) throw new Error("Error al obtener productos");
-        return res.json();
-      }),
+      fetch("https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products").then(
+        (res) => {
+          if (!res.ok) throw new Error("Error al obtener productos");
+          return res.json();
+        }
+      ),
       fetch("https://fakestoreapi.com/products/categories").then((res) => {
         if (!res.ok) throw new Error("Error al obtener categorías");
         return res.json();
