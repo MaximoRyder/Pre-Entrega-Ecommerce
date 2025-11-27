@@ -1,10 +1,20 @@
+import AdminCategories from "./AdminCategories";
 import AdminProducts from "./AdminProducts";
 
 const Admin = () => {
   return (
     <main style={{ padding: 24 }}>
       <h2>Panel de administración</h2>
-      <AdminProducts />
+      <div
+        style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 24 }}
+      >
+        <div>
+          <AdminProducts />
+        </div>
+        <aside>
+          <AdminCategories />
+        </aside>
+      </div>
     </main>
   );
 };
