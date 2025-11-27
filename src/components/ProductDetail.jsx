@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import "../styles/ProductDetail.css";
+import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 
 const ProductDetail = () => {
@@ -10,8 +11,10 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { addToCart } = useContext(CartContext);
+  const { addToCart, cart, decreaseQuantity, removeFromCart } =
+    useContext(CartContext);
   const [qty, setQty] = useState(1);
+  const [showConfirm, setShowConfirm] = useState(false);
   const { showToast } = useContext(ToastContext);
 
   const formatPrice = (value) => {
@@ -22,6 +25,40 @@ const ProductDetail = () => {
   };
 
   const totalPrice = product ? Number(product.price) * qty : 0;
+
+  const existingInCart = (() => {
+    if (!cart || !product) return 0;
+    const found = cart.find((it) => String(it.id) === String(product.id));
+    return found ? Number(found.quantity) || 0 : 0;
+  })();
+
+  const getStockFromProduct = (p) => {
+    if (!p) return null;
+    const s = p.rating?.count ?? p.quantity ?? p.stock ?? p.count;
+    if (s == null) return null;
+    return Number(s);
+  };
+
+  const availableStock = getStockFromProduct(product);
+  const remainingStock =
+    availableStock == null
+      ? null
+      : Math.max(0, availableStock - existingInCart);
+
+  useEffect(() => {
+    if (existingInCart > 0) return;
+    if (remainingStock === null) return;
+    if (remainingStock === 0) {
+      setQty(0);
+    } else {
+      setQty((prev) => {
+        const n = Number(prev) || 0;
+        if (n < 1) return 1;
+        if (n > remainingStock) return remainingStock;
+        return n;
+      });
+    }
+  }, [remainingStock, existingInCart]);
 
   useEffect(() => {
     let mounted = true;
@@ -99,20 +136,53 @@ const ProductDetail = () => {
             <div className="pd-price">${formatPrice(product.price)}</div>
           </div>
           <div className="pd-stock">
-            {product?.rating?.count ?? 0} disponibles
+            {(() => {
+              const s = getStockFromProduct(product);
+              if (s == null) return "Sin información";
+              return `${s} disponibles`;
+            })()}
           </div>
         </div>
 
         <div className="pd-quantity-section">
           <div className="pd-quantity-label">Cantidad:</div>
           <div className="quantity-selector-wrapper">
-            <QuantitySelector
-              value={qty}
-              onChange={setQty}
-              min={1}
-              max={product?.rating?.count ?? 9999}
-              onDelete={null}
-            />
+            {remainingStock === 0 && existingInCart === 0 ? (
+              <div style={{ color: "#b00" }}>Agotado</div>
+            ) : (
+              <QuantitySelector
+                value={existingInCart > 0 ? existingInCart : qty}
+                onChange={(v) => {
+                  if (!v || Number(v) < 1) {
+                    if (existingInCart > 0) return removeFromCart(product.id);
+                    return setQty(1);
+                  }
+                  const desired = Number(v);
+                  const diff = desired - (existingInCart || 0);
+                  if (diff > 0) {
+                    addToCart({
+                      id: product.id,
+                      name: product.title,
+                      price: `$${formatPrice(product.price)}`,
+                      imageUrl: product.image,
+                      quantity: diff,
+                    });
+                  }
+                  if (diff < 0)
+                    Array.from({ length: Math.abs(diff) }).forEach(() =>
+                      decreaseQuantity(product.id)
+                    );
+
+                  if (existingInCart === 0) setQty(desired);
+                }}
+                min={1}
+                stock={availableStock}
+                existing={0}
+                onDelete={
+                  existingInCart > 0 ? () => setShowConfirm(true) : null
+                }
+              />
+            )}
           </div>
         </div>
 
@@ -123,24 +193,54 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        <button
-          className="btn pd-add-to-cart"
-          data-variant="primary"
-          data-visual="solid"
-          onClick={() => {
-            addToCart({
-              id: product.id,
-              name: product.title,
-              price: `$${formatPrice(product.price)}`,
-              imageUrl: product.image,
-              quantity: qty,
-            });
-            showToast(`${product.title} añadido al carrito`);
+        {existingInCart === 0 && (
+          <button
+            className="btn pd-add-to-cart"
+            data-variant="primary"
+            data-visual="solid"
+            disabled={remainingStock === 0}
+            onClick={() => {
+              const qtyToAdd = Number(qty) || 1;
+              if (qtyToAdd <= 0) return;
+              if (remainingStock !== null && qtyToAdd > remainingStock) {
+                showToast(
+                  `No puedes agregar ${qtyToAdd} unidades. Stock restante: ${remainingStock}`,
+                  2200,
+                  "info"
+                );
+                return;
+              }
+
+              addToCart({
+                id: product.id,
+                name: product.title,
+                price: `$${formatPrice(product.price)}`,
+                imageUrl: product.image,
+                quantity: qtyToAdd,
+              });
+              showToast(`${product.title} añadido al carrito`);
+
+              if (remainingStock === null) setQty(1);
+              else setQty(remainingStock > 0 ? 1 : 0);
+            }}
+          >
+            <span className="material-symbols-rounded">add_shopping_cart</span>
+            {remainingStock === 0 ? "Agotado" : "Agregar al carrito"}
+          </button>
+        )}
+        <ConfirmModal
+          open={!!showConfirm}
+          onClose={() => setShowConfirm(false)}
+          onConfirm={() => {
+            removeFromCart(product.id);
+            showToast(`${product.title} eliminado del carrito`, 1800, "info");
+            setShowConfirm(false);
           }}
-        >
-          <span className="material-symbols-rounded">add_shopping_cart</span>
-          Agregar al carrito
-        </button>
+          title="¿Estás seguro?"
+          message={`¿Deseas eliminar el producto "${product.title}" de tu carrito? Esta acción no se puede deshacer.`}
+          cancelText="Cancelar"
+          confirmText="Eliminar"
+        />
       </div>
     </div>
   );
