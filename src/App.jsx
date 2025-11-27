@@ -1,34 +1,57 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import About from "./components/About";
+import Admin from "./components/Admin";
 import CartPage from "./components/CartPage";
 import FAQ from "./components/FAQ";
 import Home from "./components/Home";
 import Layout from "./components/Layout";
+import Login from "./components/Login";
 import ProductDetail from "./components/ProductDetail";
+import RequireAdmin from "./components/RequireAdmin";
+import RequireAuth from "./components/RequireAuth";
+import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { FilterProvider } from "./context/FilterProvider";
 import { ToastProvider } from "./context/ToastContext";
 
 function App() {
   return (
-    <CartProvider>
-      <FilterProvider>
-        <ToastProvider>
-          <BrowserRouter basename="/Pre-Entrega-Ecommerce">
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="about" element={<About />} />
-                <Route path="faq" element={<FAQ />} />
-                <Route path="product/:id" element={<ProductDetail />} />
-                <Route path="cart" element={<CartPage />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </ToastProvider>
-      </FilterProvider>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <FilterProvider>
+          <ToastProvider>
+            <BrowserRouter basename="/Pre-Entrega-Ecommerce">
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Home />} />
+                  <Route path="about" element={<About />} />
+                  <Route path="login" element={<Login />} />
+                  <Route
+                    path="admin"
+                    element={
+                      <RequireAdmin>
+                        <Admin />
+                      </RequireAdmin>
+                    }
+                  />
+                  <Route path="faq" element={<FAQ />} />
+                  <Route path="product/:id" element={<ProductDetail />} />
+                  <Route
+                    path="cart"
+                    element={
+                      <RequireAuth>
+                        <CartPage />
+                      </RequireAuth>
+                    }
+                  />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </ToastProvider>
+        </FilterProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

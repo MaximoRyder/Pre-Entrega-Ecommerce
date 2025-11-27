@@ -1,10 +1,12 @@
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import "../styles/Header.css";
 
 const Header = () => {
   const { cart } = useContext(CartContext);
+  const { isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const goToCart = () => navigate("/cart");
 
@@ -27,6 +29,23 @@ const Header = () => {
             <li>
               <Link to="/about">Nosotros</Link>
             </li>
+            {!isAuthenticated ? (
+              <li>
+                <Link to="/login">Ingresar</Link>
+              </li>
+            ) : (
+              <li>
+                <button
+                  className="btn-link"
+                  onClick={() => {
+                    logout();
+                    navigate("/");
+                  }}
+                >
+                  Cerrar sesión
+                </button>
+              </li>
+            )}
             <li>
               <Link to="/faq">Preguntas Frecuentes</Link>
             </li>
