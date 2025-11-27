@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import "../styles/CartPage.css";
@@ -11,6 +11,7 @@ const CartPage = () => {
   const { showToast } = useContext(ToastContext);
   const [toDelete, setToDelete] = useState(null);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [productStocks, setProductStocks] = useState({});
 
   const subtotal = cart.reduce((s, item) => {
     const price =
@@ -19,6 +20,39 @@ const CartPage = () => {
         : Number(item.price || 0);
     return s + price * (item.quantity || 1);
   }, 0);
+
+  useEffect(() => {
+    let mounted = true;
+    const API = "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+    async function loadStocks() {
+      try {
+        if (!cart || cart.length === 0) {
+          if (mounted) setProductStocks({});
+          return;
+        }
+        const ids = cart.map((i) => i.id);
+        const results = await Promise.all(
+          ids.map((id) =>
+            fetch(`${API}/${id}`)
+              .then((r) => (r.ok ? r.json() : null))
+              .catch(() => null)
+          )
+        );
+        const map = {};
+        for (const p of results) {
+          if (p && p.id) {
+            map[p.id] = Number(p.rating?.count ?? p.quantity ?? p.stock ?? 0);
+          }
+        }
+        if (mounted) setProductStocks(map);
+      } catch (err) {
+        console.warn("No se pudo obtener stock de productos:", err);
+      }
+    }
+
+    loadStocks();
+    return () => (mounted = false);
+  }, [cart]);
 
   return (
     <div className="cart-page">
@@ -41,7 +75,8 @@ const CartPage = () => {
                       value={item.quantity}
                       onChange={(v) => {
                         if (!v || Number(v) < 1) return removeFromCart(item.id);
-                        const diff = Number(v) - (item.quantity || 0);
+                        const desired = Number(v);
+                        const diff = desired - (item.quantity || 0);
                         if (diff > 0) {
                           addToCart({ ...item, quantity: diff });
                           showToast(`${item.name} añadido al carrito`);
@@ -52,7 +87,8 @@ const CartPage = () => {
                           );
                       }}
                       min={1}
-                      max={9999}
+                      stock={productStocks[item.id] ?? null}
+                      existing={0}
                       onDelete={() => setToDelete(item)}
                       deleteLabel={`Eliminar ${item.name}`}
                     />
