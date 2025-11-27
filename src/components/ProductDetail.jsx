@@ -26,22 +26,52 @@ const ProductDetail = () => {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    fetch(`https://fakestoreapi.com/products/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al obtener el producto");
-        return res.json();
-      })
-      .then((data) => {
-        if (mounted) setProduct(data);
-      })
-      .catch((err) => {
-        if (mounted) setError(err.message || "Error desconocido");
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
 
-    return () => (mounted = false);
+    async function load() {
+      try {
+        const MOCK_API = `https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products/${id}`;
+        const FALLBACK = `https://fakestoreapi.com/products/${id}`;
+
+        async function safeJson(res) {
+          const text = await res.text();
+          if (!text || !text.trim()) throw new Error("Empty response body");
+          try {
+            return JSON.parse(text);
+          } catch {
+            throw new Error("Invalid JSON in response");
+          }
+        }
+
+        let res = await fetch(MOCK_API);
+        if (res.ok) {
+          try {
+            const data = await safeJson(res);
+            if (mounted) setProduct(data);
+            return;
+          } catch (e) {
+            console.warn(
+              "MockAPI returned invalid/empty body, trying fallback:",
+              e.message
+            );
+          }
+        }
+
+        res = await fetch(FALLBACK);
+        if (!res.ok) throw new Error("Error al obtener el producto (fallback)");
+        const data = await safeJson(res);
+        if (mounted) setProduct(data);
+      } catch (err) {
+        if (mounted) setError(err.message || "Error desconocido");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   if (loading) return <p>Cargando detalle del producto...</p>;
