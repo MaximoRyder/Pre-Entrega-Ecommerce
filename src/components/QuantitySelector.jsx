@@ -8,9 +8,17 @@ const QuantitySelector = ({
   disabled = false,
   onDelete = null,
   deleteLabel = "Eliminar",
+  stock = null,
+  existing = 0,
 }) => {
+  const remaining =
+    typeof stock === "number"
+      ? Math.max(0, Number(stock) - (Number(existing) || 0))
+      : null;
+  const effectiveMax = remaining == null ? max : Math.max(1, remaining);
+
   const dec = () => onChange(Math.max(min, (Number(value) || 0) - 1));
-  const inc = () => onChange(Math.min(max, (Number(value) || 0) + 1));
+  const inc = () => onChange(Math.min(effectiveMax, (Number(value) || 0) + 1));
 
   return (
     <div className="qs-controls">
@@ -31,20 +39,20 @@ const QuantitySelector = ({
         className="qs-input"
         value={value}
         min={min}
-        max={max}
+        max={effectiveMax}
         onChange={(e) => {
           const v = e.target.value;
           if (v === "") return onChange("");
           const n = Math.trunc(Number(v) || 0);
           if (n < min) onChange(min);
-          else if (n > max) onChange(max);
+          else if (n > effectiveMax) onChange(effectiveMax);
           else onChange(n);
         }}
         onBlur={() => {
           let n = Number(value) || min;
           if (!Number.isInteger(n)) n = Math.trunc(n);
           if (n < min) n = min;
-          if (n > max) n = max;
+          if (n > effectiveMax) n = effectiveMax;
           onChange(n);
         }}
         disabled={disabled}
@@ -57,7 +65,7 @@ const QuantitySelector = ({
         data-size="sm"
         data-shape="square"
         onClick={inc}
-        disabled={disabled || Number(value) >= max}
+        disabled={disabled || Number(value) >= effectiveMax}
         aria-label="Aumentar cantidad"
       >
         <span className="material-symbols-rounded">add</span>
