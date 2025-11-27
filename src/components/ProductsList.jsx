@@ -23,31 +23,54 @@ const ProductsList = () => {
     let mounted = true;
     setLoading(true);
 
-    Promise.all([
-      fetch("https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products").then(
-        (res) => {
-          if (!res.ok) throw new Error("Error al obtener productos");
-          return res.json();
+    async function loadData() {
+      try {
+        const res = await fetch(
+          "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products"
+        );
+        if (!res.ok) throw new Error("Error al obtener productos");
+        const productsData = await res.json();
+
+        let categoriesData = [];
+        try {
+          const cRes = await fetch(
+            "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/categories"
+          );
+          if (cRes.ok) {
+            const maybe = await cRes.json();
+            if (
+              Array.isArray(maybe) &&
+              maybe.every((i) => typeof i === "string")
+            ) {
+              categoriesData = maybe;
+            }
+          }
+        } catch (err) {
+          console.warn("No se pudo obtener /categories, usando fallback:", err);
         }
-      ),
-      fetch("https://fakestoreapi.com/products/categories").then((res) => {
-        if (!res.ok) throw new Error("Error al obtener categorías");
-        return res.json();
-      }),
-    ])
-      .then(([productsData, categoriesData]) => {
+
+        if (!categoriesData || categoriesData.length === 0) {
+          const set = new Set(
+            productsData
+              .map((p) => (p && p.category ? String(p.category).trim() : ""))
+              .filter((c) => c)
+          );
+          categoriesData = Array.from(set);
+        }
+
         if (mounted) {
           setProducts(productsData);
           setFiltered(productsData);
           setCategories(categoriesData);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         if (mounted) setError(err.message || "Error desconocido");
-      })
-      .finally(() => {
+      } finally {
         if (mounted) setLoading(false);
-      });
+      }
+    }
+
+    loadData();
 
     return () => (mounted = false);
   }, []);
