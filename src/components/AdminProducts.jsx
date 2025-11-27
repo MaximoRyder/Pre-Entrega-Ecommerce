@@ -14,9 +14,10 @@ const emptyForm = {
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editing, setEditing] = useState(null); // id when editing
+  const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const { showToast } = useContext(ToastContext);
 
@@ -35,8 +36,33 @@ const AdminProducts = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(
+        "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/categories"
+      );
+      if (!res.ok) return setCategories([]);
+      const maybe = await res.json();
+      if (Array.isArray(maybe)) {
+        if (maybe.every((i) => typeof i === "string")) {
+          setCategories(maybe.map((s) => ({ id: s, name: s })));
+        } else if (maybe.every((i) => i && (i.name || i.title))) {
+          setCategories(
+            maybe.map((i) => ({
+              id: i.id ?? (i.name || i.title),
+              name: i.name || i.title,
+            }))
+          );
+        } else setCategories([]);
+      }
+    } catch {
+      setCategories([]);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const handleChange = (e) => {
@@ -64,11 +90,13 @@ const AdminProducts = () => {
         image: form.image,
         price: Number(form.price),
         quantity: Number(form.quantity),
-        category: form.category,
+        category:
+          categories && categories.find((c) => c.id === form.category)
+            ? form.category
+            : form.category,
       };
 
       if (editing) {
-        // update
         const res = await fetch(`${API_BASE}/${editing}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -77,7 +105,6 @@ const AdminProducts = () => {
         if (!res.ok) throw new Error("Error actualizando producto");
         showToast("Producto actualizado", 1600, "success");
       } else {
-        // create
         const res = await fetch(API_BASE, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -179,11 +206,26 @@ const AdminProducts = () => {
           <label>
             Categoría
             <br />
-            <input
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-            />
+            {categories && categories.length > 0 ? (
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+              >
+                <option value="">-- Selecciona --</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+              />
+            )}
           </label>
         </div>
         <div style={{ marginTop: 8 }}>
@@ -226,7 +268,15 @@ const AdminProducts = () => {
             <tr key={p.id}>
               <td>{p.id}</td>
               <td>{p.title}</td>
-              <td>{p.category}</td>
+              <td>
+                {(() => {
+                  const prodCat = p.category;
+                  const found =
+                    categories.find((c) => c.id === prodCat) ||
+                    categories.find((c) => String(c.name) === String(prodCat));
+                  return found ? found.name : prodCat;
+                })()}
+              </td>
               <td>{p.price}</td>
               <td>{p.quantity ?? "-"}</td>
               <td>
