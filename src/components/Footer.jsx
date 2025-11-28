@@ -11,7 +11,9 @@ const Footer = () => {
           </p>
         </div>
         <div className="space-y-3">
-          <h4 className="text-neutral-200 text-base font-semibold">Navegación</h4>
+          <h4 className="text-neutral-200 text-base font-semibold">
+            Navegación
+          </h4>
           <ul className="flex flex-col gap-2 text-sm">
             <li>
               <Link className="hover:text-primary-400 transition-colors" to="/">
@@ -19,17 +21,26 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link className="hover:text-primary-400 transition-colors" to="/about">
+              <Link
+                className="hover:text-primary-400 transition-colors"
+                to="/about"
+              >
                 Nosotros
               </Link>
             </li>
             <li>
-              <Link className="hover:text-primary-400 transition-colors" to="/faq">
+              <Link
+                className="hover:text-primary-400 transition-colors"
+                to="/faq"
+              >
                 Preguntas Frecuentes
               </Link>
             </li>
             <li>
-              <Link className="hover:text-primary-400 transition-colors" to="/cart">
+              <Link
+                className="hover:text-primary-400 transition-colors"
+                to="/cart"
+              >
                 Carrito
               </Link>
             </li>
@@ -39,11 +50,15 @@ const Footer = () => {
           <h4 className="text-neutral-200 text-base font-semibold">Contacto</h4>
           <div className="flex flex-col gap-2 text-sm text-neutral-400">
             <p className="flex items-center gap-2">
-              <span className="material-symbols-rounded text-primary-400 text-base">mail</span>
+              <span className="material-symbols-rounded text-primary-400 text-base">
+                mail
+              </span>
               info@mitienda.com
             </p>
             <p className="flex items-center gap-2">
-              <span className="material-symbols-rounded text-primary-400 text-base">phone</span>
+              <span className="material-symbols-rounded text-primary-400 text-base">
+                phone
+              </span>
               +54 (341) 2268107
             </p>
           </div>
