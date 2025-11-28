@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "../styles/AdminOrders.css";
 import { formatCurrency, formatNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 
@@ -202,110 +201,111 @@ const AdminOrders = () => {
     }
   };
 
-  if (loading) return <p>Cargando pedidos...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading)
+    return (
+      <p className="px-4 py-6 text-sm text-gray-600">Cargando pedidos...</p>
+    );
+  if (error)
+    return <p className="px-4 py-6 text-sm text-red-600">Error: {error}</p>;
 
   const localCount = (
     JSON.parse(localStorage.getItem("local_orders") || "[]") || []
   ).length;
 
   return (
-    <div className="admin-orders">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h3>Pedidos</h3>
-        <div>
-          {localCount > 0 && (
-            <button
-              className="btn"
-              style={{ marginRight: 8 }}
-              onClick={syncLocalOrders}
-            >
-              Sincronizar {localCount} pedido(s) locales
-            </button>
-          )}
-        </div>
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <div className="flex items-center justify-between">
+        <h3 className="text-2xl font-semibold tracking-tight">Pedidos</h3>
+        {localCount > 0 && (
+          <button
+            onClick={syncLocalOrders}
+            className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+          >
+            Sincronizar {localCount} pedido(s) locales
+          </button>
+        )}
       </div>
+
       {orders.length === 0 ? (
-        <p>No hay pedidos</p>
+        <p className="text-sm text-gray-600">No hay pedidos</p>
       ) : (
-        <div className="orders-list">
+        <div className="grid gap-6">
           {orders.map((o) => (
-            <div key={o.id} className="order-card">
-              <div className="order-top">
-                <div>
-                  <strong>#{o.id}</strong> — {o.userEmail}
+            <div
+              key={o.id}
+              className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 space-y-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
+                  <span className="font-semibold">#{o.id}</span> — {o.userEmail}
                   {o.local && (
-                    <span
-                      style={{
-                        marginLeft: 8,
-                        padding: "2px 6px",
-                        background: "#ffeeba",
-                        borderRadius: 4,
-                        fontSize: 12,
-                      }}
-                    >
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
                       Local
                     </span>
                   )}
                   {o.syncError && (
-                    <span
-                      style={{
-                        marginLeft: 8,
-                        padding: "2px 6px",
-                        background: "#f8d7da",
-                        borderRadius: 4,
-                        fontSize: 12,
-                      }}
-                    >
+                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-medium">
                       Sync Error
                     </span>
                   )}
                 </div>
-                <div>{new Date(o.createdAt).toLocaleString()}</div>
+                <div className="text-xs text-gray-600 whitespace-nowrap">
+                  {new Date(o.createdAt).toLocaleString()}
+                </div>
               </div>
-              <div className="order-body">
-                <div className="order-items">
+
+              <div className="space-y-4">
+                <div>
                   {o.items && o.items.length > 0 ? (
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Producto</th>
-                          <th>Cantidad</th>
-                          <th>Precio</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {o.items.map((it, idx) => (
-                          <tr key={idx}>
-                            <td>{it.name}</td>
-                            <td>
-                              {formatNumber(it.quantity, {
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0,
-                              })}
-                            </td>
-                            <td>{formatCurrency(it.price)}</td>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+                            <th className="py-2 pr-4 font-medium">Producto</th>
+                            <th className="py-2 pr-4 font-medium">Cantidad</th>
+                            <th className="py-2 font-medium">Precio</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {o.items.map((it, idx) => (
+                            <tr
+                              key={idx}
+                              className="border-b last:border-b-0 border-gray-100"
+                            >
+                              <td className="py-2 pr-4">{it.name}</td>
+                              <td className="py-2 pr-4">
+                                {formatNumber(it.quantity, {
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0,
+                                })}
+                              </td>
+                              <td className="py-2">
+                                {formatCurrency(it.price)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
-                    <p>No hay items</p>
+                    <p className="text-xs text-gray-500">No hay items</p>
                   )}
                 </div>
-                <div className="order-actions">
-                  <div>Subtotal: {formatCurrency(o.subtotal)}</div>
-                  <div>
-                    Estado:
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="text-sm text-gray-700">
+                    Subtotal:{" "}
+                    <span className="font-semibold">
+                      {formatCurrency(o.subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      Estado:
+                    </label>
                     <select
                       value={o.status}
                       onChange={(e) => updateStatus(o.id, e.target.value)}
+                      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     >
                       {statusOptions.map((s) => (
                         <option key={s} value={s}>
@@ -314,8 +314,11 @@ const AdminOrders = () => {
                       ))}
                     </select>
                   </div>
-                  <div style={{ marginTop: 8 }}>
-                    <button className="btn" onClick={() => setToDelete(o)}>
+                  <div>
+                    <button
+                      onClick={() => setToDelete(o)}
+                      className="inline-flex items-center gap-2 rounded-md border border-red-300 text-red-600 hover:bg-red-50 text-xs font-medium px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/40"
+                    >
                       Eliminar
                     </button>
                   </div>

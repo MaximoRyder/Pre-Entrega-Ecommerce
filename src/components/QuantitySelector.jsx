@@ -1,5 +1,3 @@
-import "../styles/QuantitySelector.css";
-
 const QuantitySelector = ({
   value,
   onChange,
@@ -21,22 +19,18 @@ const QuantitySelector = ({
   const inc = () => onChange(Math.min(effectiveMax, (Number(value) || 0) + 1));
 
   return (
-    <div className="qs-controls">
+    <div className="flex items-center gap-2">
       <button
-        className="btn"
-        data-variant="secondary"
-        data-visual="outline"
-        data-size="sm"
-        data-shape="square"
+        type="button"
         onClick={dec}
         disabled={disabled || Number(value) <= min}
         aria-label="Disminuir cantidad"
+        className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed w-9 h-9 text-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
       >
-        <span className="material-symbols-rounded">remove</span>
+        <span className="material-symbols-rounded text-base">remove</span>
       </button>
       <input
         type="number"
-        className="qs-input"
         value={value}
         min={min}
         max={effectiveMax}
@@ -57,31 +51,26 @@ const QuantitySelector = ({
         }}
         disabled={disabled}
         aria-label="Cantidad"
+        className="w-16 rounded-md border border-gray-300 bg-white px-2 py-1 text-center text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <button
-        className="btn"
-        data-variant="secondary"
-        data-visual="outline"
-        data-size="sm"
-        data-shape="square"
+        type="button"
         onClick={inc}
         disabled={disabled || Number(value) >= effectiveMax}
         aria-label="Aumentar cantidad"
+        className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed w-9 h-9 text-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
       >
-        <span className="material-symbols-rounded">add</span>
+        <span className="material-symbols-rounded text-base">add</span>
       </button>
       {onDelete && (
         <button
-          className="btn"
-          data-variant="error"
-          data-visual="outline"
-          data-size="sm"
-          data-shape="square"
+          type="button"
           onClick={onDelete}
           disabled={disabled}
           aria-label={deleteLabel}
+          className="inline-flex items-center justify-center rounded-md border border-red-300 text-red-600 bg-white hover:bg-red-50 w-9 h-9 text-sm focus:outline-none focus-visible:ring focus-visible:ring-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <span className="material-symbols-rounded">delete</span>
+          <span className="material-symbols-rounded text-base">delete</span>
         </button>
       )}
     </div>

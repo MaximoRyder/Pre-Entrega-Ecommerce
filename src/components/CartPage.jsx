@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
-import "../styles/CartPage.css";
 import { formatCurrency, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
@@ -24,7 +23,6 @@ const CartPage = () => {
     import.meta.env.VITE_PRODUCTS_API ||
     "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
 
-  // Helper: GET current product and PUT updated quantity with retries
   async function updateQuantityWithRetry(productUrl, quantity, attempts = 3) {
     let lastErr = null;
     for (let i = 0; i < attempts; i++) {
@@ -58,7 +56,6 @@ const CartPage = () => {
 
   useEffect(() => {
     let mounted = true;
-    const API = PRODUCTS_API;
     async function loadStocks() {
       try {
         if (!cart || cart.length === 0) {
@@ -68,14 +65,15 @@ const CartPage = () => {
         const ids = cart.map((i) => i.id);
         const results = await Promise.all(
           ids.map((id) =>
-            fetch(`${API}/${id}`)
+            fetch(`${PRODUCTS_API}/${id}`)
               .then((r) => (r.ok ? r.json() : null))
               .catch(() => null)
           )
         );
         const map = {};
         for (const p of results) {
-          if (p && p.id) map[p.id] = Number(p.quantity ?? p.stock ?? p.rating?.count ?? 0);
+          if (p && p.id)
+            map[p.id] = Number(p.quantity ?? p.stock ?? p.rating?.count ?? 0);
         }
         if (mounted) setProductStocks(map);
       } catch (err) {
@@ -83,7 +81,9 @@ const CartPage = () => {
       }
     }
     loadStocks();
-    return () => (mounted = false);
+    return () => {
+      mounted = false;
+    };
   }, [cart, PRODUCTS_API]);
 
   const handleFinalize = async () => {
@@ -124,13 +124,21 @@ const CartPage = () => {
         if (desired > avail) shortages.push({ name: it.name, desired, avail });
       }
       if (shortages.length > 0) {
-        const names = shortages.map((s) => `${s.name} (pedido: ${s.desired}, disponible: ${s.avail})`).join(", ");
+        const names = shortages
+          .map(
+            (s) => `${s.name} (pedido: ${s.desired}, disponible: ${s.avail})`
+          )
+          .join(", ");
         showToast(`Stock insuficiente: ${names}`, 5000, "error");
         return;
       }
     } catch (err) {
       console.error("Error verificando stock:", err);
-      showToast("No se pudo verificar stock. Intenta nuevamente.", 3000, "error");
+      showToast(
+        "No se pudo verificar stock. Intenta nuevamente.",
+        3000,
+        "error"
+      );
       return;
     }
 
@@ -154,9 +162,12 @@ const CartPage = () => {
         const prodRes = await fetch(`${PRODUCTS_API}/${it.id}`);
         if (!prodRes.ok) throw new Error(`No se pudo cargar producto ${it.id}`);
         const prod = await prodRes.json();
-        const available = Number(prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0);
+        const available = Number(
+          prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
+        );
         const desired = Number(it.quantity || 1);
-        if (desired > available) throw new Error(`Stock insuficiente para ${it.name}`);
+        if (desired > available)
+          throw new Error(`Stock insuficiente para ${it.name}`);
         const newCount = Math.max(0, available - desired);
         prevQuantities[it.id] = available;
         await updateQuantityWithRetry(`${PRODUCTS_API}/${it.id}`, newCount);
@@ -173,17 +184,20 @@ const CartPage = () => {
           console.error("Rollback failed for", id, rbErr);
         }
       }
-      showToast("No se pudo procesar el pedido por problemas de stock. Intenta nuevamente.", 4500, "error");
+      showToast(
+        "No se pudo procesar el pedido por problemas de stock. Intenta nuevamente.",
+        4500,
+        "error"
+      );
       return;
     }
 
     // All stock updates succeeded — now create the order remotely
     try {
-      const payload = order;
       const res = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(order),
       });
       if (!res.ok) {
         const text = await res.text().catch(() => null);
@@ -212,35 +226,55 @@ const CartPage = () => {
           createdAt: new Date().toISOString(),
           local: true,
         };
-        const existing = JSON.parse(localStorage.getItem("local_orders") || "[]");
+        const existing = JSON.parse(
+          localStorage.getItem("local_orders") || "[]"
+        );
         existing.push(fallback);
         localStorage.setItem("local_orders", JSON.stringify(existing));
         clearCart();
         showToast("Pedido guardado localmente (fallback)", 3500, "info");
       } catch (e) {
         console.error("No se pudo guardar pedido localmente", e);
-        showToast(`Error al crear el pedido: ${err.message || err}`, 4000, "error");
+        showToast(
+          `Error al crear el pedido: ${err.message || err}`,
+          4000,
+          "error"
+        );
       }
     }
   };
 
   return (
-    <div className="cart-page">
-      <div className="cart-page-left">
-        <h2>Tu Carrito ({cart.reduce((s, i) => s + (i.quantity || 1), 0)})</h2>
+    <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-3 gap-8">
+      {/* Left: Items */}
+      <div className="lg:col-span-2 space-y-6">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          Tu Carrito ({cart.reduce((s, i) => s + (i.quantity || 1), 0)})
+        </h2>
         {cart.length === 0 ? (
-          <p>Tu carrito está vacío</p>
+          <p className="text-sm text-gray-600">Tu carrito está vacío</p>
         ) : (
-          <div className="cart-items">
+          <div className="space-y-4">
             {cart.map((item) => (
-              <div key={item.id} className="cart-row">
-                <img src={item.imageUrl} alt={item.name} />
-                <div className="cart-row-info">
-                  <div className="cart-row-top">
-                    <strong>{item.name}</strong>
-                    <span className="cart-price">{formatCurrency(parseNumber(item.price))}</span>
+              <div
+                key={item.id}
+                className="flex gap-4 rounded-lg border border-gray-200 bg-white shadow-sm p-4"
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.name}
+                  className="w-20 h-20 object-contain rounded-md bg-white"
+                />
+                <div className="flex-1 flex flex-col justify-between gap-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <strong className="text-sm font-medium line-clamp-2">
+                      {item.name}
+                    </strong>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {formatCurrency(parseNumber(item.price))}
+                    </span>
                   </div>
-                  <div className="cart-row-bottom">
+                  <div>
                     <QuantitySelector
                       value={item.quantity}
                       onChange={(v) => {
@@ -270,37 +304,33 @@ const CartPage = () => {
         )}
       </div>
 
-      <aside className="cart-page-right">
-        <div className="order-summary">
-          <h3>Resumen del Pedido</h3>
-          <div className="summary-row">
-            <span>Subtotal</span>
-            <span>{formatCurrency(subtotal)}</span>
+      {/* Right: Summary */}
+      <aside className="space-y-6">
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6 space-y-4">
+          <h3 className="text-lg font-semibold">Resumen del Pedido</h3>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Subtotal</span>
+            <span className="font-medium">{formatCurrency(subtotal)}</span>
           </div>
-          <div className="summary-row">
-            <span>Envío</span>
-            <span>Gratis</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600">Envío</span>
+            <span className="font-medium">Gratis</span>
           </div>
-          <hr />
-          <div className="summary-total">
+          <hr className="border-gray-200" />
+          <div className="flex items-center justify-between text-base font-semibold">
             <strong>Total</strong>
             <strong>{formatCurrency(subtotal)}</strong>
           </div>
-          <div className="cart-actions">
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
-              className="btn"
-              data-variant="error"
-              data-visual="soft"
               onClick={() => setClearConfirm(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/40"
             >
               Vaciar carrito
             </button>
-
             <button
-              className="btn"
-              data-variant="primary"
-              data-visual="solid"
               onClick={handleFinalize}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
             >
               Finalizar compra
             </button>
@@ -308,6 +338,7 @@ const CartPage = () => {
         </div>
       </aside>
 
+      {/* Modals */}
       <ConfirmModal
         open={!!toDelete}
         onClose={() => setToDelete(null)}

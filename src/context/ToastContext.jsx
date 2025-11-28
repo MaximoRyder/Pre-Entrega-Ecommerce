@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import "../styles/Toast.css";
 import ToastContext, {
   ToastContext as ToastContextNamed,
 } from "./toastContextObj";
@@ -30,7 +29,23 @@ export const ToastProvider = ({ children }) => {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {toast.visible && (
-        <div className={`app-toast ${toast.type || "success"}`}>
+        <div
+          className={[
+            "fixed bottom-4 left-1/2 -translate-x-1/2 z-50",
+            "px-4 py-2 rounded-md shadow-lg text-sm font-medium",
+            "backdrop-blur-sm border",
+            toast.type === "error" && "bg-red-600 text-white border-red-500",
+            toast.type === "success" &&
+              "bg-green-600 text-white border-green-500",
+            toast.type === "info" && "bg-blue-600 text-white border-blue-500",
+            toast.type === "warning" &&
+              "bg-amber-500 text-white border-amber-400",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          role="status"
+          aria-live="polite"
+        >
           {toast.msg}
         </div>
       )}

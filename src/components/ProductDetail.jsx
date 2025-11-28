@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
-import "../styles/ProductDetail.css";
 import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
@@ -17,6 +16,7 @@ const ProductDetail = () => {
   const [qty, setQty] = useState(1);
   const [showConfirm, setShowConfirm] = useState(false);
   const { showToast } = useContext(ToastContext);
+
   const existingInCart = (() => {
     if (!cart || !product) return 0;
     const found = cart.find((it) => String(it.id) === String(product.id));
@@ -40,8 +40,9 @@ const ProductDetail = () => {
       ? null
       : Math.max(0, availableStock - existingInCart);
 
+  // Adjust local quantity when stock or cart changes
   useEffect(() => {
-    if (existingInCart > 0) return;
+    if (existingInCart > 0) return; // let cart drive displayed value
     if (remainingStock === null) return;
     if (remainingStock === 0) {
       setQty(0);
@@ -55,10 +56,10 @@ const ProductDetail = () => {
     }
   }, [remainingStock, existingInCart]);
 
+  // Load product data
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-
     async function load() {
       try {
         const MOCK_API = `https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products/${id}`;
@@ -81,13 +82,9 @@ const ProductDetail = () => {
             if (mounted) setProduct(data);
             return;
           } catch (e) {
-            console.warn(
-              "MockAPI returned invalid/empty body, trying fallback:",
-              e.message
-            );
+            console.warn("MockAPI invalid/empty body, fallback:", e.message);
           }
         }
-
         res = await fetch(FALLBACK);
         if (!res.ok) throw new Error("Error al obtener el producto (fallback)");
         const data = await safeJson(res);
@@ -98,9 +95,7 @@ const ProductDetail = () => {
         if (mounted) setLoading(false);
       }
     }
-
     load();
-
     return () => {
       mounted = false;
     };
@@ -111,26 +106,42 @@ const ProductDetail = () => {
   if (!product) return <p>Producto no encontrado</p>;
 
   return (
-    <div className="product-detail-card">
-      <div className="pd-left">
-        <div className="pd-image-container">
-          <img src={product.image} alt={product.title} className="pd-image" />
+    <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-10">
+      {/* Left column */}
+      <div className="space-y-6">
+        <div className="aspect-[4/5] w-full overflow-hidden rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center p-4">
+          <img
+            src={product.image}
+            alt={product.title}
+            className="object-contain h-full w-full"
+          />
         </div>
-
-        <div className="pd-info">
-          <span className="pd-category">{product.category}</span>
-          <h1 className="pd-title">{product.title}</h1>
-          <p className="pd-desc">{product.description}</p>
+        <div className="space-y-3">
+          <span className="uppercase tracking-wide text-xs font-medium text-primary-600">
+            {product.category}
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {product.title}
+          </h1>
+          <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+            {product.description}
+          </p>
         </div>
       </div>
 
-      <div className="pd-right">
-        <div className="pd-price-section">
-          <div className="pd-price-row">
-            <span className="pd-price-label">Precio unitario:</span>
-            <div className="pd-price">{formatCurrency(product.price)}</div>
+      {/* Right column */}
+      <div className="flex flex-col gap-6">
+        {/* Price / stock */}
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">
+              Precio unitario:
+            </span>
+            <div className="text-lg font-semibold text-gray-900">
+              {formatCurrency(product.price)}
+            </div>
           </div>
-          <div className="pd-stock">
+          <div className="text-xs text-gray-600">
             {(() => {
               const s = getStockFromProduct(product);
               if (s == null) return "Sin información";
@@ -142,11 +153,12 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        <div className="pd-quantity-section">
-          <div className="pd-quantity-label">Cantidad:</div>
-          <div className="quantity-selector-wrapper">
+        {/* Quantity */}
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 space-y-3">
+          <div className="text-sm font-medium text-gray-700">Cantidad:</div>
+          <div>
             {remainingStock === 0 && existingInCart === 0 ? (
-              <div style={{ color: "#b00" }}>Agotado</div>
+              <div className="text-sm font-semibold text-red-600">Agotado</div>
             ) : (
               <QuantitySelector
                 value={existingInCart > 0 ? existingInCart : qty}
@@ -170,7 +182,6 @@ const ProductDetail = () => {
                     Array.from({ length: Math.abs(diff) }).forEach(() =>
                       decreaseQuantity(product.id)
                     );
-
                   if (existingInCart === 0) setQty(desired);
                 }}
                 min={1}
@@ -184,18 +195,17 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        <div className="pd-total-section">
-          <div className="pd-total-row">
-            <span className="pd-total-label">Total:</span>
-            <div className="pd-total-price">{formatCurrency(totalPrice)}</div>
+        {/* Total */}
+        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">Total:</span>
+          <div className="text-xl font-semibold text-gray-900">
+            {formatCurrency(totalPrice)}
           </div>
         </div>
 
         {existingInCart === 0 && (
           <button
-            className="btn pd-add-to-cart"
-            data-variant="primary"
-            data-visual="solid"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-3 transition-colors shadow-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
             disabled={remainingStock === 0}
             onClick={() => {
               const qtyToAdd = Number(qty) || 1;
@@ -211,7 +221,6 @@ const ProductDetail = () => {
                 );
                 return;
               }
-
               addToCart({
                 id: product.id,
                 name: product.title,
@@ -220,12 +229,13 @@ const ProductDetail = () => {
                 quantity: qtyToAdd,
               });
               showToast(`${product.title} añadido al carrito`);
-
               if (remainingStock === null) setQty(1);
               else setQty(remainingStock > 0 ? 1 : 0);
             }}
           >
-            <span className="material-symbols-rounded">add_shopping_cart</span>
+            <span className="material-symbols-rounded text-white text-base">
+              add_shopping_cart
+            </span>
             {remainingStock === 0 ? "Agotado" : "Agregar al carrito"}
           </button>
         )}

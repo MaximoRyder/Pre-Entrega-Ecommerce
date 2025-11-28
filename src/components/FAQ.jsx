@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../styles/FAQ.css";
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -47,46 +46,60 @@ const FAQ = () => {
     },
   ];
 
-  const toggleFAQ = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+  const toggleFAQ = (index) => setOpenIndex(openIndex === index ? null : index);
 
   return (
-    <div className="faq-page">
-      <div className="faq-container">
-        <h1>Preguntas Frecuentes</h1>
-        <p className="faq-intro">
+    <div className="py-8">
+      <div className="max-w-3xl mx-auto px-4">
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Preguntas Frecuentes
+        </h1>
+        <p className="mt-4 text-sm text-gray-600 leading-relaxed">
           Encuentra respuestas a las preguntas más comunes sobre nuestros
           productos y servicios.
         </p>
 
-        <div className="faq-list">
-          {faqs.map((faq, index) => (
-            <div key={index} className="faq-item">
-              <button
-                className="faq-question"
-                onClick={() => toggleFAQ(index)}
-                aria-expanded={openIndex === index}
+        <div className="mt-8 space-y-4">
+          {faqs.map((faq, index) => {
+            const open = openIndex === index;
+            return (
+              <div
+                key={index}
+                className="rounded-lg border border-gray-200 bg-white shadow-sm"
               >
-                <span>{faq.question}</span>
-                <span className="material-symbols-rounded faq-icon">
-                  {openIndex === index ? "expand_less" : "expand_more"}
-                </span>
-              </button>
-              {openIndex === index && (
-                <div className="faq-answer">
-                  <p>{faq.answer}</p>
-                </div>
-              )}
-            </div>
-          ))}
+                <button
+                  className="w-full flex items-center justify-between px-4 py-3 text-left focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+                  onClick={() => toggleFAQ(index)}
+                  aria-expanded={open}
+                >
+                  <span className="font-medium text-sm md:text-base pr-4">
+                    {faq.question}
+                  </span>
+                  <span className="material-symbols-rounded text-gray-500">
+                    {open ? "expand_less" : "expand_more"}
+                  </span>
+                </button>
+                {open && (
+                  <div className="px-4 pb-4 -mt-1 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                    <p>{faq.answer}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        <div className="faq-contact">
-          <h3>¿No encontraste lo que buscabas?</h3>
-          <p>Contáctanos y te ayudaremos con cualquier duda adicional.</p>
-          <button className="btn" data-variant="primary" data-visual="solid">
-            <span className="material-symbols-rounded">mail</span>
+        <div className="mt-12 rounded-xl bg-gradient-to-r from-primary-50 to-primary-100 p-6 flex flex-col gap-3">
+          <h3 className="text-lg font-semibold">
+            ¿No encontraste lo que buscabas?
+          </h3>
+          <p className="text-sm text-gray-700">
+            Contáctanos y te ayudaremos con cualquier duda adicional.
+          </p>
+          <button className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40">
+            <span className="material-symbols-rounded text-white text-base">
+              mail
+            </span>
             Contactar Soporte
           </button>
         </div>

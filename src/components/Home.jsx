@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import FilterContext from "../context/searchContext";
-import "../styles/Home.css";
 import ProductsList from "./ProductsList";
 
 const Home = () => {
@@ -18,45 +17,48 @@ const Home = () => {
   };
 
   return (
-    <div className="home">
-      <div className="home-header">
-        <h2 className="home-title">Inicio</h2>
+    <div className="py-6">
+      <div className="max-w-6xl mx-auto px-4">
+        <h2 className="text-2xl font-semibold tracking-tight">Inicio</h2>
 
-        <form onSubmit={handleSearch} className="search-form">
+        <form
+          onSubmit={handleSearch}
+          className="mt-6 flex flex-col sm:flex-row gap-3"
+        >
           <input
             type="text"
             placeholder="Buscar productos..."
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            className="search-input"
+            className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
           <button
             type="submit"
-            className="btn search-button"
-            data-variant="primary"
-            data-visual="solid"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
           >
-            <span className="material-symbols-rounded">search</span>
+            <span className="material-symbols-rounded text-white text-base">
+              search
+            </span>
             Buscar
           </button>
         </form>
 
         {searchTerm && (
-          <div className="search-active">
-            <span className="search-active-label">Búsqueda activa:</span>
-            <div className="search-active-tag">
-              <span className="search-active-text">"{searchTerm}"</span>
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+              Búsqueda activa:
+            </span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-1.5">
+              <span className="text-sm font-medium text-primary-700 max-w-[220px] truncate">
+                "{searchTerm}"
+              </span>
               <button
                 type="button"
                 onClick={clearSearch}
-                className="btn search-clear-button"
-                data-variant="primary"
-                data-visual="ghost"
-                data-size="sm"
-                data-shape="square"
                 aria-label="Limpiar búsqueda"
+                className="size-7 inline-flex items-center justify-center rounded-full hover:bg-primary-100 text-primary-600 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
               >
-                <span className="material-symbols-rounded search-clear-icon">
+                <span className="material-symbols-rounded text-[18px]">
                   close
                 </span>
               </button>
@@ -65,7 +67,7 @@ const Home = () => {
         )}
       </div>
 
-      <div className="products-grid">
+      <div className="mt-8">
         <ProductsList />
       </div>
     </div>
