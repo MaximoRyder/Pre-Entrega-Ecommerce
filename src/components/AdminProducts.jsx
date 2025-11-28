@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { formatCurrency, parseNumber } from "../utils/format";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import Pagination from "./Pagination";
 
 // Endpoint de productos: usa env si está definida, sino fallback al mockapi original
 const API_ENV = import.meta.env.VITE_PRODUCTS_API;
@@ -36,6 +37,8 @@ const AdminProducts = () => {
   const [form, setForm] = useState(emptyProduct);
   const [deleting, setDeleting] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     if (!API) return;
@@ -188,7 +191,7 @@ const AdminProducts = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {products.slice((page - 1) * pageSize, page * pageSize).map((p) => (
               <tr
                 key={p.id}
                 className="border-b last:border-b-0 border-gray-100"
@@ -250,10 +253,17 @@ const AdminProducts = () => {
           </tbody>
         </table>
       </div>
+      <div className="hidden md:block mt-3">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(products.length / pageSize))}
+          onPageChange={setPage}
+        />
+      </div>
 
       {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
-        {products.map((p) => {
+        {products.slice((page - 1) * pageSize, page * pageSize).map((p) => {
           const catLabel = (() => {
             if (!categories.length) return p.category || "-";
             const match = categories.find(
@@ -314,6 +324,13 @@ const AdminProducts = () => {
             Sin productos
           </div>
         )}
+      </div>
+      <div className="md:hidden mt-2">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(products.length / pageSize))}
+          onPageChange={setPage}
+        />
       </div>
 
       <AdminEntityModal

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import FilterContext from "../context/searchContext";
 import { formatNumber } from "../utils/format";
+import Pagination from "./Pagination";
 import ProductCard from "./ProductCard";
 
 const formatCategoryName = (category) => {
@@ -18,6 +19,8 @@ const ProductsList = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     let mounted = true;
@@ -115,6 +118,9 @@ const ProductsList = () => {
     );
   }, [searchTerm, activeCategory, products]);
 
+  // reset page when filter set changes
+  useEffect(() => setPage(1), [filtered.length, activeCategory, searchTerm]);
+
   if (loading)
     return <p className="text-sm text-neutral-500">Cargando productos...</p>;
   if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
@@ -162,7 +168,7 @@ const ProductsList = () => {
       </div>
 
       <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {filtered.map((p) => {
+        {filtered.slice((page - 1) * pageSize, page * pageSize).map((p) => {
           const prodCat = p?.category ?? "";
           let displayCategory = prodCat;
           const byId = categories.find((c) => c.id === prodCat);
@@ -185,6 +191,11 @@ const ProductsList = () => {
           );
         })}
       </div>
+      <Pagination
+        page={page}
+        totalPages={Math.max(1, Math.ceil(filtered.length / pageSize))}
+        onPageChange={setPage}
+      />
     </section>
   );
 };

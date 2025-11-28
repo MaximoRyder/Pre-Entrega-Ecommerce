@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import Pagination from "./Pagination";
 
 // Endpoint de usuarios (env o fallback)
 const USERS_API_ENV = import.meta.env.VITE_USERS_API;
@@ -23,6 +24,8 @@ const AdminUsers = () => {
   const [form, setForm] = useState(emptyUser);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     setLoading(true);
@@ -132,7 +135,7 @@ const AdminUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
+            {users.slice((page - 1) * pageSize, page * pageSize).map((u) => (
               <tr
                 key={u.id}
                 className="border-b last:border-b-0 border-gray-100"
@@ -185,10 +188,17 @@ const AdminUsers = () => {
           </tbody>
         </table>
       </div>
+      <div className="hidden md:block mt-3">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(users.length / pageSize))}
+          onPageChange={setPage}
+        />
+      </div>
 
       {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
-        {users.map((u) => (
+        {users.slice((page - 1) * pageSize, page * pageSize).map((u) => (
           <div
             key={u.id}
             className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
@@ -233,6 +243,13 @@ const AdminUsers = () => {
             Sin usuarios
           </div>
         )}
+      </div>
+      <div className="md:hidden mt-2">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(users.length / pageSize))}
+          onPageChange={setPage}
+        />
       </div>
 
       <AdminEntityModal

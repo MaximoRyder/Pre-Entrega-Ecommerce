@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import Pagination from "./Pagination";
 
 // Endpoint de categorías: usa env si está, sino fallback al mockapi
 const API_ENV = import.meta.env.VITE_CATEGORIES_API;
@@ -23,6 +24,8 @@ const AdminCategories = () => {
   const [form, setForm] = useState(emptyCategory);
   const [deleting, setDeleting] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     if (!API) return; // silent if endpoint missing
@@ -131,37 +134,39 @@ const AdminCategories = () => {
             </tr>
           </thead>
           <tbody>
-            {categories.map((c) => (
-              <tr
-                key={c.id}
-                className="border-b last:border-b-0 border-gray-100"
-              >
-                <td
-                  className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[160px] truncate"
-                  title={c.name}
+            {categories
+              .slice((page - 1) * pageSize, page * pageSize)
+              .map((c) => (
+                <tr
+                  key={c.id}
+                  className="border-b last:border-b-0 border-gray-100"
                 >
-                  {c.name}
-                </td>
-                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openEdit(c)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
-                      aria-label="Editar"
-                    >
-                      <PencilSquareIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => confirmDelete(c)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
-                      aria-label="Eliminar"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  <td
+                    className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[160px] truncate"
+                    title={c.name}
+                  >
+                    {c.name}
+                  </td>
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openEdit(c)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                        aria-label="Editar"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => confirmDelete(c)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                        aria-label="Eliminar"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             {categories.length === 0 && !loading && !error && (
               <tr>
                 <td
@@ -175,10 +180,17 @@ const AdminCategories = () => {
           </tbody>
         </table>
       </div>
+      <div className="hidden md:block mt-3">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(categories.length / pageSize))}
+          onPageChange={setPage}
+        />
+      </div>
 
       {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
-        {categories.map((c) => (
+        {categories.slice((page - 1) * pageSize, page * pageSize).map((c) => (
           <div
             key={c.id}
             className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
@@ -213,6 +225,13 @@ const AdminCategories = () => {
             Sin categorías
           </div>
         )}
+      </div>
+      <div className="md:hidden mt-2">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(categories.length / pageSize))}
+          onPageChange={setPage}
+        />
       </div>
 
       <AdminEntityModal

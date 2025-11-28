@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { formatCurrency, formatNumber } from "../utils/format";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import Pagination from "./Pagination";
 
 const API =
   import.meta.env.VITE_ORDERS_API ||
@@ -23,6 +24,8 @@ const AdminOrders = () => {
   const [statusForm, setStatusForm] = useState("pending");
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState({});
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   // NOTE: PATCH can be blocked by some CORS policies on MockAPI. We use
   // `updateQuantityWithRetry` (below) which performs a GET + PUT as fallback.
@@ -259,7 +262,7 @@ const AdminOrders = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => {
+            {orders.slice((page - 1) * pageSize, page * pageSize).map((o) => {
               const itemCount = o.items?.reduce(
                 (s, it) => s + (Number(it.quantity) || 0),
                 0
@@ -397,10 +400,17 @@ const AdminOrders = () => {
           </tbody>
         </table>
       </div>
+      <div className="hidden md:block mt-3">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(orders.length / pageSize))}
+          onPageChange={setPage}
+        />
+      </div>
 
       {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
-        {orders.map((o) => {
+        {orders.slice((page - 1) * pageSize, page * pageSize).map((o) => {
           const itemCount = o.items?.reduce(
             (s, it) => s + (Number(it.quantity) || 0),
             0
@@ -521,6 +531,13 @@ const AdminOrders = () => {
             No hay pedidos
           </div>
         )}
+      </div>
+      <div className="md:hidden mt-2">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(orders.length / pageSize))}
+          onPageChange={setPage}
+        />
       </div>
 
       {/* Edit Modal */}
