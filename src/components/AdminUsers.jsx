@@ -7,68 +7,67 @@ import { useEffect, useState } from "react";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 
-// Endpoint de categorías: usa env si está, sino fallback al mockapi
-const API_ENV = import.meta.env.VITE_CATEGORIES_API;
+// Endpoint de usuarios (env o fallback)
+const USERS_API_ENV = import.meta.env.VITE_USERS_API;
 const API =
-  API_ENV || "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/categories";
+  USERS_API_ENV || "https://6928f88e9d311cddf347cd7f.mockapi.io/api/v1/users";
 
-const emptyCategory = { name: "" };
+const emptyUser = { name: "", email: "", role: "user", password: "" };
 
-const AdminCategories = () => {
-  const [categories, setCategories] = useState([]);
+const AdminUsers = () => {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(emptyCategory);
-  const [deleting, setDeleting] = useState(null);
+  const [form, setForm] = useState(emptyUser);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(null);
 
   const load = async () => {
-    if (!API) return; // silent if endpoint missing
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(API);
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const data = await res.json();
-      setCategories(Array.isArray(data) ? data : []);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e.message || "Error cargando categorías");
+      setError(e.message || "Error cargando usuarios");
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     load();
   }, []);
 
   const openNew = () => {
     setEditing(null);
-    setForm(emptyCategory);
+    setForm(emptyUser);
     setModalOpen(true);
   };
-  const openEdit = (c) => {
-    setEditing(c);
-    setForm({ name: c.name || "" });
+  const openEdit = (u) => {
+    setEditing(u);
+    setForm({
+      name: u.name || "",
+      email: u.email || "",
+      role: u.role || "user",
+      password: "", // blank: optional change
+    });
     setModalOpen(true);
   };
-
-  const slugify = (str) =>
-    str
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .substring(0, 60);
 
   const save = async () => {
     if (!API) return;
     setSaving(true);
     try {
-      const body = { name: form.name.trim(), slug: slugify(form.name.trim()) };
+      const body = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        role: form.role,
+      };
+      if (!editing) body.password = form.password.trim();
       let res;
       if (editing) {
         res = await fetch(`${API}/${editing.id}`, {
@@ -83,7 +82,7 @@ const AdminCategories = () => {
           body: JSON.stringify(body),
         });
       }
-      if (!res.ok) throw new Error("Error guardando categoría");
+      if (!res.ok) throw new Error("Error guardando usuario");
       await load();
       setModalOpen(false);
     } catch (e) {
@@ -94,12 +93,12 @@ const AdminCategories = () => {
     }
   };
 
-  const confirmDelete = (c) => setDeleting(c);
+  const confirmDelete = (u) => setDeleting(u);
   const doDelete = async () => {
     if (!API || !deleting) return;
     try {
       const res = await fetch(`${API}/${deleting.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Error eliminando categoría");
+      if (!res.ok) throw new Error("Error eliminando usuario");
       setDeleting(null);
       await load();
     } catch (e) {
@@ -111,7 +110,7 @@ const AdminCategories = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold tracking-tight">Categorías</h3>
+        <h3 className="text-xl font-semibold tracking-tight">Usuarios</h3>
         <button
           onClick={openNew}
           className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
@@ -127,29 +126,38 @@ const AdminCategories = () => {
           <thead>
             <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
               <th className="px-3 py-2">Nombre</th>
+              <th className="px-3 py-2">Email</th>
+              <th className="px-3 py-2">Rol</th>
               <th className="px-3 py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((c) => (
+            {users.map((u) => (
               <tr
-                key={c.id}
+                key={u.id}
                 className="border-b last:border-b-0 border-gray-100"
               >
-                <td className="px-3 py-2 max-w-xs truncate" title={c.name}>
-                  {c.name}
+                <td className="px-3 py-2 max-w-xs truncate" title={u.name}>
+                  {u.name}
                 </td>
+                <td
+                  className="px-3 py-2 text-gray-600 truncate"
+                  title={u.email}
+                >
+                  {u.email}
+                </td>
+                <td className="px-3 py-2">{u.role || "user"}</td>
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => openEdit(c)}
+                      onClick={() => openEdit(u)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
                       aria-label="Editar"
                     >
                       <PencilSquareIcon className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => confirmDelete(c)}
+                      onClick={() => confirmDelete(u)}
                       className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
                       aria-label="Eliminar"
                     >
@@ -159,13 +167,13 @@ const AdminCategories = () => {
                 </td>
               </tr>
             ))}
-            {categories.length === 0 && !loading && !error && (
+            {users.length === 0 && !loading && !error && (
               <tr>
                 <td
-                  colSpan={2}
+                  colSpan={4}
                   className="px-3 py-6 text-center text-xs text-gray-500"
                 >
-                  Sin categorías
+                  Sin usuarios
                 </td>
               </tr>
             )}
@@ -175,7 +183,7 @@ const AdminCategories = () => {
 
       <AdminEntityModal
         open={modalOpen}
-        title={editing ? "Editar categoría" : "Agregar categoría"}
+        title={editing ? "Editar usuario" : "Agregar usuario"}
         onClose={() => setModalOpen(false)}
         onSubmit={save}
         submitLabel={editing ? "Guardar cambios" : "Crear"}
@@ -193,7 +201,45 @@ const AdminCategories = () => {
               className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
-          {/* Campo slug removido; se genera automáticamente */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600 uppercase">
+              Email
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600 uppercase">
+              Rol
+            </label>
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="user">Usuario</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          {!editing && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium text-gray-600 uppercase">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+          )}
         </div>
       </AdminEntityModal>
 
@@ -201,8 +247,10 @@ const AdminCategories = () => {
         open={!!deleting}
         onClose={() => setDeleting(null)}
         onConfirm={doDelete}
-        title="Eliminar categoría"
-        message={deleting ? `¿Eliminar "${deleting.name}"?` : ""}
+        title="Eliminar usuario"
+        message={
+          deleting ? `¿Eliminar "${deleting.name || deleting.email}"?` : ""
+        }
         cancelText="Cancelar"
         confirmText="Eliminar"
       />
@@ -210,4 +258,4 @@ const AdminCategories = () => {
   );
 };
 
-export default AdminCategories;
+export default AdminUsers;

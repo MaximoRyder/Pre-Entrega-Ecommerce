@@ -1,6 +1,10 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import About from "./components/About";
 import Admin from "./components/Admin";
+import AdminCategories from "./components/AdminCategories";
+import AdminOrders from "./components/AdminOrders";
+import AdminProducts from "./components/AdminProducts";
+import AdminUsers from "./components/AdminUsers";
 import CartPage from "./components/CartPage";
 import FAQ from "./components/FAQ";
 import Home from "./components/Home";
@@ -34,7 +38,13 @@ function App() {
                         <Admin />
                       </RequireAdmin>
                     }
-                  />
+                  >
+                    <Route index element={<AdminProducts />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="categories" element={<AdminCategories />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="users" element={<AdminUsers />} />
+                  </Route>
                   <Route path="faq" element={<FAQ />} />
                   <Route path="product/:id" element={<ProductDetail />} />
                   <Route path="cart" element={<CartPage />} />

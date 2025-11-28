@@ -1,5 +1,11 @@
+import {
+  ArrowPathIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { formatCurrency, formatNumber } from "../utils/format";
+import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 
 const API =
@@ -13,6 +19,9 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [statusForm, setStatusForm] = useState("pending");
+  const [saving, setSaving] = useState(false);
 
   // NOTE: PATCH can be blocked by some CORS policies on MockAPI. We use
   // `updateQuantityWithRetry` (below) which performs a GET + PUT as fallback.
@@ -201,6 +210,7 @@ const AdminOrders = () => {
     }
   };
 
+  // Loading / error early return kept simpler for table context
   if (loading)
     return (
       <p className="px-4 py-6 text-sm text-gray-600">Cargando pedidos...</p>
@@ -213,121 +223,208 @@ const AdminOrders = () => {
   ).length;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-semibold tracking-tight">Pedidos</h3>
-        {localCount > 0 && (
+        <h3 className="text-xl font-semibold tracking-tight">Pedidos</h3>
+        <div className="flex items-center gap-2">
+          {localCount > 0 && (
+            <button
+              onClick={syncLocalOrders}
+              className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            >
+              <ArrowPathIcon className="w-5 h-5" /> Sincronizar ({localCount})
+            </button>
+          )}
           <button
-            onClick={syncLocalOrders}
-            className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            onClick={refresh}
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-700 text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
           >
-            Sincronizar {localCount} pedido(s) locales
+            <ArrowPathIcon className="w-5 h-5" /> Refrescar
           </button>
-        )}
+        </div>
       </div>
 
-      {orders.length === 0 ? (
-        <p className="text-sm text-gray-600">No hay pedidos</p>
-      ) : (
-        <div className="grid gap-6">
-          {orders.map((o) => (
-            <div
-              key={o.id}
-              className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 space-y-4"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                <div className="text-sm font-medium text-gray-900 flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">#{o.id}</span> — {o.userEmail}
-                  {o.local && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                      Local
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+              <th className="px-3 py-2">ID</th>
+              <th className="px-3 py-2">Usuario</th>
+              <th className="px-3 py-2">Fecha</th>
+              <th className="px-3 py-2">Items</th>
+              <th className="px-3 py-2">Subtotal</th>
+              <th className="px-3 py-2">Estado</th>
+              <th className="px-3 py-2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((o) => {
+              const itemCount = o.items?.reduce(
+                (s, it) => s + (Number(it.quantity) || 0),
+                0
+              );
+              return (
+                <tr
+                  key={o.id}
+                  className="border-b last:border-b-0 border-gray-100 align-top"
+                >
+                  <td className="px-3 py-2 text-xs sm:text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      <span>#{o.id}</span>
+                      {o.local && (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+                          Local
+                        </span>
+                      )}
+                      {o.syncError && (
+                        <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+                          Sync
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td
+                    className="px-3 py-2 max-w-[180px] truncate"
+                    title={o.userEmail}
+                  >
+                    {o.userEmail || "-"}
+                  </td>
+                  <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">
+                    {new Date(o.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-3 py-2 text-center">{itemCount || 0}</td>
+                  <td className="px-3 py-2 font-medium">
+                    {formatCurrency(o.subtotal)}
+                  </td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
+                        (o.status === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : o.status === "processing"
+                          ? "bg-blue-100 text-blue-700"
+                          : o.status === "shipped"
+                          ? "bg-green-100 text-green-700"
+                          : o.status === "rejected"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-gray-100 text-gray-600")
+                      }
+                    >
+                      {o.status || "-"}
                     </span>
-                  )}
-                  {o.syncError && (
-                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-medium">
-                      Sync Error
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-600 whitespace-nowrap">
-                  {new Date(o.createdAt).toLocaleString()}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  {o.items && o.items.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
-                            <th className="py-2 pr-4 font-medium">Producto</th>
-                            <th className="py-2 pr-4 font-medium">Cantidad</th>
-                            <th className="py-2 font-medium">Precio</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setEditing(o);
+                          setStatusForm(o.status || "pending");
+                        }}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                        aria-label="Editar"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setToDelete(o)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                        aria-label="Eliminar"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {o.items && o.items.length > 0 && (
+                      <details className="mt-2 group">
+                        <summary className="cursor-pointer select-none text-xs text-gray-500">
+                          Ver items
+                        </summary>
+                        <ul className="mt-1 space-y-1 text-xs text-gray-600">
                           {o.items.map((it, idx) => (
-                            <tr
+                            <li
                               key={idx}
-                              className="border-b last:border-b-0 border-gray-100"
+                              className="flex justify-between gap-2"
                             >
-                              <td className="py-2 pr-4">{it.name}</td>
-                              <td className="py-2 pr-4">
+                              <span className="truncate" title={it.name}>
+                                {it.name}
+                              </span>
+                              <span className="whitespace-nowrap">
+                                x
                                 {formatNumber(it.quantity, {
                                   minimumFractionDigits: 0,
                                   maximumFractionDigits: 0,
                                 })}
-                              </td>
-                              <td className="py-2">
-                                {formatCurrency(it.price)}
-                              </td>
-                            </tr>
+                              </span>
+                            </li>
                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-500">No hay items</p>
-                  )}
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="text-sm text-gray-700">
-                    Subtotal:{" "}
-                    <span className="font-semibold">
-                      {formatCurrency(o.subtotal)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                      Estado:
-                    </label>
-                    <select
-                      value={o.status}
-                      onChange={(e) => updateStatus(o.id, e.target.value)}
-                      className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      {statusOptions.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => setToDelete(o)}
-                      className="inline-flex items-center gap-2 rounded-md border border-red-300 text-red-600 hover:bg-red-50 text-xs font-medium px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/40"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              </div>
+                        </ul>
+                      </details>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {orders.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-3 py-6 text-center text-xs text-gray-500"
+                >
+                  No hay pedidos
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Edit Modal */}
+      <AdminEntityModal
+        open={!!editing}
+        title={editing ? `Editar pedido #${editing.id}` : ""}
+        onClose={() => setEditing(null)}
+        onSubmit={async () => {
+          if (!editing) return;
+          setSaving(true);
+          await updateStatus(editing.id, statusForm);
+          setSaving(false);
+          setEditing(null);
+        }}
+        submitLabel="Guardar cambios"
+        loading={saving}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600 uppercase">
+              Estado
+            </label>
+            <select
+              value={statusForm}
+              onChange={(e) => setStatusForm(e.target.value)}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              {statusOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          {editing && (
+            <div className="text-xs text-gray-500 space-y-1">
+              <p>
+                <strong>Usuario:</strong> {editing.userEmail || "-"}
+              </p>
+              <p>
+                <strong>Subtotal:</strong> {formatCurrency(editing.subtotal)}
+              </p>
+              <p>
+                <strong>Items:</strong> {editing.items?.length || 0}
+              </p>
             </div>
-          ))}
+          )}
         </div>
-      )}
+      </AdminEntityModal>
 
       <ConfirmModal
         open={!!toDelete}
