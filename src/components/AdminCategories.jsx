@@ -110,7 +110,7 @@ const AdminCategories = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <h3 className="text-xl font-semibold tracking-tight">Categorías</h3>
         <button
           onClick={openNew}
@@ -123,11 +123,11 @@ const AdminCategories = () => {
       {loading && <p className="text-sm text-gray-500">Cargando...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs sm:text-sm min-w-[420px]">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
-              <th className="px-3 py-2">Nombre</th>
-              <th className="px-3 py-2">Acciones</th>
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Nombre</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -136,10 +136,13 @@ const AdminCategories = () => {
                 key={c.id}
                 className="border-b last:border-b-0 border-gray-100"
               >
-                <td className="px-3 py-2 max-w-xs truncate" title={c.name}>
+                <td
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[160px] truncate"
+                  title={c.name}
+                >
                   {c.name}
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openEdit(c)}
@@ -163,7 +166,7 @@ const AdminCategories = () => {
               <tr>
                 <td
                   colSpan={2}
-                  className="px-3 py-6 text-center text-xs text-gray-500"
+                  className="px-2 py-6 text-center text-[10px] sm:text-xs text-gray-500"
                 >
                   Sin categorías
                 </td>

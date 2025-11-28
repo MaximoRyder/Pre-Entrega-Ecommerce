@@ -163,7 +163,7 @@ const AdminProducts = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <h3 className="text-xl font-semibold tracking-tight">Productos</h3>
         <button
           onClick={openNew}
@@ -175,15 +175,16 @@ const AdminProducts = () => {
       {/* Mensaje de endpoint por defecto removido a pedido del usuario */}
       {loading && <p className="text-sm text-gray-500">Cargando...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
+      {/* Vista tabla (desktop) */}
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
+        <table className="w-full text-xs sm:text-sm min-w-[520px]">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
-              <th className="px-3 py-2">Título</th>
-              <th className="px-3 py-2">Precio</th>
-              <th className="px-3 py-2">Cantidad</th>
-              <th className="px-3 py-2">Categoría</th>
-              <th className="px-3 py-2">Acciones</th>
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Título</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Precio</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Cantidad</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Categoría</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -193,16 +194,18 @@ const AdminProducts = () => {
                 className="border-b last:border-b-0 border-gray-100"
               >
                 <td
-                  className="px-3 py-2 max-w-xs truncate"
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[140px] truncate"
                   title={p.title || p.name}
                 >
                   {p.title || p.name}
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                   {formatCurrency(parseNumber(p.price))}
                 </td>
-                <td className="px-3 py-2">{p.quantity ?? p.stock ?? "-"}</td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                  {p.quantity ?? p.stock ?? "-"}
+                </td>
+                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                   {(() => {
                     if (!categories.length) return p.category || "-";
                     const match = categories.find(
@@ -214,7 +217,7 @@ const AdminProducts = () => {
                     return match ? match.name : p.category || "-";
                   })()}
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openEdit(p)}
@@ -246,6 +249,66 @@ const AdminProducts = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista móvil tipo tarjeta/lista */}
+      <div className="md:hidden space-y-3">
+        {products.map((p) => {
+          const catLabel = (() => {
+            if (!categories.length) return p.category || "-";
+            const match = categories.find(
+              (c) =>
+                c.id === p.category ||
+                c.slug === p.category ||
+                c.name === p.category
+            );
+            return match ? match.name : p.category || "-";
+          })();
+          return (
+            <div
+              key={p.id}
+              className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm flex flex-col gap-1"
+            >
+              <div>
+                <span className="font-semibold">Título:</span>{" "}
+                {p.title || p.name}
+              </div>
+              <div>
+                <span className="font-semibold">Precio:</span>{" "}
+                {formatCurrency(parseNumber(p.price))}
+              </div>
+              <div>
+                <span className="font-semibold">Cantidad:</span>{" "}
+                {p.quantity ?? p.stock ?? "-"}
+              </div>
+              <div>
+                <span className="font-semibold">Categoría:</span> {catLabel}
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="font-semibold">Acciones:</span>
+                <button
+                  onClick={() => openEdit(p)}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                  aria-label="Editar"
+                >
+                  <PencilSquareIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => confirmDelete(p)}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                  aria-label="Eliminar"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {products.length === 0 && !loading && !error && (
+          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+            Sin productos
+          </div>
+        )}
       </div>
 
       <AdminEntityModal

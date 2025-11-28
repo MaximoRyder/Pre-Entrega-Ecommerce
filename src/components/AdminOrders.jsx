@@ -224,7 +224,7 @@ const AdminOrders = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <h3 className="text-xl font-semibold tracking-tight">Pedidos</h3>
         <div className="flex items-center gap-2">
           {localCount > 0 && (
@@ -245,16 +245,16 @@ const AdminOrders = () => {
       </div>
 
       <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs sm:text-sm min-w-[640px]">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
-              <th className="px-3 py-2">ID</th>
-              <th className="px-3 py-2">Usuario</th>
-              <th className="px-3 py-2">Fecha</th>
-              <th className="px-3 py-2">Items</th>
-              <th className="px-3 py-2">Subtotal</th>
-              <th className="px-3 py-2">Estado</th>
-              <th className="px-3 py-2">Acciones</th>
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">ID</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Usuario</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Fecha</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Items</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Subtotal</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Estado</th>
+              <th className="px-2 py-1.5 sm:px-3 sm:py-2">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -268,7 +268,7 @@ const AdminOrders = () => {
                   key={o.id}
                   className="border-b last:border-b-0 border-gray-100 align-top"
                 >
-                  <td className="px-3 py-2 text-xs sm:text-sm font-medium">
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
                     <div className="flex items-center gap-2">
                       <span>#{o.id}</span>
                       {o.local && (
@@ -284,19 +284,21 @@ const AdminOrders = () => {
                     </div>
                   </td>
                   <td
-                    className="px-3 py-2 max-w-[180px] truncate"
+                    className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[160px] truncate"
                     title={o.userEmail}
                   >
                     {o.userEmail || "-"}
                   </td>
-                  <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-gray-600 whitespace-nowrap">
                     {new Date(o.createdAt).toLocaleString()}
                   </td>
-                  <td className="px-3 py-2 text-center">{itemCount || 0}</td>
-                  <td className="px-3 py-2 font-medium">
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-center">
+                    {itemCount || 0}
+                  </td>
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
                     {formatCurrency(o.subtotal)}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                     <span
                       className={
                         "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
@@ -314,7 +316,7 @@ const AdminOrders = () => {
                       {o.status || "-"}
                     </span>
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {

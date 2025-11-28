@@ -22,7 +22,7 @@ const AdminEntityModal = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose?.();
       }}
@@ -30,7 +30,7 @@ const AdminEntityModal = ({
       aria-modal="true"
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative w-full max-w-lg rounded-xl bg-white shadow-lg ring-1 ring-black/10 p-6 flex flex-col gap-4">
+      <div className="relative w-full max-w-lg rounded-xl bg-white shadow-lg ring-1 ring-black/10 p-5 sm:p-6 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
           <button
