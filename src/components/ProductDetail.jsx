@@ -1,9 +1,9 @@
+import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
-import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 

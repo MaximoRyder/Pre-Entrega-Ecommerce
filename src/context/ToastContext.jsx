@@ -31,9 +31,11 @@ export const ToastProvider = ({ children }) => {
       {toast.visible && (
         <div
           className={[
-            "fixed bottom-4 left-1/2 -translate-x-1/2 z-50",
-            "px-4 py-2 rounded-md shadow-lg text-sm font-medium",
-            "backdrop-blur-sm border",
+            "fixed bottom-6 left-1/2 -translate-x-1/2 z-50",
+            "w-[min(90vw,560px)]", // responsive width
+            "px-5 py-3 rounded-lg shadow-lg text-sm sm:text-base font-medium",
+            "backdrop-blur-sm border flex items-start gap-3", // layout
+            "leading-relaxed",
             toast.type === "error" && "bg-red-600 text-white border-red-500",
             toast.type === "success" &&
               "bg-green-600 text-white border-green-500",
@@ -46,7 +48,9 @@ export const ToastProvider = ({ children }) => {
           role="status"
           aria-live="polite"
         >
-          {toast.msg}
+          <p className="m-0 whitespace-pre-line break-words flex-1">
+            {toast.msg}
+          </p>
         </div>
       )}
     </ToastContext.Provider>

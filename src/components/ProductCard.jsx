@@ -1,3 +1,4 @@
+import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
@@ -5,7 +6,6 @@ import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
-import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
   const { cart, addToCart, decreaseQuantity, removeFromCart } =

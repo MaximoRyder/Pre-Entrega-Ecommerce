@@ -1,8 +1,8 @@
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ToastContext } from "../context/ToastContext";
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 const Login = () => {
   const [email, setEmail] = useState("");

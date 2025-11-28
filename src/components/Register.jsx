@@ -1,8 +1,8 @@
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ToastContext } from "../context/ToastContext";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
 
 const Register = () => {
   const [email, setEmail] = useState("");

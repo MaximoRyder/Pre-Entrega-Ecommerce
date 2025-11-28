@@ -1,3 +1,11 @@
+import {
+  BookOpenIcon,
+  CheckBadgeIcon,
+  FlagIcon,
+  LifebuoyIcon,
+  TruckIcon,
+} from "@heroicons/react/24/outline";
+
 const About = () => {
   return (
     <div className="py-8">
@@ -8,9 +16,7 @@ const About = () => {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <span className="material-symbols-rounded text-primary-600">
-              history
-            </span>
+            <BookOpenIcon className="w-6 h-6 text-primary-600" />
             Nuestra Historia
           </h2>
           <p className="text-sm leading-relaxed text-gray-700">
@@ -24,9 +30,7 @@ const About = () => {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 flex flex-col gap-3">
             <div className="size-12 rounded-full bg-primary-50 flex items-center justify-center">
-              <span className="material-symbols-rounded text-primary-600">
-                local_shipping
-              </span>
+              <TruckIcon className="w-6 h-6 text-primary-600" />
             </div>
             <h3 className="font-medium text-lg">Envío Gratis</h3>
             <p className="text-sm text-gray-600 leading-relaxed">
@@ -36,9 +40,7 @@ const About = () => {
           </div>
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 flex flex-col gap-3">
             <div className="size-12 rounded-full bg-primary-50 flex items-center justify-center">
-              <span className="material-symbols-rounded text-primary-600">
-                verified
-              </span>
+              <CheckBadgeIcon className="w-6 h-6 text-primary-600" />
             </div>
             <h3 className="font-medium text-lg">Calidad Garantizada</h3>
             <p className="text-sm text-gray-600 leading-relaxed">
@@ -47,9 +49,7 @@ const About = () => {
           </div>
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 flex flex-col gap-3">
             <div className="size-12 rounded-full bg-primary-50 flex items-center justify-center">
-              <span className="material-symbols-rounded text-primary-600">
-                support_agent
-              </span>
+              <LifebuoyIcon className="w-6 h-6 text-primary-600" />
             </div>
             <h3 className="font-medium text-lg">Soporte 24/7</h3>
             <p className="text-sm text-gray-600 leading-relaxed">
@@ -60,9 +60,7 @@ const About = () => {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <span className="material-symbols-rounded text-primary-600">
-              flag
-            </span>
+            <FlagIcon className="w-6 h-6 text-primary-600" />
             Nuestra Misión
           </h2>
           <p className="text-sm leading-relaxed text-gray-700">

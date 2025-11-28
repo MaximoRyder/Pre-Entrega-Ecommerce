@@ -245,7 +245,7 @@ const CartPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-3 gap-8">
+    <div className="max-w-6xl mx-auto py-8 grid lg:grid-cols-3 gap-8">
       {/* Left: Items */}
       <div className="lg:col-span-2 space-y-6">
         <h2 className="text-2xl font-semibold tracking-tight">

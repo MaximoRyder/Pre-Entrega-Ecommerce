@@ -1,3 +1,4 @@
+import { ChevronDownIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 const FAQ = () => {
@@ -75,9 +76,12 @@ const FAQ = () => {
                   <span className="font-medium text-sm md:text-base pr-4">
                     {faq.question}
                   </span>
-                  <span className="material-symbols-rounded text-gray-500">
-                    {open ? "expand_less" : "expand_more"}
-                  </span>
+                  <ChevronDownIcon
+                    className={
+                      "w-5 h-5 text-gray-500 transition-transform " +
+                      (open ? "rotate-180" : "rotate-0")
+                    }
+                  />
                 </button>
                 {open && (
                   <div className="px-4 pb-4 -mt-1 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
@@ -97,9 +101,7 @@ const FAQ = () => {
             Contáctanos y te ayudaremos con cualquier duda adicional.
           </p>
           <button className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40">
-            <span className="material-symbols-rounded text-white text-base">
-              mail
-            </span>
+            <EnvelopeIcon className="w-5 h-5" />
             Contactar Soporte
           </button>
         </div>

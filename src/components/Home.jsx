@@ -1,5 +1,5 @@
-import { useContext, useState } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useContext, useState } from "react";
 import FilterContext from "../context/searchContext";
 import ProductsList from "./ProductsList";
 

@@ -1,9 +1,12 @@
+import {
+  ArrowRightOnRectangleIcon,
+  ShoppingCartIcon,
+} from "@heroicons/react/24/outline";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { formatNumber } from "../utils/format";
-import { ShoppingCartIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 const Header = () => {
   const { cart } = useContext(CartContext);
@@ -75,7 +78,7 @@ const Header = () => {
             >
               <ShoppingCartIcon className="w-6 h-6" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-error text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-[1.25rem] flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.15rem] h-[1.15rem] leading-none flex items-center justify-center shadow-sm ring-1 ring-red-400">
                   {formatNumber(totalItems)}
                 </span>
               )}
