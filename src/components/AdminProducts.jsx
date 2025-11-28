@@ -267,24 +267,29 @@ const AdminProducts = () => {
           return (
             <div
               key={p.id}
-              className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm flex flex-col gap-1"
+              className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
             >
-              <div>
-                <span className="font-semibold">Título:</span>{" "}
-                {p.title || p.name}
+              <div className="space-y-1">
+                <div className="flex">
+                  <span className="font-semibold mr-1">Título:</span>
+                  <span className="flex-1 truncate">{p.title || p.name}</span>
+                </div>
+                <div className="border-t border-gray-200 pt-1 flex">
+                  <span className="font-semibold mr-1">Precio:</span>
+                  <span className="flex-1">
+                    {formatCurrency(parseNumber(p.price))}
+                  </span>
+                </div>
+                <div className="border-t border-gray-200 pt-1 flex">
+                  <span className="font-semibold mr-1">Cantidad:</span>
+                  <span className="flex-1">{p.quantity ?? p.stock ?? "-"}</span>
+                </div>
+                <div className="border-t border-gray-200 pt-1 flex">
+                  <span className="font-semibold mr-1">Categoría:</span>
+                  <span className="flex-1">{catLabel}</span>
+                </div>
               </div>
-              <div>
-                <span className="font-semibold">Precio:</span>{" "}
-                {formatCurrency(parseNumber(p.price))}
-              </div>
-              <div>
-                <span className="font-semibold">Cantidad:</span>{" "}
-                {p.quantity ?? p.stock ?? "-"}
-              </div>
-              <div>
-                <span className="font-semibold">Categoría:</span> {catLabel}
-              </div>
-              <div className="flex items-center gap-2 pt-1">
+              <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
                 <span className="font-semibold">Acciones:</span>
                 <button
                   onClick={() => openEdit(p)}

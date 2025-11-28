@@ -22,6 +22,7 @@ const AdminOrders = () => {
   const [editing, setEditing] = useState(null);
   const [statusForm, setStatusForm] = useState("pending");
   const [saving, setSaving] = useState(false);
+  const [expanded, setExpanded] = useState({});
 
   // NOTE: PATCH can be blocked by some CORS policies on MockAPI. We use
   // `updateQuantityWithRetry` (below) which performs a GET + PUT as fallback.
@@ -244,7 +245,7 @@ const AdminOrders = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[640px]">
           <thead>
             <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
@@ -263,94 +264,111 @@ const AdminOrders = () => {
                 (s, it) => s + (Number(it.quantity) || 0),
                 0
               );
+              const isExp = expanded[o.id];
               return (
-                <tr
-                  key={o.id}
-                  className="border-b last:border-b-0 border-gray-100 align-top"
-                >
-                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <span>#{o.id}</span>
-                      {o.local && (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
-                          Local
-                        </span>
-                      )}
-                      {o.syncError && (
-                        <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
-                          Sync
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td
-                    className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[160px] truncate"
-                    title={o.userEmail}
+                <>
+                  <tr
+                    key={o.id}
+                    className={
+                      "align-top border-b border-gray-100 " +
+                      (isExp ? "" : "last:border-b-0")
+                    }
                   >
-                    {o.userEmail || "-"}
-                  </td>
-                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-gray-600 whitespace-nowrap">
-                    {new Date(o.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-center">
-                    {itemCount || 0}
-                  </td>
-                  <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
-                    {formatCurrency(o.subtotal)}
-                  </td>
-                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                    <span
-                      className={
-                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
-                        (o.status === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : o.status === "processing"
-                          ? "bg-blue-100 text-blue-700"
-                          : o.status === "shipped"
-                          ? "bg-green-100 text-green-700"
-                          : o.status === "rejected"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-600")
-                      }
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>#{o.id}</span>
+                        {o.local && (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+                            Local
+                          </span>
+                        )}
+                        {o.syncError && (
+                          <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+                            Sync
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td
+                      className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[180px]"
+                      title={o.userEmail}
                     >
-                      {o.status || "-"}
-                    </span>
-                  </td>
-                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setEditing(o);
-                          setStatusForm(o.status || "pending");
-                        }}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
-                        aria-label="Editar"
+                      <div className="flex flex-col">
+                        <span className="truncate">{o.userEmail || "-"}</span>
+                        {o.items && o.items.length > 0 && (
+                          <button
+                            onClick={() =>
+                              setExpanded((prev) => ({
+                                ...prev,
+                                [o.id]: !prev[o.id],
+                              }))
+                            }
+                            className="mt-1 text-[11px] text-primary-600 hover:underline text-left"
+                          >
+                            {isExp ? "Ocultar items" : "Ver items"}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-gray-600 whitespace-nowrap">
+                      {new Date(o.createdAt).toLocaleString()}
+                    </td>
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                      {itemCount || 0}
+                    </td>
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
+                      {formatCurrency(o.subtotal)}
+                    </td>
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                      <span
+                        className={
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
+                          (o.status === "pending"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : o.status === "processing"
+                            ? "bg-blue-100 text-blue-700"
+                            : o.status === "shipped"
+                            ? "bg-green-100 text-green-700"
+                            : o.status === "rejected"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-gray-100 text-gray-600")
+                        }
                       >
-                        <PencilSquareIcon className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setToDelete(o)}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
-                        aria-label="Eliminar"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {o.items && o.items.length > 0 && (
-                      <details className="mt-2 group">
-                        <summary className="cursor-pointer select-none text-xs text-gray-500">
-                          Ver items
-                        </summary>
-                        <ul className="mt-1 space-y-1 text-xs text-gray-600">
+                        {o.status || "-"}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditing(o);
+                            setStatusForm(o.status || "pending");
+                          }}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                          aria-label="Editar"
+                        >
+                          <PencilSquareIcon className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setToDelete(o)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                          aria-label="Eliminar"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {isExp && o.items && o.items.length > 0 && (
+                    <tr className="border-b last:border-b-0 border-gray-100">
+                      <td colSpan={7} className="px-3 py-2 bg-gray-50">
+                        <ul className="space-y-1 text-xs text-gray-700">
                           {o.items.map((it, idx) => (
-                            <li
-                              key={idx}
-                              className="flex justify-between gap-2"
-                            >
+                            <li key={idx} className="flex gap-2">
                               <span className="truncate" title={it.name}>
                                 {it.name}
                               </span>
-                              <span className="whitespace-nowrap">
+                              <span className="shrink-0">
                                 x
                                 {formatNumber(it.quantity, {
                                   minimumFractionDigits: 0,
@@ -360,10 +378,10 @@ const AdminOrders = () => {
                             </li>
                           ))}
                         </ul>
-                      </details>
-                    )}
-                  </td>
-                </tr>
+                      </td>
+                    </tr>
+                  )}
+                </>
               );
             })}
             {orders.length === 0 && (
@@ -378,6 +396,131 @@ const AdminOrders = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista móvil tipo tarjeta/lista */}
+      <div className="md:hidden space-y-3">
+        {orders.map((o) => {
+          const itemCount = o.items?.reduce(
+            (s, it) => s + (Number(it.quantity) || 0),
+            0
+          );
+          const isExpanded = expanded[o.id];
+          return (
+            <div
+              key={o.id}
+              className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">ID:</span>
+                  <span>#{o.id}</span>
+                  {o.local && (
+                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+                      Local
+                    </span>
+                  )}
+                  {o.syncError && (
+                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+                      Sync
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={
+                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
+                    (o.status === "pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : o.status === "processing"
+                      ? "bg-blue-100 text-blue-700"
+                      : o.status === "shipped"
+                      ? "bg-green-100 text-green-700"
+                      : o.status === "rejected"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-600")
+                  }
+                >
+                  {o.status || "-"}
+                </span>
+              </div>
+              <div className="border-t border-gray-200 mt-2 pt-1 flex">
+                <span className="font-semibold mr-1">Usuario:</span>
+                <span className="flex-1 truncate" title={o.userEmail}>
+                  {o.userEmail || "-"}
+                </span>
+              </div>
+              <div className="border-t border-gray-200 pt-1 flex">
+                <span className="font-semibold mr-1">Fecha:</span>
+                <span className="flex-1">
+                  {new Date(o.createdAt).toLocaleString()}
+                </span>
+              </div>
+              <div className="border-t border-gray-200 pt-1 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold">Items:</span>
+                  <span>{itemCount || 0}</span>
+                </div>
+                {o.items && o.items.length > 0 && (
+                  <button
+                    onClick={() =>
+                      setExpanded((prev) => ({ ...prev, [o.id]: !prev[o.id] }))
+                    }
+                    className="text-xs font-medium px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-50"
+                  >
+                    {isExpanded ? "Ocultar" : "Ver"}
+                  </button>
+                )}
+              </div>
+              {isExpanded && o.items && o.items.length > 0 && (
+                <ul className="mt-1 space-y-1 text-xs text-gray-600">
+                  {o.items.map((it, idx) => (
+                    <li key={idx} className="flex justify-between gap-2">
+                      <span className="truncate" title={it.name}>
+                        {it.name}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        x
+                        {formatNumber(it.quantity, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
+                        })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="border-t border-gray-200 pt-1 mt-1 flex">
+                <span className="font-semibold mr-1">Subtotal:</span>
+                <span className="flex-1">{formatCurrency(o.subtotal)}</span>
+              </div>
+              <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
+                <span className="font-semibold">Acciones:</span>
+                <button
+                  onClick={() => {
+                    setEditing(o);
+                    setStatusForm(o.status || "pending");
+                  }}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                  aria-label="Editar"
+                >
+                  <PencilSquareIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setToDelete(o)}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                  aria-label="Eliminar"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {orders.length === 0 && (
+          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+            No hay pedidos
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}

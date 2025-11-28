@@ -122,7 +122,7 @@ const AdminCategories = () => {
       {/* Mensaje de advertencia eliminado a pedido del usuario */}
       {loading && <p className="text-sm text-gray-500">Cargando...</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[420px]">
           <thead>
             <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
@@ -174,6 +174,45 @@ const AdminCategories = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista móvil tipo tarjeta/lista */}
+      <div className="md:hidden space-y-3">
+        {categories.map((c) => (
+          <div
+            key={c.id}
+            className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
+          >
+            <div className="flex">
+              <span className="font-semibold mr-1">Nombre:</span>
+              <span className="flex-1 truncate" title={c.name}>
+                {c.name}
+              </span>
+            </div>
+            <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
+              <span className="font-semibold">Acciones:</span>
+              <button
+                onClick={() => openEdit(c)}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                aria-label="Editar"
+              >
+                <PencilSquareIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => confirmDelete(c)}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                aria-label="Eliminar"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+        {categories.length === 0 && !loading && !error && (
+          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+            Sin categorías
+          </div>
+        )}
       </div>
 
       <AdminEntityModal
