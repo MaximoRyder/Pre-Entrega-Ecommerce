@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
+import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 
@@ -233,9 +234,7 @@ const ProductDetail = () => {
               else setQty(remainingStock > 0 ? 1 : 0);
             }}
           >
-            <span className="material-symbols-rounded text-white text-base">
-              add_shopping_cart
-            </span>
+            <ShoppingCartIcon className="w-5 h-5" />
             {remainingStock === 0 ? "Agotado" : "Agregar al carrito"}
           </button>
         )}

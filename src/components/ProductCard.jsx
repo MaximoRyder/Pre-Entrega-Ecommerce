@@ -5,6 +5,7 @@ import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
+import { ShoppingCartIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
   const { cart, addToCart, decreaseQuantity, removeFromCart } =
@@ -154,9 +155,7 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                 showToast(`${product.name || name} añadido al carrito`);
               }}
             >
-              <span className="material-symbols-rounded text-base">
-                add_shopping_cart
-              </span>
+              <ShoppingCartIcon className="w-5 h-5" />
               Agregar
             </button>
           )}

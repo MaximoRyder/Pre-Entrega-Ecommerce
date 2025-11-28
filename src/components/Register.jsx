@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ToastContext } from "../context/ToastContext";
+import { UserPlusIcon } from "@heroicons/react/24/outline";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -117,7 +118,7 @@ const Register = () => {
           type="submit"
           className="mt-2 inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
-          <span className="material-symbols-rounded text-base">person_add</span>
+          <UserPlusIcon className="w-5 h-5" />
           Registrarse
         </button>
         <p className="text-center text-xs text-neutral-600">

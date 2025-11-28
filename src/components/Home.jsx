@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import FilterContext from "../context/searchContext";
 import ProductsList from "./ProductsList";
 
@@ -36,9 +37,7 @@ const Home = () => {
             type="submit"
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
           >
-            <span className="material-symbols-rounded text-white text-base">
-              search
-            </span>
+            <MagnifyingGlassIcon className="w-5 h-5" />
             Buscar
           </button>
         </form>
@@ -58,9 +57,7 @@ const Home = () => {
                 aria-label="Limpiar búsqueda"
                 className="size-7 inline-flex items-center justify-center rounded-full hover:bg-primary-100 text-primary-600 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
               >
-                <span className="material-symbols-rounded text-[18px]">
-                  close
-                </span>
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
           </div>

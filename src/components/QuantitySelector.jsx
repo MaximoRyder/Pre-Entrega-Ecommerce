@@ -1,3 +1,4 @@
+import { MinusSmallIcon, PlusSmallIcon, TrashIcon } from "@heroicons/react/24/outline";
 const QuantitySelector = ({
   value,
   onChange,
@@ -27,7 +28,7 @@ const QuantitySelector = ({
         aria-label="Disminuir cantidad"
         className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed w-9 h-9 text-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
       >
-        <span className="material-symbols-rounded text-base">remove</span>
+            <MinusSmallIcon className="w-5 h-5" />
       </button>
       <input
         type="number"
@@ -60,7 +61,7 @@ const QuantitySelector = ({
         aria-label="Aumentar cantidad"
         className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed w-9 h-9 text-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
       >
-        <span className="material-symbols-rounded text-base">add</span>
+            <PlusSmallIcon className="w-5 h-5" />
       </button>
       {onDelete && (
         <button
@@ -70,7 +71,7 @@ const QuantitySelector = ({
           aria-label={deleteLabel}
           className="inline-flex items-center justify-center rounded-md border border-red-300 text-red-600 bg-white hover:bg-red-50 w-9 h-9 text-sm focus:outline-none focus-visible:ring focus-visible:ring-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          <span className="material-symbols-rounded text-base">delete</span>
+              <TrashIcon className="w-5 h-5" />
         </button>
       )}
     </div>

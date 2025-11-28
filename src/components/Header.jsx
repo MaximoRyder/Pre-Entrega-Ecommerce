@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { formatNumber } from "../utils/format";
+import { ShoppingCartIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 const Header = () => {
   const { cart } = useContext(CartContext);
@@ -72,9 +73,7 @@ const Header = () => {
               className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-neutral-300 transition-colors text-neutral-900"
               aria-label={`Ir al carrito (${formatNumber(totalItems)} items)`}
             >
-              <span className="material-symbols-rounded text-xl">
-                shopping_cart
-              </span>
+              <ShoppingCartIcon className="w-6 h-6" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-error text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-[1.25rem] flex items-center justify-center">
                   {formatNumber(totalItems)}
@@ -85,8 +84,9 @@ const Header = () => {
             {!isAuthenticated ? (
               <Link
                 to="/login"
-                className="px-3 py-2 rounded-md bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
+                className="px-3 py-2 rounded-md bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors inline-flex items-center gap-1"
               >
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
                 Ingresar
               </Link>
             ) : (
