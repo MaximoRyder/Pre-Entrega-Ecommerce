@@ -1,19 +1,19 @@
 import { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ToastContext } from "../context/ToastContext";
 import "../styles/Login.css";
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const { register, login } = useContext(AuthContext);
   const { showToast } = useContext(ToastContext);
-  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const validate = () => {
-    if (!email || !password) {
+    if (!email || !password || !name) {
       showToast("Por favor completa todos los campos", 1800, "info");
       return false;
     }
@@ -32,26 +32,22 @@ const Login = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-      const user = await login(email, password);
-      if (user) {
-        showToast(
-          user?.role === "admin"
-            ? "Bienvenido, administrador"
-            : "Inicio de sesión exitoso",
-          1400,
-          "success"
-        );
-        const to =
-          (location.state &&
-            location.state.from &&
-            location.state.from.pathname) ||
-          (user?.role === "admin" ? "/admin" : "/");
-        setTimeout(() => navigate(to), 700);
+      const created = await register({ email, password, name });
+      if (created) {
+        showToast("Registrado correctamente", 1400, "success");
+        // try auto-login
+        const u = await login(email, password);
+        if (u) {
+          const to = u?.role === "admin" ? "/admin" : "/";
+          setTimeout(() => navigate(to), 700);
+        } else {
+          setTimeout(() => navigate("/login"), 700);
+        }
       } else {
-        showToast("Credenciales inválidas", 1600, "error");
+        showToast("Error al registrarse", 1800, "error");
       }
     } catch (err) {
-      showToast("Error al iniciar sesión", 1800, "error");
+      showToast("Error al registrarse", 1800, "error");
     }
   };
 
@@ -60,9 +56,20 @@ const Login = () => {
       <form
         className="login-form"
         onSubmit={handleSubmit}
-        aria-label="form-login"
+        aria-label="form-register"
       >
-        <h2>Iniciar sesión</h2>
+        <h2>Crear cuenta</h2>
+
+        <label className="field">
+          <span>Nombre</span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Tu nombre"
+            required
+          />
+        </label>
 
         <label className="field">
           <span>Email</span>
@@ -86,17 +93,16 @@ const Login = () => {
           />
         </label>
 
+        {/* Role is assigned by admins in MockAPI — public registration creates users */}
+
         <div className="actions">
           <button className="btn" data-variant="primary" type="submit">
-            Entrar
+            Registrarse
           </button>
-        </div>
-        <div style={{ marginTop: 12, textAlign: "center" }}>
-          ¿No tenés cuenta? <Link to="/register">Crear cuenta</Link>
         </div>
       </form>
     </main>
   );
 };
 
-export default Login;
+export default Register;

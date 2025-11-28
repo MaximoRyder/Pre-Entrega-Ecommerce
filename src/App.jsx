@@ -8,6 +8,7 @@ import Home from "./components/Home";
 import Layout from "./components/Layout";
 import Login from "./components/Login";
 import ProductDetail from "./components/ProductDetail";
+import Register from "./components/Register";
 import RequireAdmin from "./components/RequireAdmin";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
@@ -26,6 +27,7 @@ function App() {
                   <Route index element={<Home />} />
                   <Route path="about" element={<About />} />
                   <Route path="login" element={<Login />} />
+                  <Route path="register" element={<Register />} />
                   <Route
                     path="admin"
                     element={
