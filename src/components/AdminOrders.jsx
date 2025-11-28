@@ -15,6 +15,35 @@ const AdminOrders = () => {
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
 
+  // NOTE: PATCH can be blocked by some CORS policies on MockAPI. We use
+  // `updateQuantityWithRetry` (below) which performs a GET + PUT as fallback.
+
+  async function updateQuantityWithRetry(url, newQuantity, attempts = 3) {
+    let lastErr = null;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const getRes = await fetch(url);
+        if (!getRes.ok) throw new Error(`GET status ${getRes.status}`);
+        const prod = await getRes.json();
+        prod.quantity = newQuantity;
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(prod),
+        });
+        if (!putRes.ok) {
+          const text = await putRes.text().catch(() => null);
+          throw new Error(`PUT status ${putRes.status} ${text || ""}`);
+        }
+        return putRes;
+      } catch (e) {
+        lastErr = e;
+        await new Promise((r) => setTimeout(r, 300 * Math.pow(2, i)));
+      }
+    }
+    throw lastErr;
+  }
+
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -37,20 +66,6 @@ const AdminOrders = () => {
     return () => (mounted = false);
   }, []);
 
-  const refresh = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(API);
-      const data = await res.json();
-      const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
-      setOrders([...local, ...data].reverse());
-    } catch (err) {
-      setError(err.message || "Error desconocido");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const syncLocalOrders = async () => {
     const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
     if (!local || local.length === 0) {
@@ -63,8 +78,12 @@ const AdminOrders = () => {
       );
       return;
     }
+    const PRODUCTS_API =
+      import.meta.env.VITE_PRODUCTS_API ||
+      "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
     setLoading(true);
     try {
+      let allOk = true;
       for (const o of local) {
         // remove local metadata before sending
         const payload = { ...o };
@@ -82,13 +101,56 @@ const AdminOrders = () => {
           throw new Error(`Sync failed: ${res.status} ${text || ""}`);
         }
         await res.json();
+
+        // after successful creation, decrement stock for each item
+        for (const it of payload.items || []) {
+          try {
+            const prodRes = await fetch(`${PRODUCTS_API}/${it.id}`);
+            if (!prodRes.ok) {
+              console.warn(
+                `No se pudo cargar producto ${it.id} para actualizar stock`
+              );
+              allOk = false;
+              continue;
+            }
+            const prod = await prodRes.json();
+            const available = Number(
+              prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
+            );
+            const newCount = Math.max(0, available - Number(it.quantity || 0));
+            await updateQuantityWithRetry(`${PRODUCTS_API}/${it.id}`, newCount);
+          } catch (uerr) {
+            console.error("Error actualizando stock al sincronizar:", uerr);
+            allOk = false;
+          }
+        }
       }
       // if all succeeded, clear local orders
-      localStorage.removeItem("local_orders");
+      if (allOk) {
+        localStorage.removeItem("local_orders");
+      } else {
+        setError(
+          "Algunos stocks no se pudieron actualizar. Reintenta sincronizar desde Admin."
+        );
+      }
       await refresh();
     } catch (err) {
       console.error("Error sincronizando pedidos locales:", err);
       setError(err.message || "Error sincronizando pedidos locales");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(API);
+      const data = await res.json();
+      const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
+      setOrders([...local, ...data].reverse());
+    } catch (err) {
+      setError(err.message || "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -178,6 +240,32 @@ const AdminOrders = () => {
               <div className="order-top">
                 <div>
                   <strong>#{o.id}</strong> — {o.userEmail}
+                  {o.local && (
+                    <span
+                      style={{
+                        marginLeft: 8,
+                        padding: "2px 6px",
+                        background: "#ffeeba",
+                        borderRadius: 4,
+                        fontSize: 12,
+                      }}
+                    >
+                      Local
+                    </span>
+                  )}
+                  {o.syncError && (
+                    <span
+                      style={{
+                        marginLeft: 8,
+                        padding: "2px 6px",
+                        background: "#f8d7da",
+                        borderRadius: 4,
+                        fontSize: 12,
+                      }}
+                    >
+                      Sync Error
+                    </span>
+                  )}
                 </div>
                 <div>{new Date(o.createdAt).toLocaleString()}</div>
               </div>

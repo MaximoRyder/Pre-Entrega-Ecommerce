@@ -20,6 +20,37 @@ const CartPage = () => {
   const [clearConfirm, setClearConfirm] = useState(false);
   const [productStocks, setProductStocks] = useState({});
 
+  const PRODUCTS_API =
+    import.meta.env.VITE_PRODUCTS_API ||
+    "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+
+  // Helper: GET current product and PUT updated quantity with retries
+  async function updateQuantityWithRetry(productUrl, quantity, attempts = 3) {
+    let lastErr = null;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const getRes = await fetch(productUrl);
+        if (!getRes.ok) throw new Error(`GET ${getRes.status}`);
+        const prod = await getRes.json();
+        prod.quantity = quantity;
+        const putRes = await fetch(productUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(prod),
+        });
+        if (!putRes.ok) {
+          const text = await putRes.text().catch(() => null);
+          throw new Error(`PUT ${putRes.status} ${text || ""}`);
+        }
+        return putRes;
+      } catch (e) {
+        lastErr = e;
+        await new Promise((r) => setTimeout(r, 250 * Math.pow(2, i)));
+      }
+    }
+    throw lastErr;
+  }
+
   const subtotal = cart.reduce((s, item) => {
     const price = parseNumber(item.price);
     return s + price * (item.quantity || 1);
@@ -27,7 +58,7 @@ const CartPage = () => {
 
   useEffect(() => {
     let mounted = true;
-    const API = "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+    const API = PRODUCTS_API;
     async function loadStocks() {
       try {
         if (!cart || cart.length === 0) {
@@ -44,19 +75,154 @@ const CartPage = () => {
         );
         const map = {};
         for (const p of results) {
-          if (p && p.id) {
-            map[p.id] = Number(p.rating?.count ?? p.quantity ?? p.stock ?? 0);
-          }
+          if (p && p.id) map[p.id] = Number(p.quantity ?? p.stock ?? p.rating?.count ?? 0);
         }
         if (mounted) setProductStocks(map);
       } catch (err) {
         console.warn("No se pudo obtener stock de productos:", err);
       }
     }
-
     loadStocks();
     return () => (mounted = false);
-  }, [cart]);
+  }, [cart, PRODUCTS_API]);
+
+  const handleFinalize = async () => {
+    if (cart.length === 0) {
+      showToast("No hay productos en el carrito", 1800, "info");
+      return;
+    }
+    if (!user || !user.email) {
+      setLoginPrompt(true);
+      return;
+    }
+
+    const API =
+      import.meta.env.VITE_ORDERS_API ||
+      "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/orders";
+
+    // Verify availability
+    let productsMap = {};
+    try {
+      const ids = cart.map((it) => it.id);
+      const results = await Promise.all(
+        ids.map((id) =>
+          fetch(`${PRODUCTS_API}/${id}`)
+            .then((r) => (r.ok ? r.json() : null))
+            .catch(() => null)
+        )
+      );
+      for (const p of results) {
+        if (!p || !p.id) continue;
+        const available = Number(p.quantity ?? p.stock ?? p.rating?.count ?? 0);
+        productsMap[p.id] = { product: p, available };
+      }
+      const shortages = [];
+      for (const it of cart) {
+        const desired = Number(it.quantity || 1);
+        const meta = productsMap[it.id];
+        const avail = meta ? meta.available : 0;
+        if (desired > avail) shortages.push({ name: it.name, desired, avail });
+      }
+      if (shortages.length > 0) {
+        const names = shortages.map((s) => `${s.name} (pedido: ${s.desired}, disponible: ${s.avail})`).join(", ");
+        showToast(`Stock insuficiente: ${names}`, 5000, "error");
+        return;
+      }
+    } catch (err) {
+      console.error("Error verificando stock:", err);
+      showToast("No se pudo verificar stock. Intenta nuevamente.", 3000, "error");
+      return;
+    }
+
+    const order = {
+      userEmail: String(user.email || "").trim(),
+      items: cart.map((it) => ({
+        id: String(it.id || ""),
+        name: String(it.name || ""),
+        price: Number(parseNumber(it.price) || 0),
+        quantity: Number(it.quantity || 1),
+      })),
+      subtotal: Number(subtotal || 0),
+      status: "pending",
+    };
+
+    // First: attempt to decrement stock for each item. Rollback on failure.
+    const prevQuantities = {};
+    const updatedIds = [];
+    try {
+      for (const it of order.items) {
+        const prodRes = await fetch(`${PRODUCTS_API}/${it.id}`);
+        if (!prodRes.ok) throw new Error(`No se pudo cargar producto ${it.id}`);
+        const prod = await prodRes.json();
+        const available = Number(prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0);
+        const desired = Number(it.quantity || 1);
+        if (desired > available) throw new Error(`Stock insuficiente para ${it.name}`);
+        const newCount = Math.max(0, available - desired);
+        prevQuantities[it.id] = available;
+        await updateQuantityWithRetry(`${PRODUCTS_API}/${it.id}`, newCount);
+        updatedIds.push(it.id);
+      }
+    } catch (uerr) {
+      console.error("Error actualizando stock antes de crear pedido:", uerr);
+      // rollback
+      for (const id of updatedIds) {
+        try {
+          const prev = prevQuantities[id];
+          await updateQuantityWithRetry(`${PRODUCTS_API}/${id}`, prev);
+        } catch (rbErr) {
+          console.error("Rollback failed for", id, rbErr);
+        }
+      }
+      showToast("No se pudo procesar el pedido por problemas de stock. Intenta nuevamente.", 4500, "error");
+      return;
+    }
+
+    // All stock updates succeeded — now create the order remotely
+    try {
+      const payload = order;
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => null);
+        console.error("Error creando pedido", res.status, text);
+        // rollback stock
+        for (const id of updatedIds) {
+          try {
+            const prev = prevQuantities[id];
+            await updateQuantityWithRetry(`${PRODUCTS_API}/${id}`, prev);
+          } catch (rbErr) {
+            console.error("Rollback failed for", id, rbErr);
+          }
+        }
+        throw new Error(text || "No se pudo crear el pedido");
+      }
+      await res.json();
+      showToast("Pedido creado correctamente", 3000, "success");
+      clearCart();
+    } catch (err) {
+      console.error(err);
+      // Fallback: save order locally so user/admin can still see it
+      try {
+        const fallback = {
+          ...order,
+          id: `local-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          local: true,
+        };
+        const existing = JSON.parse(localStorage.getItem("local_orders") || "[]");
+        existing.push(fallback);
+        localStorage.setItem("local_orders", JSON.stringify(existing));
+        clearCart();
+        showToast("Pedido guardado localmente (fallback)", 3500, "info");
+      } catch (e) {
+        console.error("No se pudo guardar pedido localmente", e);
+        showToast(`Error al crear el pedido: ${err.message || err}`, 4000, "error");
+      }
+    }
+  };
 
   return (
     <div className="cart-page">
@@ -72,9 +238,7 @@ const CartPage = () => {
                 <div className="cart-row-info">
                   <div className="cart-row-top">
                     <strong>{item.name}</strong>
-                    <span className="cart-price">
-                      {formatCurrency(parseNumber(item.price))}
-                    </span>
+                    <span className="cart-price">{formatCurrency(parseNumber(item.price))}</span>
                   </div>
                   <div className="cart-row-bottom">
                     <QuantitySelector
@@ -136,89 +300,14 @@ const CartPage = () => {
               className="btn"
               data-variant="primary"
               data-visual="solid"
-              onClick={async () => {
-                if (cart.length === 0) {
-                  showToast("No hay productos en el carrito", 1800, "info");
-                  return;
-                }
-                if (!user || !user.email) {
-                  // show modal prompting login before finalizing
-                  setLoginPrompt(true);
-                  return;
-                }
-
-                const API =
-                  import.meta.env.VITE_ORDERS_API ||
-                  "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/orders";
-                const order = {
-                  userEmail: String(user.email || "").trim(),
-                  items: cart.map((it) => ({
-                    id: String(it.id || ""),
-                    name: String(it.name || ""),
-                    price: Number(parseNumber(it.price) || 0),
-                    quantity: Number(it.quantity || 1),
-                  })),
-                  subtotal: Number(subtotal || 0),
-                  status: "pending",
-                };
-
-                try {
-                  // Sanitize and simplify payload for MockAPI
-                  const payload = order;
-                  console.debug("Creando pedido (payload):", payload);
-                  const res = await fetch(API, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                  });
-                  if (!res.ok) {
-                    const text = await res.text().catch(() => null);
-                    console.error("Error creando pedido", res.status, text);
-                    throw new Error(text || "No se pudo crear el pedido");
-                  }
-                  await res.json();
-                  clearCart();
-                  showToast("Pedido creado correctamente", 3000, "success");
-                } catch (err) {
-                  console.error(err);
-                  // Fallback: save order locally so user/admin can still see it
-                  try {
-                    const fallback = {
-                      ...order,
-                      id: `local-${Date.now()}`,
-                      createdAt: new Date().toISOString(),
-                      local: true,
-                    };
-                    const existing = JSON.parse(
-                      localStorage.getItem("local_orders") || "[]"
-                    );
-                    existing.push(fallback);
-                    localStorage.setItem(
-                      "local_orders",
-                      JSON.stringify(existing)
-                    );
-                    clearCart();
-                    showToast(
-                      "Pedido guardado localmente (fallback)",
-                      3500,
-                      "info"
-                    );
-                  } catch (e) {
-                    console.error("No se pudo guardar pedido localmente", e);
-                    showToast(
-                      `Error al crear el pedido: ${err.message || err}`,
-                      4000,
-                      "error"
-                    );
-                  }
-                }
-              }}
+              onClick={handleFinalize}
             >
               Finalizar compra
             </button>
           </div>
         </div>
       </aside>
+
       <ConfirmModal
         open={!!toDelete}
         onClose={() => setToDelete(null)}
