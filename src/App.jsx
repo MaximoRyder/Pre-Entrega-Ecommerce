@@ -9,7 +9,6 @@ import Layout from "./components/Layout";
 import Login from "./components/Login";
 import ProductDetail from "./components/ProductDetail";
 import RequireAdmin from "./components/RequireAdmin";
-import RequireAuth from "./components/RequireAuth";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { FilterProvider } from "./context/FilterProvider";
@@ -37,14 +36,7 @@ function App() {
                   />
                   <Route path="faq" element={<FAQ />} />
                   <Route path="product/:id" element={<ProductDetail />} />
-                  <Route
-                    path="cart"
-                    element={
-                      <RequireAuth>
-                        <CartPage />
-                      </RequireAuth>
-                    }
-                  />
+                  <Route path="cart" element={<CartPage />} />
                 </Route>
               </Routes>
             </BrowserRouter>

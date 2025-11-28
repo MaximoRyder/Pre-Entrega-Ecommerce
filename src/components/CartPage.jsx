@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
@@ -12,7 +13,10 @@ const CartPage = () => {
     useContext(CartContext);
   const { user } = useContext(AuthContext);
   const { showToast } = useContext(ToastContext);
+  const navigate = useNavigate();
+  const location = useLocation();
   const [toDelete, setToDelete] = useState(null);
+  const [loginPrompt, setLoginPrompt] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
   const [productStocks, setProductStocks] = useState({});
 
@@ -138,11 +142,8 @@ const CartPage = () => {
                   return;
                 }
                 if (!user || !user.email) {
-                  showToast(
-                    "Debes iniciar sesión para finalizar la compra",
-                    2000,
-                    "info"
-                  );
+                  // show modal prompting login before finalizing
+                  setLoginPrompt(true);
                   return;
                 }
 
@@ -236,6 +237,18 @@ const CartPage = () => {
         }
         cancelText="Cancelar"
         confirmText="Eliminar"
+      />
+      <ConfirmModal
+        open={loginPrompt}
+        onClose={() => setLoginPrompt(false)}
+        onConfirm={() => {
+          setLoginPrompt(false);
+          navigate("/login", { state: { from: location } });
+        }}
+        title="Necesitás iniciar sesión"
+        message="Para completar la orden debes iniciar sesión. ¿Deseas ir a la página de inicio de sesión ahora?"
+        cancelText="Cancelar"
+        confirmText="Ir a iniciar sesión"
       />
       <ConfirmModal
         open={clearConfirm}
