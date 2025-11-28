@@ -1,0 +1,43 @@
+.admin-orders {
+  padding: 12px;
+}
+.admin-orders .orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.order-card {
+  background: var(--card-bg, #2b2f33);
+  border-radius: 8px;
+  padding: 12px;
+  color: #eaeaea;
+}
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.order-body {
+  display: flex;
+  gap: 12px;
+}
+.order-items table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.order-items th,
+.order-items td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.order-actions {
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.order-actions select {
+  padding: 6px;
+  border-radius: 6px;
+}

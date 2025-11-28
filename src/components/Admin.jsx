@@ -1,4 +1,5 @@
 import AdminCategories from "./AdminCategories";
+import AdminOrders from "./AdminOrders";
 import AdminProducts from "./AdminProducts";
 
 const Admin = () => {
@@ -10,6 +11,9 @@ const Admin = () => {
       >
         <div>
           <AdminProducts />
+          <div style={{ marginTop: 24 }}>
+            <AdminOrders />
+          </div>
         </div>
         <aside>
           <AdminCategories />

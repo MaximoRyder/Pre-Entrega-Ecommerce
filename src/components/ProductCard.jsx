@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import "../styles/ProductCard.css";
+import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 
@@ -15,7 +16,10 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
     ? {
         id: fullProduct.id,
         name: fullProduct.title || name,
-        price: fullProduct.price != null ? `$${fullProduct.price}` : price,
+        price:
+          fullProduct.price != null
+            ? Number(fullProduct.price)
+            : parseNumber(price),
         imageUrl: fullProduct.image || imageUrl,
         category: fullProduct.category,
         stock: Number(
@@ -25,7 +29,7 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
             0
         ),
       }
-    : { id, name, price, imageUrl };
+    : { id, name, price: parseNumber(price), imageUrl };
 
   const productInCart = cart.find((item) => item.id === id);
   const qty = productInCart ? productInCart.quantity : 1;
@@ -53,7 +57,7 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
         </div>
         <div className="pc-bottom">
           <div className="pc-price-stock">
-            <div className="pc-price">{price}</div>
+            <div className="pc-price">{formatCurrency(product.price)}</div>
             <div className="pc-stock">
               {(() => {
                 const s =
@@ -62,7 +66,10 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                     fullProduct.quantity ??
                     fullProduct.stock);
                 if (s == null) return "Sin información";
-                return `${s} disponibles`;
+                return `${formatNumber(s, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })} disponibles`;
               })()}
             </div>
           </div>
@@ -76,7 +83,10 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                   const stock = availableStock;
                   if (typeof stock === "number" && desired > stock) {
                     showToast(
-                      `No hay stock suficiente. Máximo: ${stock}`,
+                      `No hay stock suficiente. Máximo: ${formatNumber(stock, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}`,
                       2000,
                       "info"
                     );

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import "../styles/Header.css";
+import { formatNumber } from "../utils/format";
 
 const Header = () => {
   const { cart } = useContext(CartContext);
@@ -57,10 +58,12 @@ const Header = () => {
           data-variant="secondary"
           data-visual="ghost"
           onClick={goToCart}
-          aria-label={`Ir al carrito (${totalItems} items)`}
+          aria-label={`Ir al carrito (${formatNumber(totalItems)} items)`}
         >
           <span className="material-symbols-rounded">shopping_cart</span>
-          {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+          {totalItems > 0 && (
+            <span className="cart-badge">{formatNumber(totalItems)}</span>
+          )}
         </button>
       </div>
     </header>

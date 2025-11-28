@@ -1,23 +1,23 @@
 import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import "../styles/CartPage.css";
+import { formatCurrency, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 
 const CartPage = () => {
   const { cart, decreaseQuantity, addToCart, removeFromCart, clearCart } =
     useContext(CartContext);
+  const { user } = useContext(AuthContext);
   const { showToast } = useContext(ToastContext);
   const [toDelete, setToDelete] = useState(null);
   const [clearConfirm, setClearConfirm] = useState(false);
   const [productStocks, setProductStocks] = useState({});
 
   const subtotal = cart.reduce((s, item) => {
-    const price =
-      typeof item.price === "string"
-        ? parseFloat(item.price.replace(/[^0-9.-]+/g, ""))
-        : Number(item.price || 0);
+    const price = parseNumber(item.price);
     return s + price * (item.quantity || 1);
   }, 0);
 
@@ -68,7 +68,9 @@ const CartPage = () => {
                 <div className="cart-row-info">
                   <div className="cart-row-top">
                     <strong>{item.name}</strong>
-                    <span className="cart-price">{item.price}</span>
+                    <span className="cart-price">
+                      {formatCurrency(parseNumber(item.price))}
+                    </span>
                   </div>
                   <div className="cart-row-bottom">
                     <QuantitySelector
@@ -105,7 +107,7 @@ const CartPage = () => {
           <h3>Resumen del Pedido</h3>
           <div className="summary-row">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>{formatCurrency(subtotal)}</span>
           </div>
           <div className="summary-row">
             <span>Envío</span>
@@ -114,7 +116,7 @@ const CartPage = () => {
           <hr />
           <div className="summary-total">
             <strong>Total</strong>
-            <strong>${subtotal.toFixed(2)}</strong>
+            <strong>{formatCurrency(subtotal)}</strong>
           </div>
           <div className="cart-actions">
             <button
@@ -130,17 +132,85 @@ const CartPage = () => {
               className="btn"
               data-variant="primary"
               data-visual="solid"
-              onClick={() => {
+              onClick={async () => {
                 if (cart.length === 0) {
                   showToast("No hay productos en el carrito", 1800, "info");
                   return;
                 }
-                clearCart();
-                showToast(
-                  "¡Gracias por su compra! Lo contactaremos a la brevedad para coordinar la entrega.",
-                  3000,
-                  "success"
-                );
+                if (!user || !user.email) {
+                  showToast(
+                    "Debes iniciar sesión para finalizar la compra",
+                    2000,
+                    "info"
+                  );
+                  return;
+                }
+
+                const API =
+                  import.meta.env.VITE_ORDERS_API ||
+                  "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/orders";
+                const order = {
+                  userEmail: String(user.email || "").trim(),
+                  items: cart.map((it) => ({
+                    id: String(it.id || ""),
+                    name: String(it.name || ""),
+                    price: Number(parseNumber(it.price) || 0),
+                    quantity: Number(it.quantity || 1),
+                  })),
+                  subtotal: Number(subtotal || 0),
+                  status: "pending",
+                };
+
+                try {
+                  // Sanitize and simplify payload for MockAPI
+                  const payload = order;
+                  console.debug("Creando pedido (payload):", payload);
+                  const res = await fetch(API, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                  });
+                  if (!res.ok) {
+                    const text = await res.text().catch(() => null);
+                    console.error("Error creando pedido", res.status, text);
+                    throw new Error(text || "No se pudo crear el pedido");
+                  }
+                  await res.json();
+                  clearCart();
+                  showToast("Pedido creado correctamente", 3000, "success");
+                } catch (err) {
+                  console.error(err);
+                  // Fallback: save order locally so user/admin can still see it
+                  try {
+                    const fallback = {
+                      ...order,
+                      id: `local-${Date.now()}`,
+                      createdAt: new Date().toISOString(),
+                      local: true,
+                    };
+                    const existing = JSON.parse(
+                      localStorage.getItem("local_orders") || "[]"
+                    );
+                    existing.push(fallback);
+                    localStorage.setItem(
+                      "local_orders",
+                      JSON.stringify(existing)
+                    );
+                    clearCart();
+                    showToast(
+                      "Pedido guardado localmente (fallback)",
+                      3500,
+                      "info"
+                    );
+                  } catch (e) {
+                    console.error("No se pudo guardar pedido localmente", e);
+                    showToast(
+                      `Error al crear el pedido: ${err.message || err}`,
+                      4000,
+                      "error"
+                    );
+                  }
+                }
               }}
             >
               Finalizar compra

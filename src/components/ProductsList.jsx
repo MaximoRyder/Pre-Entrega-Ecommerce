@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import FilterContext from "../context/searchContext";
 import "../styles/ProductsList.css";
+import { formatNumber } from "../utils/format";
 import ProductCard from "./ProductCard";
 
 const formatCategoryName = (category) => {
@@ -140,7 +141,7 @@ const ProductsList = () => {
         ))}
 
         <div className="info">
-          {`Mostrando ${filtered.length} producto${
+          {`Mostrando ${formatNumber(filtered.length)} producto${
             filtered.length !== 1 ? "s" : ""
           }`}
           {activeCategory !== "all" &&
@@ -168,7 +169,7 @@ const ProductsList = () => {
               key={p.id}
               id={p.id}
               name={p.title}
-              price={`$${p.price}`}
+              price={p.price}
               imageUrl={p.image}
               fullProduct={{ ...p, category: displayCategory }}
             />

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import "../styles/ProductDetail.css";
+import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 
@@ -16,21 +17,15 @@ const ProductDetail = () => {
   const [qty, setQty] = useState(1);
   const [showConfirm, setShowConfirm] = useState(false);
   const { showToast } = useContext(ToastContext);
-
-  const formatPrice = (value) => {
-    return Number(value).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
-  const totalPrice = product ? Number(product.price) * qty : 0;
-
   const existingInCart = (() => {
     if (!cart || !product) return 0;
     const found = cart.find((it) => String(it.id) === String(product.id));
     return found ? Number(found.quantity) || 0 : 0;
   })();
+
+  const unitPrice = product ? parseNumber(product.price) : 0;
+  const displayedQuantity = existingInCart > 0 ? existingInCart : qty;
+  const totalPrice = product ? unitPrice * displayedQuantity : 0;
 
   const getStockFromProduct = (p) => {
     if (!p) return null;
@@ -133,13 +128,16 @@ const ProductDetail = () => {
         <div className="pd-price-section">
           <div className="pd-price-row">
             <span className="pd-price-label">Precio unitario:</span>
-            <div className="pd-price">${formatPrice(product.price)}</div>
+            <div className="pd-price">{formatCurrency(product.price)}</div>
           </div>
           <div className="pd-stock">
             {(() => {
               const s = getStockFromProduct(product);
               if (s == null) return "Sin información";
-              return `${s} disponibles`;
+              return `${formatNumber(s, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })} disponibles`;
             })()}
           </div>
         </div>
@@ -163,7 +161,7 @@ const ProductDetail = () => {
                     addToCart({
                       id: product.id,
                       name: product.title,
-                      price: `$${formatPrice(product.price)}`,
+                      price: parseNumber(product.price),
                       imageUrl: product.image,
                       quantity: diff,
                     });
@@ -189,7 +187,7 @@ const ProductDetail = () => {
         <div className="pd-total-section">
           <div className="pd-total-row">
             <span className="pd-total-label">Total:</span>
-            <div className="pd-total-price">${formatPrice(totalPrice)}</div>
+            <div className="pd-total-price">{formatCurrency(totalPrice)}</div>
           </div>
         </div>
 
@@ -204,7 +202,10 @@ const ProductDetail = () => {
               if (qtyToAdd <= 0) return;
               if (remainingStock !== null && qtyToAdd > remainingStock) {
                 showToast(
-                  `No puedes agregar ${qtyToAdd} unidades. Stock restante: ${remainingStock}`,
+                  `No puedes agregar ${qtyToAdd} unidades. Stock restante: ${formatNumber(
+                    remainingStock,
+                    { minimumFractionDigits: 0, maximumFractionDigits: 0 }
+                  )}`,
                   2200,
                   "info"
                 );
@@ -214,7 +215,7 @@ const ProductDetail = () => {
               addToCart({
                 id: product.id,
                 name: product.title,
-                price: `$${formatPrice(product.price)}`,
+                price: parseNumber(product.price),
                 imageUrl: product.image,
                 quantity: qtyToAdd,
               });
