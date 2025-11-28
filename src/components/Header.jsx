@@ -2,7 +2,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
-import "../styles/Header.css";
 import { formatNumber } from "../utils/format";
 
 const Header = () => {
@@ -25,43 +24,79 @@ const Header = () => {
   const totalItems = cart.reduce((s, i) => s + (i.quantity || 1), 0);
 
   return (
-    <header className="header">
-      <div className="brand">
-        <h1>
-          <Link to="/">Mi Tienda</Link>
-        </h1>
-      </div>
+    <header className="sticky top-0 z-50 bg-neutral-200/90 backdrop-blur border-b border-neutral-300 shadow-sm">
+      <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3 gap-4">
+        <div className="flex items-center">
+          <h1 className="m-0 text-lg sm:text-xl font-bold">
+            <Link
+              to="/"
+              className="text-primary-500 hover:text-primary-600 transition-colors"
+            >
+              Mi Tienda
+            </Link>
+          </h1>
+        </div>
 
-      <div className="right-actions">
-        <nav className="main-nav">
-          <ul>
-            <li>
-              <Link to="/">Inicio</Link>
-            </li>
-            <li>
-              <Link to="/about">Nosotros</Link>
-            </li>
-            {user?.role === "admin" && (
+        <div className="flex items-center gap-4">
+          <nav className="hidden md:block">
+            <ul className="flex list-none m-0 p-0 gap-4 text-sm font-medium text-neutral-600">
               <li>
-                <Link to="/admin">Administración</Link>
+                <Link className="hover:text-neutral-900" to="/">
+                  Inicio
+                </Link>
               </li>
-            )}
+              <li>
+                <Link className="hover:text-neutral-900" to="/about">
+                  Nosotros
+                </Link>
+              </li>
+              {user?.role === "admin" && (
+                <li>
+                  <Link className="hover:text-neutral-900" to="/admin">
+                    Administración
+                  </Link>
+                </li>
+              )}
+              <li>
+                <Link className="hover:text-neutral-900" to="/faq">
+                  Preguntas Frecuentes
+                </Link>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Mobile simplified nav trigger (optional future) */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={goToCart}
+              className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-neutral-300 transition-colors text-neutral-900"
+              aria-label={`Ir al carrito (${formatNumber(totalItems)} items)`}
+            >
+              <span className="material-symbols-rounded text-xl">
+                shopping_cart
+              </span>
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-error text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-[1.25rem] flex items-center justify-center">
+                  {formatNumber(totalItems)}
+                </span>
+              )}
+            </button>
+
             {!isAuthenticated ? (
-              <li>
-                <Link to="/login">Ingresar</Link>
-              </li>
-            ) : (
-              <li
-                ref={menuRef}
-                className="user-badge-li"
-                style={{ position: "relative" }}
+              <Link
+                to="/login"
+                className="px-3 py-2 rounded-md bg-primary-500 text-white text-sm font-medium hover:bg-primary-600 transition-colors"
               >
+                Ingresar
+              </Link>
+            ) : (
+              <div ref={menuRef} className="relative">
                 <button
-                  className="user-badge"
                   onClick={(e) => {
                     e.stopPropagation();
                     setMenuOpen((s) => !s);
                   }}
+                  className="w-9 h-9 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold flex items-center justify-center shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
                 >
                   {user?.name
                     ? user.name
@@ -72,45 +107,20 @@ const Header = () => {
                     : (user?.email || "U")[0].toUpperCase()}
                 </button>
                 {menuOpen && (
-                  <div
-                    className="user-menu"
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      top: "calc(100% + 8px)",
-                      zIndex: 60,
-                      minWidth: 200,
-                      background: "white",
-                      boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-                      borderRadius: 6,
-                      padding: 10,
-                    }}
-                  >
-                    <div
-                      style={{
-                        padding: "6px 8px",
-                        borderBottom: "1px solid #eee",
-                      }}
-                    >
-                      <div style={{ fontWeight: 700 }}>
+                  <div className="absolute right-0 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-neutral-300 p-2 z-50 text-sm">
+                    <div className="px-2 py-2 border-b border-neutral-200 mb-2">
+                      <div className="font-semibold truncate">
                         {user?.name || user?.email}
                       </div>
-                      <div style={{ fontSize: 12, color: "#666" }}>
+                      <div className="text-xs text-neutral-500">
                         {user?.role === "admin" ? "Administrador" : "Usuario"}
                       </div>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 6,
-                        marginTop: 8,
-                      }}
-                    >
+                    <div className="flex flex-col gap-1">
                       <Link
                         to="/profile"
                         onClick={() => setMenuOpen(false)}
-                        style={{ padding: "6px 8px" }}
+                        className="px-2 py-1 rounded hover:bg-neutral-100 transition-colors"
                       >
                         Perfil
                       </Link>
@@ -118,50 +128,28 @@ const Header = () => {
                         <Link
                           to="/admin"
                           onClick={() => setMenuOpen(false)}
-                          style={{ padding: "6px 8px" }}
+                          className="px-2 py-1 rounded hover:bg-neutral-100 transition-colors"
                         >
                           Panel Admin
                         </Link>
                       )}
                       <button
-                        className="btn-link"
                         onClick={() => {
                           setMenuOpen(false);
                           logout();
                           navigate("/");
                         }}
-                        style={{
-                          textAlign: "left",
-                          padding: "6px 8px",
-                          border: "none",
-                          background: "transparent",
-                        }}
+                        className="text-left px-2 py-1 rounded hover:bg-neutral-100 transition-colors"
                       >
                         Cerrar sesión
                       </button>
                     </div>
                   </div>
                 )}
-              </li>
+              </div>
             )}
-            <li>
-              <Link to="/faq">Preguntas Frecuentes</Link>
-            </li>
-          </ul>
-        </nav>
-
-        <button
-          className="btn cart-button"
-          data-variant="secondary"
-          data-visual="ghost"
-          onClick={goToCart}
-          aria-label={`Ir al carrito (${formatNumber(totalItems)} items)`}
-        >
-          <span className="material-symbols-rounded">shopping_cart</span>
-          {totalItems > 0 && (
-            <span className="cart-badge">{formatNumber(totalItems)}</span>
-          )}
-        </button>
+          </div>
+        </div>
       </div>
     </header>
   );

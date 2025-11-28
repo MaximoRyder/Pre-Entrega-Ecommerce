@@ -1,3 +1,8 @@
+/* Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Importar Google Fonts + Material Icons */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0&display=swap");
 
