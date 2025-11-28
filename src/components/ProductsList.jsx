@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import FilterContext from "../context/searchContext";
-import "../styles/ProductsList.css";
 import { formatNumber } from "../utils/format";
 import ProductCard from "./ProductCard";
 
@@ -116,31 +115,41 @@ const ProductsList = () => {
     );
   }, [searchTerm, activeCategory, products]);
 
-  if (loading) return <p>Cargando productos...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading)
+    return <p className="text-sm text-neutral-500">Cargando productos...</p>;
+  if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
 
   return (
-    <main className="main-content">
-      <h2>Productos Disponibles</h2>
+    <section className="space-y-6">
+      <h2 className="text-xl font-semibold text-neutral-800">
+        Productos Disponibles
+      </h2>
 
-      <div className="category-bar">
+      <div className="flex flex-wrap gap-2 items-center">
         <button
-          className={activeCategory === "all" ? "active" : ""}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+            activeCategory === "all"
+              ? "bg-primary-500 text-white border-primary-500"
+              : "bg-white text-neutral-600 hover:bg-neutral-100 border-neutral-300"
+          }`}
           onClick={() => setActiveCategory("all")}
         >
-          Todas las categorías
+          Todas
         </button>
         {categories.map((c) => (
           <button
             key={c.id}
-            className={activeCategory === c.id ? "active" : ""}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              activeCategory === c.id
+                ? "bg-primary-500 text-white border-primary-500"
+                : "bg-white text-neutral-600 hover:bg-neutral-100 border-neutral-300"
+            }`}
             onClick={() => setActiveCategory(c.id)}
           >
             {formatCategoryName(c.name)}
           </button>
         ))}
-
-        <div className="info">
+        <div className="ml-auto text-xs text-neutral-500">
           {`Mostrando ${formatNumber(filtered.length)} producto${
             filtered.length !== 1 ? "s" : ""
           }`}
@@ -152,7 +161,7 @@ const ProductsList = () => {
         </div>
       </div>
 
-      <div className="product-grid">
+      <div className="grid gap-5 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {filtered.map((p) => {
           const prodCat = p?.category ?? "";
           let displayCategory = prodCat;
@@ -176,7 +185,7 @@ const ProductsList = () => {
           );
         })}
       </div>
-    </main>
+    </section>
   );
 };
 

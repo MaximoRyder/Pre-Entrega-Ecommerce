@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
-import "../styles/ProductCard.css";
 import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
@@ -46,35 +45,49 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
     availableStock == null ? null : Math.max(0, availableStock - existingQty);
 
   return (
-    <div className="product-card">
-      <Link to={`/product/${id}`} className="pc-image-wrap">
-        <img src={imageUrl} alt={name} />
+    <div className="group bg-white border border-neutral-200 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+      <Link
+        to={`/product/${id}`}
+        className="block aspect-[4/3] bg-neutral-100 overflow-hidden"
+      >
+        <img
+          src={imageUrl}
+          alt={name}
+          className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform"
+          loading="lazy"
+        />
       </Link>
-      <div className="pc-body">
-        <h3 className="pc-title">{name}</h3>
-        <div className="pc-meta">
-          <div className="pc-category">{product?.category}</div>
+      <div className="flex flex-col flex-1 p-4 gap-3">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-neutral-800 line-clamp-2 min-h-[2.5rem]">
+            {name}
+          </h3>
+          <div className="text-xs text-primary-600 font-medium">
+            {product?.category}
+          </div>
         </div>
-        <div className="pc-bottom">
-          <div className="pc-price-stock">
-            <div className="pc-price">{formatCurrency(product.price)}</div>
-            <div className="pc-stock">
+        <div className="mt-auto space-y-2">
+          <div className="flex items-baseline justify-between">
+            <div className="text-base font-semibold text-neutral-900">
+              {formatCurrency(product.price)}
+            </div>
+            <div className="text-[11px] text-neutral-500">
               {(() => {
                 const s =
                   fullProduct &&
                   (fullProduct.rating?.count ??
                     fullProduct.quantity ??
                     fullProduct.stock);
-                if (s == null) return "Sin información";
+                if (s == null) return "Sin info";
                 return `${formatNumber(s, {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
-                })} disponibles`;
+                })} disp.`;
               })()}
             </div>
           </div>
           {productInCart ? (
-            <div className="quantity-controls">
+            <div className="flex items-center justify-between gap-2">
               <QuantitySelector
                 value={qty}
                 onChange={(v) => {
@@ -111,53 +124,41 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                 onDelete={() => setShowConfirm(true)}
                 deleteLabel="Eliminar producto"
               />
-            </div>
-          ) : (
-            <div className="product-card__footer">
               <button
-                className="btn"
-                data-variant="primary"
-                data-visual="soft"
-                data-size="sm"
-                disabled={
-                  typeof availableStock === "number"
-                    ? availableStock <= 0
-                    : false
-                }
-                onClick={() => {
-                  if (
-                    typeof availableStock === "number" &&
-                    availableStock <= 0
-                  ) {
-                    showToast("Producto agotado", 1800, "info");
-                    return;
-                  }
-                  const toAdd = Math.min(
-                    1,
-                    remainingStock == null ? 1 : remainingStock
-                  );
-                  if (toAdd <= 0) {
-                    showToast("No hay stock disponible", 1800, "info");
-                    return;
-                  }
-                  addToCart({ ...product, quantity: toAdd });
-                  showToast(`${product.name || name} añadido al carrito`);
-                }}
-                style={{
-                  "--button-hue": "30",
-                  "--button-sat": "25%",
-                  "--button-light": "36%",
-                }}
+                onClick={() => setShowConfirm(true)}
+                className="text-xs text-red-500 hover:text-red-600"
               >
-                <span
-                  className="material-symbols-rounded"
-                  style={{ fontSize: "20px" }}
-                >
-                  add_shopping_cart
-                </span>
-                Agregar al carrito
+                Quitar
               </button>
             </div>
+          ) : (
+            <button
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={
+                typeof availableStock === "number" ? availableStock <= 0 : false
+              }
+              onClick={() => {
+                if (typeof availableStock === "number" && availableStock <= 0) {
+                  showToast("Producto agotado", 1800, "info");
+                  return;
+                }
+                const toAdd = Math.min(
+                  1,
+                  remainingStock == null ? 1 : remainingStock
+                );
+                if (toAdd <= 0) {
+                  showToast("No hay stock disponible", 1800, "info");
+                  return;
+                }
+                addToCart({ ...product, quantity: toAdd });
+                showToast(`${product.name || name} añadido al carrito`);
+              }}
+            >
+              <span className="material-symbols-rounded text-base">
+                add_shopping_cart
+              </span>
+              Agregar
+            </button>
           )}
         </div>
       </div>
