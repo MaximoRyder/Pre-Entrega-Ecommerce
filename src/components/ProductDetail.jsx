@@ -102,15 +102,16 @@ const ProductDetail = () => {
     };
   }, [id]);
 
-  if (loading) return <p>Cargando detalle del producto...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!product) return <p>Producto no encontrado</p>;
+  if (loading)
+    return <p className="text-sub">Cargando detalle del producto...</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
+  if (!product) return <p className="text-sub">Producto no encontrado</p>;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-10">
       {/* Left column */}
       <div className="space-y-6">
-        <div className="aspect-[4/5] w-full overflow-hidden rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center p-4">
+        <div className="aspect-[4/5] w-full overflow-hidden rounded-xl bg-surface border border-border shadow-sm flex items-center justify-center p-4">
           <img
             src={product.image}
             alt={product.title}
@@ -118,13 +119,13 @@ const ProductDetail = () => {
           />
         </div>
         <div className="space-y-3">
-          <span className="uppercase tracking-wide text-xs font-medium text-primary-600">
+          <span className="uppercase tracking-wide text-xs font-medium text-primary-500">
             {product.category}
           </span>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight text-main">
             {product.title}
           </h1>
-          <p className="text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+          <p className="text-sm leading-relaxed text-sub whitespace-pre-line">
             {product.description}
           </p>
         </div>
@@ -133,16 +134,16 @@ const ProductDetail = () => {
       {/* Right column */}
       <div className="flex flex-col gap-6">
         {/* Price / stock */}
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 space-y-3">
+        <div className="rounded-lg border border-border bg-surface shadow-sm p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-sub">
               Precio unitario:
             </span>
-            <div className="text-lg font-semibold text-gray-900">
+            <div className="text-lg font-semibold text-main">
               {formatCurrency(product.price)}
             </div>
           </div>
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-sub">
             {(() => {
               const s = getStockFromProduct(product);
               if (s == null) return "Sin información";
@@ -155,8 +156,8 @@ const ProductDetail = () => {
         </div>
 
         {/* Quantity */}
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 space-y-3">
-          <div className="text-sm font-medium text-gray-700">Cantidad:</div>
+        <div className="rounded-lg border border-border bg-surface shadow-sm p-5 space-y-3">
+          <div className="text-sm font-medium text-sub">Cantidad:</div>
           <div>
             {remainingStock === 0 && existingInCart === 0 ? (
               <div className="text-sm font-semibold text-red-600">Agotado</div>
@@ -197,16 +198,16 @@ const ProductDetail = () => {
         </div>
 
         {/* Total */}
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-5 flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">Total:</span>
-          <div className="text-xl font-semibold text-gray-900">
+        <div className="rounded-lg border border-border bg-surface shadow-sm p-5 flex items-center justify-between">
+          <span className="text-sm font-medium text-sub">Total:</span>
+          <div className="text-xl font-semibold text-main">
             {formatCurrency(totalPrice)}
           </div>
         </div>
 
         {existingInCart === 0 && (
           <button
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-3 transition-colors shadow-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-3 transition-colors shadow-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
             disabled={remainingStock === 0}
             onClick={() => {
               const qtyToAdd = Number(qty) || 1;

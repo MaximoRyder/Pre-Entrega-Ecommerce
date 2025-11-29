@@ -170,19 +170,19 @@ const AdminProducts = () => {
         <h3 className="text-xl font-semibold tracking-tight">Productos</h3>
         <button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+          className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
         >
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
       </div>
       {/* Mensaje de endpoint por defecto removido a pedido del usuario */}
-      {loading && <p className="text-sm text-gray-500">Cargando...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && <p className="text-sm text-muted">Cargando...</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
       {/* Vista tabla (desktop) */}
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[520px]">
           <thead>
-            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-muted border-b border-border">
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Título</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Precio</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Cantidad</th>
@@ -192,10 +192,7 @@ const AdminProducts = () => {
           </thead>
           <tbody>
             {products.slice((page - 1) * pageSize, page * pageSize).map((p) => (
-              <tr
-                key={p.id}
-                className="border-b last:border-b-0 border-gray-100"
-              >
+              <tr key={p.id} className="border-b last:border-b-0 border-border">
                 <td
                   className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[140px] truncate"
                   title={p.title || p.name}
@@ -224,14 +221,14 @@ const AdminProducts = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openEdit(p)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                       aria-label="Editar"
                     >
                       <PencilSquareIcon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => confirmDelete(p)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
                       aria-label="Eliminar"
                     >
                       <TrashIcon className="w-4 h-4" />
@@ -244,7 +241,7 @@ const AdminProducts = () => {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-3 py-6 text-center text-xs text-gray-500"
+                  className="px-3 py-6 text-center text-xs text-muted"
                 >
                   Sin productos
                 </td>
@@ -277,40 +274,40 @@ const AdminProducts = () => {
           return (
             <div
               key={p.id}
-              className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
+              className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
             >
               <div className="space-y-1">
                 <div className="flex">
                   <span className="font-semibold mr-1">Título:</span>
                   <span className="flex-1 truncate">{p.title || p.name}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-1 flex">
+                <div className="border-t border-border pt-1 flex">
                   <span className="font-semibold mr-1">Precio:</span>
                   <span className="flex-1">
                     {formatCurrency(parseNumber(p.price))}
                   </span>
                 </div>
-                <div className="border-t border-gray-200 pt-1 flex">
+                <div className="border-t border-border pt-1 flex">
                   <span className="font-semibold mr-1">Cantidad:</span>
                   <span className="flex-1">{p.quantity ?? p.stock ?? "-"}</span>
                 </div>
-                <div className="border-t border-gray-200 pt-1 flex">
+                <div className="border-t border-border pt-1 flex">
                   <span className="font-semibold mr-1">Categoría:</span>
                   <span className="flex-1">{catLabel}</span>
                 </div>
               </div>
-              <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
+              <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
                 <span className="font-semibold">Acciones:</span>
                 <button
                   onClick={() => openEdit(p)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                   aria-label="Editar"
                 >
                   <PencilSquareIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => confirmDelete(p)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
                   aria-label="Eliminar"
                 >
                   <TrashIcon className="w-4 h-4" />
@@ -320,7 +317,7 @@ const AdminProducts = () => {
           );
         })}
         {products.length === 0 && !loading && !error && (
-          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+          <div className="text-center text-sm text-muted py-6 border border-dashed border-border rounded-md">
             Sin productos
           </div>
         )}
@@ -343,19 +340,19 @@ const AdminProducts = () => {
       >
         <div className="grid gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Título
             </label>
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 flex flex-col gap-1">
-              <label className="text-xs font-medium text-gray-600 uppercase">
+              <label className="text-xs font-medium text-sub uppercase">
                 Precio
               </label>
               <input
@@ -365,11 +362,11 @@ const AdminProducts = () => {
                 value={form.price}
                 onChange={(e) => setForm({ ...form, price: e.target.value })}
                 required
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
               />
             </div>
             <div className="flex-1 flex flex-col gap-1">
-              <label className="text-xs font-medium text-gray-600 uppercase">
+              <label className="text-xs font-medium text-sub uppercase">
                 Cantidad
               </label>
               <input
@@ -378,19 +375,19 @@ const AdminProducts = () => {
                 value={form.quantity}
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
                 required
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
               />
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Categoría
             </label>
             {categories.length > 0 ? (
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
               >
                 <option value="">-- Seleccionar --</option>
                 {categories.map((c) => (
@@ -404,19 +401,19 @@ const AdminProducts = () => {
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
                 placeholder="Ingresar categoría"
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
               />
             )}
             {/* Mensaje de fallback de categorías eliminado a pedido del usuario */}
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Imagen (URL)
             </label>
             <input
               value={form.image}
               onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
             />
           </div>
         </div>

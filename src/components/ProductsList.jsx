@@ -121,22 +121,19 @@ const ProductsList = () => {
   // reset page when filter set changes
   useEffect(() => setPage(1), [filtered.length, activeCategory, searchTerm]);
 
-  if (loading)
-    return <p className="text-sm text-neutral-500">Cargando productos...</p>;
+  if (loading) return <p className="text-sm text-sub">Cargando productos...</p>;
   if (error) return <p className="text-sm text-red-500">Error: {error}</p>;
 
   return (
     <section className="space-y-6">
-      <h2 className="text-xl font-semibold text-neutral-800">
-        Productos Disponibles
-      </h2>
+      <h2 className="text-xl font-semibold text-main">Productos Disponibles</h2>
 
       <div className="flex flex-wrap gap-2 items-center">
         <button
           className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
             activeCategory === "all"
               ? "bg-primary-500 text-white border-primary-500"
-              : "bg-white text-neutral-600 hover:bg-neutral-100 border-neutral-300"
+              : "bg-surface text-sub hover:bg-surface-hover border-border"
           }`}
           onClick={() => setActiveCategory("all")}
         >
@@ -148,14 +145,14 @@ const ProductsList = () => {
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
               activeCategory === c.id
                 ? "bg-primary-500 text-white border-primary-500"
-                : "bg-white text-neutral-600 hover:bg-neutral-100 border-neutral-300"
+                : "bg-surface text-sub hover:bg-surface-hover border-border"
             }`}
             onClick={() => setActiveCategory(c.id)}
           >
             {formatCategoryName(c.name)}
           </button>
         ))}
-        <div className="ml-auto text-xs text-neutral-500">
+        <div className="ml-auto text-xs text-sub">
           {`Mostrando ${formatNumber(filtered.length)} producto${
             filtered.length !== 1 ? "s" : ""
           }`}

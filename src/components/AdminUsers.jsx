@@ -116,18 +116,18 @@ const AdminUsers = () => {
         <h3 className="text-xl font-semibold tracking-tight">Usuarios</h3>
         <button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+          className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
         >
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
       </div>
       {/* Mensaje de advertencia eliminado a pedido del usuario */}
-      {loading && <p className="text-sm text-gray-500">Cargando...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
+      {loading && <p className="text-sm text-muted">Cargando...</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[520px]">
           <thead>
-            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-muted border-b border-border">
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Nombre</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Email</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Rol</th>
@@ -136,10 +136,7 @@ const AdminUsers = () => {
           </thead>
           <tbody>
             {users.slice((page - 1) * pageSize, page * pageSize).map((u) => (
-              <tr
-                key={u.id}
-                className="border-b last:border-b-0 border-gray-100"
-              >
+              <tr key={u.id} className="border-b last:border-b-0 border-border">
                 <td
                   className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[140px] truncate"
                   title={u.name}
@@ -147,7 +144,7 @@ const AdminUsers = () => {
                   {u.name}
                 </td>
                 <td
-                  className="px-2 py-1.5 sm:px-3 sm:py-2 text-gray-600 truncate"
+                  className="px-2 py-1.5 sm:px-3 sm:py-2 text-sub truncate"
                   title={u.email}
                 >
                   {u.email}
@@ -159,14 +156,14 @@ const AdminUsers = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openEdit(u)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                       aria-label="Editar"
                     >
                       <PencilSquareIcon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => confirmDelete(u)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
                       aria-label="Eliminar"
                     >
                       <TrashIcon className="w-4 h-4" />
@@ -179,7 +176,7 @@ const AdminUsers = () => {
               <tr>
                 <td
                   colSpan={4}
-                  className="px-2 py-6 text-center text-[10px] sm:text-xs text-gray-500"
+                  className="px-2 py-6 text-center text-[10px] sm:text-xs text-muted"
                 >
                   Sin usuarios
                 </td>
@@ -201,7 +198,7 @@ const AdminUsers = () => {
         {users.slice((page - 1) * pageSize, page * pageSize).map((u) => (
           <div
             key={u.id}
-            className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
+            className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
           >
             <div className="flex">
               <span className="font-semibold mr-1">Nombre:</span>
@@ -209,28 +206,28 @@ const AdminUsers = () => {
                 {u.name}
               </span>
             </div>
-            <div className="border-t border-gray-200 pt-1 mt-1 flex">
+            <div className="border-t border-border pt-1 mt-1 flex">
               <span className="font-semibold mr-1">Email:</span>
               <span className="flex-1 truncate" title={u.email}>
                 {u.email}
               </span>
             </div>
-            <div className="border-t border-gray-200 pt-1 mt-1 flex">
+            <div className="border-t border-border pt-1 mt-1 flex">
               <span className="font-semibold mr-1">Rol:</span>
               <span className="flex-1">{u.role || "user"}</span>
             </div>
-            <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
+            <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
               <span className="font-semibold">Acciones:</span>
               <button
                 onClick={() => openEdit(u)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                 aria-label="Editar"
               >
                 <PencilSquareIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => confirmDelete(u)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
                 aria-label="Eliminar"
               >
                 <TrashIcon className="w-4 h-4" />
@@ -239,7 +236,7 @@ const AdminUsers = () => {
           </div>
         ))}
         {users.length === 0 && !loading && !error && (
-          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+          <div className="text-center text-sm text-muted py-6 border border-dashed border-border rounded-md">
             Sin usuarios
           </div>
         )}
@@ -262,18 +259,18 @@ const AdminUsers = () => {
       >
         <div className="grid gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Nombre
             </label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Email
             </label>
             <input
@@ -281,17 +278,17 @@ const AdminUsers = () => {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Rol
             </label>
             <select
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="user">Usuario</option>
               <option value="admin">Admin</option>
@@ -299,7 +296,7 @@ const AdminUsers = () => {
           </div>
           {!editing && (
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-gray-600 uppercase">
+              <label className="text-xs font-medium text-sub uppercase">
                 Contraseña
               </label>
               <input
@@ -307,7 +304,7 @@ const AdminUsers = () => {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
-                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           )}

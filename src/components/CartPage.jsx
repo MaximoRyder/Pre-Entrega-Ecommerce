@@ -248,29 +248,29 @@ const CartPage = () => {
     <div className="max-w-6xl mx-auto py-8 grid lg:grid-cols-3 gap-8">
       {/* Left: Items */}
       <div className="lg:col-span-2 space-y-6">
-        <h2 className="text-2xl font-semibold tracking-tight">
+        <h2 className="text-2xl font-semibold tracking-tight text-main">
           Tu Carrito ({cart.reduce((s, i) => s + (i.quantity || 1), 0)})
         </h2>
         {cart.length === 0 ? (
-          <p className="text-sm text-gray-600">Tu carrito está vacío</p>
+          <p className="text-sm text-sub">Tu carrito está vacío</p>
         ) : (
           <div className="space-y-4">
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="flex gap-4 rounded-lg border border-gray-200 bg-white shadow-sm p-4"
+                className="flex gap-4 rounded-lg border border-border bg-surface shadow-sm p-4"
               >
                 <img
                   src={item.imageUrl}
                   alt={item.name}
-                  className="w-20 h-20 object-contain rounded-md bg-white"
+                  className="w-20 h-20 object-contain rounded-md bg-surface-hover"
                 />
                 <div className="flex-1 flex flex-col justify-between gap-3">
                   <div className="flex items-start justify-between gap-4">
-                    <strong className="text-sm font-medium line-clamp-2">
+                    <strong className="text-sm font-medium line-clamp-2 text-main">
                       {item.name}
                     </strong>
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-main">
                       {formatCurrency(parseNumber(item.price))}
                     </span>
                   </div>
@@ -306,31 +306,35 @@ const CartPage = () => {
 
       {/* Right: Summary */}
       <aside className="space-y-6">
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6 space-y-4">
-          <h3 className="text-lg font-semibold">Resumen del Pedido</h3>
+        <div className="rounded-lg border border-border bg-surface shadow-sm p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-main">
+            Resumen del Pedido
+          </h3>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">{formatCurrency(subtotal)}</span>
+            <span className="text-sub">Subtotal</span>
+            <span className="font-medium text-main">
+              {formatCurrency(subtotal)}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Envío</span>
-            <span className="font-medium">Gratis</span>
+            <span className="text-sub">Envío</span>
+            <span className="font-medium text-main">Gratis</span>
           </div>
-          <hr className="border-gray-200" />
-          <div className="flex items-center justify-between text-base font-semibold">
+          <hr className="border-border" />
+          <div className="flex items-center justify-between text-base font-semibold text-main">
             <strong>Total</strong>
             <strong>{formatCurrency(subtotal)}</strong>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               onClick={() => setClearConfirm(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-red-300 text-red-600 hover:bg-red-50 text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/40"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-red-500 text-red-500 hover:bg-red-900/20 text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/40"
             >
               Vaciar carrito
             </button>
             <button
               onClick={handleFinalize}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
             >
               Finalizar compra
             </button>

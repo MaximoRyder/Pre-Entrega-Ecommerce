@@ -10,7 +10,7 @@ const Layout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-100 text-neutral-900 font-sans">
+    <div className="min-h-screen flex flex-col bg-background text-main font-sans">
       <Header />
       <main className="flex-1 w-full mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="w-full">

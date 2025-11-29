@@ -1,7 +1,11 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+// import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default {
   plugins: [react()],
-})
+  // config options
+}
+// export default defineConfig({
+//   plugins: [react()],
+// })

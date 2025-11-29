@@ -28,7 +28,7 @@ const Header = () => {
   const totalItems = cart.reduce((s, i) => s + (i.quantity || 1), 0);
 
   return (
-    <header className="sticky top-0 z-50 bg-neutral-200/90 backdrop-blur border-b border-neutral-300 shadow-sm">
+    <header className="sticky top-0 z-50 bg-surface/90 backdrop-blur border-b border-border shadow-sm">
       <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3 gap-4">
         <div className="flex items-center">
           <h1 className="m-0 text-lg sm:text-xl font-bold">
@@ -43,26 +43,26 @@ const Header = () => {
 
         <div className="flex items-center gap-4">
           <nav className="hidden md:block">
-            <ul className="flex list-none m-0 p-0 gap-4 text-sm font-medium text-neutral-600">
+            <ul className="flex list-none m-0 p-0 gap-4 text-sm font-medium text-sub">
               <li>
-                <Link className="hover:text-neutral-900" to="/">
+                <Link className="hover:text-main" to="/">
                   Inicio
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-neutral-900" to="/about">
+                <Link className="hover:text-main" to="/about">
                   Nosotros
                 </Link>
               </li>
               {user?.role === "admin" && (
                 <li>
-                  <Link className="hover:text-neutral-900" to="/admin">
+                  <Link className="hover:text-main" to="/admin">
                     Administración
                   </Link>
                 </li>
               )}
               <li>
-                <Link className="hover:text-neutral-900" to="/faq">
+                <Link className="hover:text-main" to="/faq">
                   Preguntas Frecuentes
                 </Link>
               </li>
@@ -73,7 +73,7 @@ const Header = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={goToCart}
-              className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-neutral-300 transition-colors text-neutral-900"
+              className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-hover transition-colors text-main"
               aria-label={`Ir al carrito (${formatNumber(totalItems)} items)`}
             >
               <ShoppingCartIcon className="w-6 h-6" />
@@ -110,12 +110,12 @@ const Header = () => {
                     : (user?.email || "U")[0].toUpperCase()}
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-neutral-300 p-2 z-50 text-sm">
-                    <div className="px-2 py-2 border-b border-neutral-200 mb-2">
+                  <div className="absolute right-0 mt-2 w-56 rounded-md bg-surface shadow-lg ring-1 ring-border p-2 z-50 text-sm">
+                    <div className="px-2 py-2 border-b border-border mb-2">
                       <div className="font-semibold truncate">
                         {user?.name || user?.email}
                       </div>
-                      <div className="text-xs text-neutral-500">
+                      <div className="text-xs text-sub">
                         {user?.role === "admin" ? "Administrador" : "Usuario"}
                       </div>
                     </div>
@@ -123,7 +123,7 @@ const Header = () => {
                       <Link
                         to="/profile"
                         onClick={() => setMenuOpen(false)}
-                        className="px-2 py-1 rounded hover:bg-neutral-100 transition-colors"
+                        className="px-2 py-1 rounded hover:bg-surface-hover transition-colors"
                       >
                         Perfil
                       </Link>
@@ -131,7 +131,7 @@ const Header = () => {
                         <Link
                           to="/admin"
                           onClick={() => setMenuOpen(false)}
-                          className="px-2 py-1 rounded hover:bg-neutral-100 transition-colors"
+                          className="px-2 py-1 rounded hover:bg-surface-hover transition-colors"
                         >
                           Panel Admin
                         </Link>
@@ -142,7 +142,7 @@ const Header = () => {
                           logout();
                           navigate("/");
                         }}
-                        className="text-left px-2 py-1 rounded hover:bg-neutral-100 transition-colors"
+                        className="text-left px-2 py-1 rounded hover:bg-surface-hover transition-colors"
                       >
                         Cerrar sesión
                       </button>

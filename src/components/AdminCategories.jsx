@@ -117,18 +117,18 @@ const AdminCategories = () => {
         <h3 className="text-xl font-semibold tracking-tight">Categorías</h3>
         <button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+          className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
         >
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
       </div>
       {/* Mensaje de advertencia eliminado a pedido del usuario */}
-      {loading && <p className="text-sm text-gray-500">Cargando...</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
+      {loading && <p className="text-sm text-muted">Cargando...</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[420px]">
           <thead>
-            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-muted border-b border-border">
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Nombre</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Acciones</th>
             </tr>
@@ -139,7 +139,7 @@ const AdminCategories = () => {
               .map((c) => (
                 <tr
                   key={c.id}
-                  className="border-b last:border-b-0 border-gray-100"
+                  className="border-b last:border-b-0 border-border"
                 >
                   <td
                     className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[160px] truncate"
@@ -151,14 +151,14 @@ const AdminCategories = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openEdit(c)}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                         aria-label="Editar"
                       >
                         <PencilSquareIcon className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => confirmDelete(c)}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
                         aria-label="Eliminar"
                       >
                         <TrashIcon className="w-4 h-4" />
@@ -171,7 +171,7 @@ const AdminCategories = () => {
               <tr>
                 <td
                   colSpan={2}
-                  className="px-2 py-6 text-center text-[10px] sm:text-xs text-gray-500"
+                  className="px-2 py-6 text-center text-[10px] sm:text-xs text-muted"
                 >
                   Sin categorías
                 </td>
@@ -193,7 +193,7 @@ const AdminCategories = () => {
         {categories.slice((page - 1) * pageSize, page * pageSize).map((c) => (
           <div
             key={c.id}
-            className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
+            className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
           >
             <div className="flex">
               <span className="font-semibold mr-1">Nombre:</span>
@@ -201,18 +201,18 @@ const AdminCategories = () => {
                 {c.name}
               </span>
             </div>
-            <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
+            <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
               <span className="font-semibold">Acciones:</span>
               <button
                 onClick={() => openEdit(c)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                 aria-label="Editar"
               >
                 <PencilSquareIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => confirmDelete(c)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
                 aria-label="Eliminar"
               >
                 <TrashIcon className="w-4 h-4" />
@@ -221,7 +221,7 @@ const AdminCategories = () => {
           </div>
         ))}
         {categories.length === 0 && !loading && !error && (
-          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+          <div className="text-center text-sm text-muted py-6 border border-dashed border-border rounded-md">
             Sin categorías
           </div>
         )}
@@ -244,14 +244,14 @@ const AdminCategories = () => {
       >
         <div className="grid gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Nombre
             </label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
             />
           </div>
           {/* Campo slug removido; se genera automáticamente */}

@@ -40,24 +40,24 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
         disabled={page === 1}
         className={`inline-flex items-center px-3 py-1.5 rounded-md border text-sm ${
           page === 1
-            ? "border-gray-200 text-gray-300 bg-white"
-            : "border-gray-300 hover:bg-gray-50 text-gray-700"
+            ? "border-border text-muted bg-surface"
+            : "border-border hover:bg-surface-hover text-main"
         }`}
         aria-label="Pagina anterior"
       >
         ‹
       </button>
 
-      <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-transparent bg-white text-sm">
-        <span className="text-xs text-gray-500">Página</span>
-        <strong className="mx-1">{page}</strong>
-        <span className="text-xs text-gray-500">de {totalPages}</span>
+      <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-transparent bg-surface text-sm">
+        <span className="text-xs text-sub">Página</span>
+        <strong className="mx-1 text-main">{page}</strong>
+        <span className="text-xs text-sub">de {totalPages}</span>
       </div>
 
       <div className="inline-flex items-center gap-1">
         {pages.map((p, idx) =>
           p === "..." ? (
-            <span key={`dots-${idx}`} className="px-2 text-sm text-gray-400">
+            <span key={`dots-${idx}`} className="px-2 text-sm text-muted">
               …
             </span>
           ) : (
@@ -67,8 +67,8 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
               aria-current={p === page ? "page" : undefined}
               className={`inline-flex items-center justify-center w-8 h-8 text-sm rounded-md border ${
                 p === page
-                  ? "bg-primary-600 text-white border-primary-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  ? "bg-primary-500 text-white border-primary-500"
+                  : "bg-surface text-main border-border hover:bg-surface-hover"
               }`}
             >
               {p}
@@ -82,8 +82,8 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
         disabled={page === totalPages}
         className={`inline-flex items-center px-3 py-1.5 rounded-md border text-sm ${
           page === totalPages
-            ? "border-gray-200 text-gray-300 bg-white"
-            : "border-gray-300 hover:bg-gray-50 text-gray-700"
+            ? "border-border text-muted bg-surface"
+            : "border-border hover:bg-surface-hover text-main"
         }`}
         aria-label="Pagina siguiente"
       >

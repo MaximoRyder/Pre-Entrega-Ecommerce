@@ -248,10 +248,10 @@ const AdminOrders = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm hidden md:block">
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[640px]">
           <thead>
-            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+            <tr className="text-left text-[10px] sm:text-xs uppercase tracking-wide text-sub border-b border-border">
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">ID</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Usuario</th>
               <th className="px-2 py-1.5 sm:px-3 sm:py-2">Fecha</th>
@@ -273,7 +273,7 @@ const AdminOrders = () => {
                   <tr
                     key={o.id}
                     className={
-                      "align-top border-b border-gray-100 " +
+                      "align-top border-b border-border " +
                       (isExp ? "" : "last:border-b-0")
                     }
                   >
@@ -281,12 +281,12 @@ const AdminOrders = () => {
                       <div className="flex items-center gap-2">
                         <span>#{o.id}</span>
                         {o.local && (
-                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-900/20 text-amber-500 text-[10px] font-medium">
                             Local
                           </span>
                         )}
                         {o.syncError && (
-                          <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+                          <span className="px-2 py-0.5 rounded-full bg-red-900/20 text-red-500 text-[10px] font-medium">
                             Sync
                           </span>
                         )}
@@ -306,14 +306,14 @@ const AdminOrders = () => {
                                 [o.id]: !prev[o.id],
                               }))
                             }
-                            className="mt-1 text-[11px] text-primary-600 hover:underline text-left"
+                            className="mt-1 text-[11px] text-primary-500 hover:underline text-left"
                           >
                             {isExp ? "Ocultar items" : "Ver items"}
                           </button>
                         )}
                       </div>
                     </td>
-                    <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-gray-600 whitespace-nowrap">
+                    <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-sub whitespace-nowrap">
                       {new Date(o.createdAt).toLocaleString()}
                     </td>
                     <td className="px-2 py-1.5 sm:px-3 sm:py-2">
@@ -327,14 +327,14 @@ const AdminOrders = () => {
                         className={
                           "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
                           (o.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
+                            ? "bg-yellow-900/20 text-yellow-500"
                             : o.status === "processing"
-                            ? "bg-blue-100 text-blue-700"
+                            ? "bg-blue-900/20 text-blue-500"
                             : o.status === "shipped"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-green-900/20 text-green-500"
                             : o.status === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-gray-100 text-gray-600")
+                            ? "bg-red-900/20 text-red-500"
+                            : "bg-surface-hover text-sub")
                         }
                       >
                         {o.status || "-"}
@@ -347,14 +347,14 @@ const AdminOrders = () => {
                             setEditing(o);
                             setStatusForm(o.status || "pending");
                           }}
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                           aria-label="Editar"
                         >
                           <PencilSquareIcon className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setToDelete(o)}
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
                           aria-label="Eliminar"
                         >
                           <TrashIcon className="w-4 h-4" />
@@ -363,9 +363,9 @@ const AdminOrders = () => {
                     </td>
                   </tr>
                   {isExp && o.items && o.items.length > 0 && (
-                    <tr className="border-b last:border-b-0 border-gray-100">
-                      <td colSpan={7} className="px-3 py-2 bg-gray-50">
-                        <ul className="space-y-1 text-xs text-gray-700">
+                    <tr className="border-b last:border-b-0 border-border">
+                      <td colSpan={7} className="px-3 py-2 bg-surface-hover">
+                        <ul className="space-y-1 text-xs text-main">
                           {o.items.map((it, idx) => (
                             <li key={idx} className="flex gap-2">
                               <span className="truncate" title={it.name}>
@@ -391,7 +391,7 @@ const AdminOrders = () => {
               <tr>
                 <td
                   colSpan={7}
-                  className="px-3 py-6 text-center text-xs text-gray-500"
+                  className="px-3 py-6 text-center text-xs text-sub"
                 >
                   No hay pedidos
                 </td>
@@ -419,19 +419,19 @@ const AdminOrders = () => {
           return (
             <div
               key={o.id}
-              className="border border-gray-200 rounded-md bg-white shadow-sm px-3 py-2 text-sm"
+              className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">ID:</span>
                   <span>#{o.id}</span>
                   {o.local && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-amber-900/20 text-amber-500 text-[10px] font-medium">
                       Local
                     </span>
                   )}
                   {o.syncError && (
-                    <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-red-900/20 text-red-500 text-[10px] font-medium">
                       Sync
                     </span>
                   )}
@@ -440,32 +440,32 @@ const AdminOrders = () => {
                   className={
                     "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
                     (o.status === "pending"
-                      ? "bg-yellow-100 text-yellow-700"
+                      ? "bg-yellow-900/20 text-yellow-500"
                       : o.status === "processing"
-                      ? "bg-blue-100 text-blue-700"
+                      ? "bg-blue-900/20 text-blue-500"
                       : o.status === "shipped"
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-green-900/20 text-green-500"
                       : o.status === "rejected"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-600")
+                      ? "bg-red-900/20 text-red-500"
+                      : "bg-surface-hover text-sub")
                   }
                 >
                   {o.status || "-"}
                 </span>
               </div>
-              <div className="border-t border-gray-200 mt-2 pt-1 flex">
+              <div className="border-t border-border mt-2 pt-1 flex">
                 <span className="font-semibold mr-1">Usuario:</span>
                 <span className="flex-1 truncate" title={o.userEmail}>
                   {o.userEmail || "-"}
                 </span>
               </div>
-              <div className="border-t border-gray-200 pt-1 flex">
+              <div className="border-t border-border pt-1 flex">
                 <span className="font-semibold mr-1">Fecha:</span>
                 <span className="flex-1">
                   {new Date(o.createdAt).toLocaleString()}
                 </span>
               </div>
-              <div className="border-t border-gray-200 pt-1 flex items-center justify-between gap-2">
+              <div className="border-t border-border pt-1 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">
                   <span className="font-semibold">Items:</span>
                   <span>{itemCount || 0}</span>
@@ -475,14 +475,14 @@ const AdminOrders = () => {
                     onClick={() =>
                       setExpanded((prev) => ({ ...prev, [o.id]: !prev[o.id] }))
                     }
-                    className="text-xs font-medium px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-50"
+                    className="text-xs font-medium px-2 py-1 rounded-md border border-border hover:bg-surface-hover"
                   >
                     {isExpanded ? "Ocultar" : "Ver"}
                   </button>
                 )}
               </div>
               {isExpanded && o.items && o.items.length > 0 && (
-                <ul className="mt-1 space-y-1 text-xs text-gray-600">
+                <ul className="mt-1 space-y-1 text-xs text-sub">
                   {o.items.map((it, idx) => (
                     <li key={idx} className="flex justify-between gap-2">
                       <span className="truncate" title={it.name}>
@@ -499,25 +499,25 @@ const AdminOrders = () => {
                   ))}
                 </ul>
               )}
-              <div className="border-t border-gray-200 pt-1 mt-1 flex">
+              <div className="border-t border-border pt-1 mt-1 flex">
                 <span className="font-semibold mr-1">Subtotal:</span>
                 <span className="flex-1">{formatCurrency(o.subtotal)}</span>
               </div>
-              <div className="border-t border-gray-200 mt-2 pt-2 flex items-center gap-2">
+              <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
                 <span className="font-semibold">Acciones:</span>
                 <button
                   onClick={() => {
                     setEditing(o);
                     setStatusForm(o.status || "pending");
                   }}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-600"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                   aria-label="Editar"
                 >
                   <PencilSquareIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setToDelete(o)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-50 text-red-600"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
                   aria-label="Eliminar"
                 >
                   <TrashIcon className="w-4 h-4" />
@@ -527,7 +527,7 @@ const AdminOrders = () => {
           );
         })}
         {orders.length === 0 && (
-          <div className="text-center text-sm text-gray-500 py-6 border border-dashed border-gray-300 rounded-md">
+          <div className="text-center text-sm text-sub py-6 border border-dashed border-border rounded-md">
             No hay pedidos
           </div>
         )}
@@ -557,13 +557,13 @@ const AdminOrders = () => {
       >
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-gray-600 uppercase">
+            <label className="text-xs font-medium text-sub uppercase">
               Estado
             </label>
             <select
               value={statusForm}
               onChange={(e) => setStatusForm(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-main"
             >
               {statusOptions.map((s) => (
                 <option key={s} value={s}>
@@ -573,7 +573,7 @@ const AdminOrders = () => {
             </select>
           </div>
           {editing && (
-            <div className="text-xs text-gray-500 space-y-1">
+            <div className="text-xs text-sub space-y-1">
               <p>
                 <strong>Usuario:</strong> {editing.userEmail || "-"}
               </p>

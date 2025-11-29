@@ -30,8 +30,8 @@ const Admin = () => {
         className={({ isActive }) =>
           linkBase +
           (isActive
-            ? " bg-primary-600 text-white shadow-sm"
-            : " text-gray-700 hover:bg-gray-100")
+            ? " bg-primary-500 text-white shadow-sm"
+            : " text-main hover:bg-background")
         }
       >
         <CubeIcon className="w-5 h-5" /> Productos
@@ -41,8 +41,8 @@ const Admin = () => {
         className={({ isActive }) =>
           linkBase +
           (isActive
-            ? " bg-primary-600 text-white shadow-sm"
-            : " text-gray-700 hover:bg-gray-100")
+            ? " bg-primary-500 text-white shadow-sm"
+            : " text-main hover:bg-background")
         }
       >
         <TagIcon className="w-5 h-5" /> Categorías
@@ -52,8 +52,8 @@ const Admin = () => {
         className={({ isActive }) =>
           linkBase +
           (isActive
-            ? " bg-primary-600 text-white shadow-sm"
-            : " text-gray-700 hover:bg-gray-100")
+            ? " bg-primary-500 text-white shadow-sm"
+            : " text-main hover:bg-background")
         }
       >
         <ClipboardDocumentListIcon className="w-5 h-5" /> Órdenes
@@ -63,8 +63,8 @@ const Admin = () => {
         className={({ isActive }) =>
           linkBase +
           (isActive
-            ? " bg-primary-600 text-white shadow-sm"
-            : " text-gray-700 hover:bg-gray-100")
+            ? " bg-primary-500 text-white shadow-sm"
+            : " text-main hover:bg-background")
         }
       >
         <UsersIcon className="w-5 h-5" /> Usuarios
@@ -73,19 +73,21 @@ const Admin = () => {
   );
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-background">
       {/* Sidebar desktop */}
-      <aside className="hidden md:flex w-60 bg-white border-r border-gray-200 p-4 flex-col gap-4">
-        <h2 className="text-lg font-semibold tracking-tight">Administración</h2>
+      <aside className="hidden md:flex w-60 bg-surface border-r border-border p-4 flex-col gap-4">
+        <h2 className="text-lg font-semibold tracking-tight text-main">
+          Administración
+        </h2>
         {navLinks}
       </aside>
       <div className="flex-1 flex flex-col">
         {/* Top bar mobile */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white sticky top-0 z-30">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-surface sticky top-0 z-30">
           <button
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-border bg-surface text-main hover:bg-background focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
           >
             {open ? (
               <XMarkIcon className="w-6 h-6" />
@@ -93,13 +95,13 @@ const Admin = () => {
               <Bars3Icon className="w-6 h-6" />
             )}
           </button>
-          <h2 className="text-base font-semibold tracking-tight flex-1 truncate">
+          <h2 className="text-base font-semibold tracking-tight flex-1 truncate text-main">
             {currentTitle}
           </h2>
         </div>
         {/* Dropdown panel mobile */}
         {open && (
-          <div className="md:hidden px-4 py-3 border-b border-gray-200 bg-white shadow-sm animate-fade-in">
+          <div className="md:hidden px-4 py-3 border-b border-border bg-surface shadow-sm animate-fade-in">
             {navLinks}
           </div>
         )}

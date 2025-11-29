@@ -46,10 +46,10 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
     availableStock == null ? null : Math.max(0, availableStock - existingQty);
 
   return (
-    <div className="group bg-white border border-neutral-200 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+    <div className="group bg-surface border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
       <Link
         to={`/product/${id}`}
-        className="block aspect-[4/3] bg-neutral-100 overflow-hidden"
+        className="block aspect-[4/3] bg-surface-hover overflow-hidden"
       >
         <img
           src={imageUrl}
@@ -60,19 +60,19 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
       </Link>
       <div className="flex flex-col flex-1 p-4 gap-3">
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-neutral-800 line-clamp-2 min-h-[2.5rem]">
+          <h3 className="text-sm font-semibold text-main line-clamp-2 min-h-[2.5rem]">
             {name}
           </h3>
-          <div className="text-xs text-primary-600 font-medium">
+          <div className="text-xs text-primary-500 font-medium">
             {product?.category}
           </div>
         </div>
         <div className="mt-auto space-y-2">
           <div className="flex items-baseline justify-between">
-            <div className="text-base font-semibold text-neutral-900">
+            <div className="text-base font-semibold text-main">
               {formatCurrency(product.price)}
             </div>
-            <div className="text-[11px] text-neutral-500">
+            <div className="text-[11px] text-sub">
               {(() => {
                 const s =
                   fullProduct &&

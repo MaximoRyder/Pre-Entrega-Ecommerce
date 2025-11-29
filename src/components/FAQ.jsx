@@ -52,10 +52,10 @@ const FAQ = () => {
   return (
     <div className="py-8">
       <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-3xl font-semibold tracking-tight text-main">
           Preguntas Frecuentes
         </h1>
-        <p className="mt-4 text-sm text-gray-600 leading-relaxed">
+        <p className="mt-4 text-sm text-sub leading-relaxed">
           Encuentra respuestas a las preguntas más comunes sobre nuestros
           productos y servicios.
         </p>
@@ -66,25 +66,25 @@ const FAQ = () => {
             return (
               <div
                 key={index}
-                className="rounded-lg border border-gray-200 bg-white shadow-sm"
+                className="rounded-lg border border-border bg-surface shadow-sm"
               >
                 <button
                   className="w-full flex items-center justify-between px-4 py-3 text-left focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
                   onClick={() => toggleFAQ(index)}
                   aria-expanded={open}
                 >
-                  <span className="font-medium text-sm md:text-base pr-4">
+                  <span className="font-medium text-sm md:text-base pr-4 text-main">
                     {faq.question}
                   </span>
                   <ChevronDownIcon
                     className={
-                      "w-5 h-5 text-gray-500 transition-transform " +
+                      "w-5 h-5 text-sub transition-transform " +
                       (open ? "rotate-180" : "rotate-0")
                     }
                   />
                 </button>
                 {open && (
-                  <div className="px-4 pb-4 -mt-1 text-sm text-gray-600 leading-relaxed border-t border-gray-100">
+                  <div className="px-4 pb-4 -mt-1 text-sm text-sub leading-relaxed border-t border-border">
                     <p>{faq.answer}</p>
                   </div>
                 )}
@@ -93,14 +93,14 @@ const FAQ = () => {
           })}
         </div>
 
-        <div className="mt-12 rounded-xl bg-gradient-to-r from-primary-50 to-primary-100 p-6 flex flex-col gap-3">
-          <h3 className="text-lg font-semibold">
+        <div className="mt-12 rounded-xl bg-gradient-to-r from-primary-500/10 to-primary-500/20 p-6 flex flex-col gap-3">
+          <h3 className="text-lg font-semibold text-main">
             ¿No encontraste lo que buscabas?
           </h3>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-sub">
             Contáctanos y te ayudaremos con cualquier duda adicional.
           </p>
-          <button className="inline-flex items-center gap-2 rounded-md bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40">
+          <button className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40">
             <EnvelopeIcon className="w-5 h-5" />
             Contactar Soporte
           </button>
