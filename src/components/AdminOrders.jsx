@@ -3,7 +3,7 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { formatCurrency, formatNumber } from "../utils/format";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
@@ -13,7 +13,7 @@ const API =
   import.meta.env.VITE_ORDERS_API ||
   "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/orders";
 
-const statusOptions = ["pending", "rejected", "processing", "shipped"];
+const statusOptions = ["Pending", "Rejected", "Processing", "Shipped"];
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -21,15 +21,11 @@ const AdminOrders = () => {
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
   const [editing, setEditing] = useState(null);
-  const [statusForm, setStatusForm] = useState("pending");
+  const [statusForm, setStatusForm] = useState("Pending");
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState({});
   const [page, setPage] = useState(1);
   const pageSize = 10;
-
-  // NOTE: PATCH can be blocked by some CORS policies on MockAPI. We use
-  // `updateQuantityWithRetry` (below) which performs a GET + PUT as fallback.
-
   async function updateQuantityWithRetry(url, newQuantity, attempts = 3) {
     let lastErr = null;
     for (let i = 0; i < attempts; i++) {
@@ -64,7 +60,6 @@ const AdminOrders = () => {
         const res = await fetch(API);
         if (!res.ok) throw new Error("Error al obtener pedidos");
         const data = await res.json();
-        // also include local orders saved as fallback
         const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
         const combined = [...local, ...data];
         if (mounted) setOrders(combined.reverse());
@@ -97,11 +92,9 @@ const AdminOrders = () => {
     try {
       let allOk = true;
       for (const o of local) {
-        // remove local metadata before sending
         const payload = { ...o };
         delete payload.id;
         delete payload.local;
-        // ensure createdAt exists
         payload.createdAt = payload.createdAt || new Date().toISOString();
         const res = await fetch(API, {
           method: "POST",
@@ -114,7 +107,6 @@ const AdminOrders = () => {
         }
         await res.json();
 
-        // after successful creation, decrement stock for each item
         for (const it of payload.items || []) {
           try {
             const prodRes = await fetch(`${PRODUCTS_API}/${it.id}`);
@@ -137,7 +129,6 @@ const AdminOrders = () => {
           }
         }
       }
-      // if all succeeded, clear local orders
       if (allOk) {
         localStorage.removeItem("local_orders");
       } else {
@@ -176,7 +167,6 @@ const AdminOrders = () => {
         if (idx !== -1) {
           local[idx].status = status;
           localStorage.setItem("local_orders", JSON.stringify(local));
-          // update state
           setOrders((prev) =>
             prev.map((o) => (o.id === id ? { ...o, status } : o))
           );
@@ -214,7 +204,6 @@ const AdminOrders = () => {
     }
   };
 
-  // Loading / error early return kept simpler for table context
   if (loading)
     return (
       <p className="px-4 py-6 text-sm text-gray-600">Cargando pedidos...</p>
@@ -269,9 +258,8 @@ const AdminOrders = () => {
               );
               const isExp = expanded[o.id];
               return (
-                <>
+                <Fragment key={o.id}>
                   <tr
-                    key={o.id}
                     className={
                       "align-top border-b border-border " +
                       (isExp ? "" : "last:border-b-0")
@@ -326,13 +314,13 @@ const AdminOrders = () => {
                       <span
                         className={
                           "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
-                          (o.status === "pending"
+                          (o.status === "Pending"
                             ? "bg-yellow-900/20 text-yellow-500"
-                            : o.status === "processing"
+                            : o.status === "Processing"
                             ? "bg-blue-900/20 text-blue-500"
-                            : o.status === "shipped"
+                            : o.status === "Shipped"
                             ? "bg-green-900/20 text-green-500"
-                            : o.status === "rejected"
+                            : o.status === "Rejected"
                             ? "bg-red-900/20 text-red-500"
                             : "bg-surface-hover text-sub")
                         }
@@ -384,7 +372,7 @@ const AdminOrders = () => {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
             {orders.length === 0 && (
@@ -439,13 +427,13 @@ const AdminOrders = () => {
                 <span
                   className={
                     "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
-                    (o.status === "pending"
+                    (o.status === "Pending"
                       ? "bg-yellow-900/20 text-yellow-500"
-                      : o.status === "processing"
+                      : o.status === "Processing"
                       ? "bg-blue-900/20 text-blue-500"
-                      : o.status === "shipped"
+                      : o.status === "Shipped"
                       ? "bg-green-900/20 text-green-500"
-                      : o.status === "rejected"
+                      : o.status === "Rejected"
                       ? "bg-red-900/20 text-red-500"
                       : "bg-surface-hover text-sub")
                   }
@@ -508,7 +496,7 @@ const AdminOrders = () => {
                 <button
                   onClick={() => {
                     setEditing(o);
-                    setStatusForm(o.status || "pending");
+                    setStatusForm(o.status || "Pending");
                   }}
                   className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
                   aria-label="Editar"

@@ -1,5 +1,6 @@
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
@@ -41,9 +42,8 @@ const ProductDetail = () => {
       ? null
       : Math.max(0, availableStock - existingInCart);
 
-  // Adjust local quantity when stock or cart changes
   useEffect(() => {
-    if (existingInCart > 0) return; // let cart drive displayed value
+    if (existingInCart > 0) return;
     if (remainingStock === null) return;
     if (remainingStock === 0) {
       setQty(0);
@@ -57,7 +57,7 @@ const ProductDetail = () => {
     }
   }, [remainingStock, existingInCart]);
 
-  // Load product data
+   Load product data
   useEffect(() => {
     let mounted = true;
     setLoading(true);
@@ -109,6 +109,10 @@ const ProductDetail = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-10">
+      <Helmet>
+        <title>{product.title} | Mi Tienda</title>
+        <meta name="description" content={product.description} />
+      </Helmet>
       {/* Left column */}
       <div className="space-y-6">
         <div className="aspect-[4/5] w-full overflow-hidden rounded-xl bg-surface border border-border shadow-sm flex items-center justify-center p-4">

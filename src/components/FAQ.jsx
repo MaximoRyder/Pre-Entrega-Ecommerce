@@ -1,5 +1,6 @@
 import { ChevronDownIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -51,6 +52,13 @@ const FAQ = () => {
 
   return (
     <div className="py-8">
+      <Helmet>
+        <title>Preguntas Frecuentes | Mi Tienda</title>
+        <meta
+          name="description"
+          content="Resuelve tus dudas sobre envíos, pagos y devoluciones en nuestra sección de preguntas frecuentes."
+        />
+      </Helmet>
       <div className="max-w-3xl mx-auto px-4">
         <h1 className="text-3xl font-semibold tracking-tight text-main">
           Preguntas Frecuentes

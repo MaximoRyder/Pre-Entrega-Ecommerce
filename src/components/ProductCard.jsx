@@ -1,4 +1,4 @@
-import { ShoppingCartIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
@@ -51,12 +51,18 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
         to={`/product/${id}`}
         className="block aspect-[4/3] bg-surface-hover overflow-hidden"
       >
-        <img
-          src={imageUrl}
-          alt={name}
-          className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform"
-          loading="lazy"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-border">
+            <PhotoIcon className="w-12 h-12" />
+          </div>
+        )}
       </Link>
       <div className="flex flex-col flex-1 p-4 gap-3">
         <div className="space-y-1">

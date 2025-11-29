@@ -100,6 +100,9 @@ const Header = () => {
                     setMenuOpen((s) => !s);
                   }}
                   className="w-9 h-9 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold flex items-center justify-center shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  aria-label="Menú de usuario"
+                  aria-expanded={menuOpen}
+                  aria-haspopup="true"
                 >
                   {user?.name
                     ? user.name

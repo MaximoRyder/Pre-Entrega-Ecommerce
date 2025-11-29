@@ -38,6 +38,7 @@ const AdminEntityModal = ({
           <button
             onClick={onClose}
             className="inline-flex items-center justify-center rounded-md hover:bg-surface-hover w-8 h-8 text-sub focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            aria-label="Cerrar"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
@@ -100,7 +101,6 @@ const CartPage = () => {
       import.meta.env.VITE_ORDERS_API ||
       "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/orders";
 
-    // Verify availability
     let productsMap = {};
     try {
       const ids = cart.map((it) => it.id);
@@ -151,10 +151,9 @@ const CartPage = () => {
         quantity: Number(it.quantity || 1),
       })),
       subtotal: Number(subtotal || 0),
-      status: "pending",
+      status: "Pending",
     };
 
-    // First: attempt to decrement stock for each item. Rollback on failure.
     const prevQuantities = {};
     const updatedIds = [];
     try {
@@ -175,7 +174,6 @@ const CartPage = () => {
       }
     } catch (uerr) {
       console.error("Error actualizando stock antes de crear pedido:", uerr);
-      // rollback
       for (const id of updatedIds) {
         try {
           const prev = prevQuantities[id];
@@ -192,7 +190,6 @@ const CartPage = () => {
       return;
     }
 
-    // All stock updates succeeded — now create the order remotely
     try {
       const res = await fetch(API, {
         method: "POST",
@@ -202,7 +199,6 @@ const CartPage = () => {
       if (!res.ok) {
         const text = await res.text().catch(() => null);
         console.error("Error creando pedido", res.status, text);
-        // rollback stock
         for (const id of updatedIds) {
           try {
             const prev = prevQuantities[id];
@@ -218,7 +214,6 @@ const CartPage = () => {
       clearCart();
     } catch (err) {
       console.error(err);
-      // Fallback: save order locally so user/admin can still see it
       try {
         const fallback = {
           ...order,
@@ -246,6 +241,13 @@ const CartPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-8 grid lg:grid-cols-3 gap-8">
+      <Helmet>
+        <title>Carrito de Compras | Mi Tienda</title>
+        <meta
+          name="description"
+          content="Revisa los productos en tu carrito y finaliza tu compra de forma segura."
+        />
+      </Helmet>
       {/* Left: Items */}
       <div className="lg:col-span-2 space-y-6">
         <h2 className="text-2xl font-semibold tracking-tight text-main">

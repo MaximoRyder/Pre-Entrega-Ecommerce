@@ -5,10 +5,18 @@ import {
   LifebuoyIcon,
   TruckIcon,
 } from "@heroicons/react/24/outline";
+import { Helmet } from "react-helmet-async";
 
 const About = () => {
   return (
     <div className="py-8">
+      <Helmet>
+        <title>Nosotros | Mi Tienda</title>
+        <meta
+          name="description"
+          content="Conoce más sobre Mi Tienda, nuestra historia y compromiso con la calidad."
+        />
+      </Helmet>
       <div className="max-w-5xl mx-auto px-4 space-y-12">
         <h1 className="text-3xl font-semibold tracking-tight text-main">
           Acerca de Mi Tienda

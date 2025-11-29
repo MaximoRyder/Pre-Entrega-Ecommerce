@@ -1,5 +1,6 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useContext } from "react";
+import { Helmet } from "react-helmet-async";
 import FilterContext from "../context/searchContext";
 import ProductsList from "./ProductsList";
 import SearchForm from "./SearchForm";
@@ -17,6 +18,13 @@ const Home = () => {
 
   return (
     <div className="py-6">
+      <Helmet>
+        <title>Inicio | Mi Tienda</title>
+        <meta
+          name="description"
+          content="Bienvenido a Mi Tienda. Encuentra los mejores productos a precios increíbles."
+        />
+      </Helmet>
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-2xl font-semibold tracking-tight text-main">
           Inicio
