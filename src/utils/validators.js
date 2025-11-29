@@ -43,6 +43,7 @@ export const validatePrice = (price) => {
 
     if (isNaN(num)) return "El precio debe ser un número válido";
     if (num <= 0) return "El precio debe ser mayor a 0";
+    if (num > 10000000) return "El precio no puede ser mayor a 10.000.000";
     return null;
 };
 
@@ -51,6 +52,7 @@ export const validateQuantity = (quantity) => {
         return "La cantidad es obligatoria";
     const num = Number(quantity);
     if (isNaN(num)) return "La cantidad debe ser un número válido";
+    if (num > 9999) return "La cantidad no puede ser mayor a 9999";
     if (!Number.isInteger(num)) return "La cantidad debe ser un número entero";
     return null;
 };
