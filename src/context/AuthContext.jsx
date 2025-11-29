@@ -13,33 +13,29 @@ export const AuthProvider = ({ children }) => {
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       if (parsed && parsed.email) return parsed;
-      // malformed — remove
-      try {
-        localStorage.removeItem("authUser");
-      } catch (e2) {}
-      return null;
     } catch (e) {
-      try {
-        localStorage.removeItem("authUser");
-      } catch (e2) {}
-      return null;
+      console.error("Error recuperando la sesión:", e);
     }
+
+    try {
+      localStorage.removeItem("authUser");
+    } catch (e) {
+      console.error("Error limpiando la sesión:", e);
+    }
+    return null;
   });
 
-  // Login against MockAPI users resource. Returns user object or null.
   const login = useCallback(async (email, password) => {
-    // Basic client-side validation
     if (!email || !password) return null;
     try {
       const url = `${USERS_API}?email=${encodeURIComponent(
         email
       )}&password=${encodeURIComponent(password)}`;
       const res = await fetch(url);
-      if (!res.ok) return null;
+      if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
       const list = await res.json();
       if (!Array.isArray(list) || list.length === 0) return null;
       const u = list[0];
-      // persist minimal user object
       const saved = {
         id: u.id,
         email: u.email,
@@ -50,12 +46,11 @@ export const AuthProvider = ({ children }) => {
       setUser(saved);
       return saved;
     } catch (e) {
-      console.error("Login error:", e);
-      return null;
+      console.error("Error de inicio de sesión:", e);
+      throw e;
     }
   }, []);
 
-  // Optional register helper (creates user in MockAPI). Returns created user or null.
   const register = useCallback(
     async ({ email, password, role = "user", name = "" }) => {
       try {
@@ -70,12 +65,12 @@ export const AuthProvider = ({ children }) => {
             createdAt: new Date().toISOString(),
           }),
         });
-        if (!res.ok) throw new Error(`Register failed ${res.status}`);
+        if (!res.ok) throw new Error(`Error al registrar: ${res.status}`);
         const created = await res.json();
         return created;
       } catch (e) {
-        console.error("Register error:", e);
-        return null;
+        console.error("Error de registro:", e);
+        throw e;
       }
     },
     []
@@ -84,7 +79,9 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(() => {
     try {
       localStorage.removeItem("authUser");
-    } catch (e) {}
+    } catch (e) {
+      console.error("Error limpiando la sesión:", e);
+    }
     setUser(null);
   }, []);
 

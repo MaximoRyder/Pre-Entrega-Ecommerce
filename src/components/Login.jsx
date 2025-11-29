@@ -51,7 +51,7 @@ const Login = () => {
         showToast("Credenciales inválidas", 1600, "error");
       }
     } catch (err) {
-      showToast("Error al iniciar sesión", 1800, "error");
+      showToast(err.message || "Error al iniciar sesión", 1800, "error");
     }
   };
 

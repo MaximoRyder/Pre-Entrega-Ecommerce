@@ -56,8 +56,8 @@ const Register = () => {
       } else {
         showToast("Error al registrarse", 1800, "error");
       }
-    } catch {
-      showToast("Error al registrarse", 1800, "error");
+    } catch (e) {
+      showToast(e.message || "Error al registrarse", 1800, "error");
     }
   };
 
