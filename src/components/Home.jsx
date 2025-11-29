@@ -1,20 +1,18 @@
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useContext, useState } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useContext } from "react";
 import FilterContext from "../context/searchContext";
 import ProductsList from "./ProductsList";
+import SearchForm from "./SearchForm";
 
 const Home = () => {
   const { searchTerm, setSearchTerm } = useContext(FilterContext);
-  const [localSearch, setLocalSearch] = useState(searchTerm || "");
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setSearchTerm(localSearch);
+  const handleSearch = (term) => {
+    setSearchTerm(term);
   };
 
   const clearSearch = () => {
     setSearchTerm("");
-    setLocalSearch("");
   };
 
   return (
@@ -24,25 +22,12 @@ const Home = () => {
           Inicio
         </h2>
 
-        <form
-          onSubmit={handleSearch}
-          className="mt-6 flex flex-col sm:flex-row gap-3"
-        >
-          <input
-            type="text"
-            placeholder="Buscar productos..."
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            className="flex-1 rounded-md border border-border bg-surface text-main px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          />
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
-          >
-            <MagnifyingGlassIcon className="w-5 h-5" />
-            Buscar
-          </button>
-        </form>
+        <SearchForm
+          onSearch={handleSearch}
+          initialValue={searchTerm}
+          placeholder="Buscar productos..."
+          className="mt-6"
+        />
 
         {searchTerm && (
           <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
