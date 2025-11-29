@@ -4,7 +4,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { formatCurrency, parseNumber } from "../utils/format";
+import { formatCurrency, formatNumber, parseNumber } from "../utils/format";
 import {
   validateCategory,
   validatePrice,
@@ -17,11 +17,9 @@ import ConfirmModal from "./ConfirmModal";
 import FormField from "./FormField";
 import Pagination from "./Pagination";
 
-// Endpoint de productos: usa env si está definida, sino fallback al mockapi original
 const API_ENV = import.meta.env.VITE_PRODUCTS_API;
 const API =
   API_ENV || "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
-// Endpoint de categorías (para dropdown) con fallback
 const CAT_API_ENV = import.meta.env.VITE_CATEGORIES_API;
 const CAT_API =
   CAT_API_ENV ||
@@ -68,13 +66,12 @@ const AdminProducts = () => {
   useEffect(() => {
     load();
     const loadCategories = async () => {
-      if (!CAT_API) return; // silencioso si falta
+      if (!CAT_API) return;
       try {
         const res = await fetch(CAT_API);
         if (!res.ok) return;
         const data = await res.json();
         if (Array.isArray(data)) {
-          // Normalizamos a objetos {id,name,slug}
           const mapped = data.map((c) => {
             if (typeof c === "string") return { id: c, name: c, slug: c };
             return {
@@ -89,8 +86,9 @@ const AdminProducts = () => {
           });
           setCategories(mapped);
         }
-      } catch {
-        // ignoramos error
+      } catch (e) {
+        console.error("Error cargando categorías:", e);
+        setError("Error cargando categorías");
       }
     };
     loadCategories();
@@ -107,7 +105,7 @@ const AdminProducts = () => {
     setEditing(p);
     setForm({
       title: p.title || p.name || "",
-      price: p.price != null ? String(p.price) : "",
+      price: p.price != null ? formatNumber(p.price) : "",
       quantity:
         p.quantity != null
           ? String(p.quantity)
@@ -156,8 +154,6 @@ const AdminProducts = () => {
         title: form.title.trim(),
         price: parseNumber(form.price),
         quantity: qty,
-        // Para compatibilidad si backend aún usa 'stock'
-        stock: qty,
         category: form.category.trim(),
         image: form.image.trim(),
       };
@@ -395,12 +391,29 @@ const AdminProducts = () => {
               <FormField label="Precio" htmlFor="price" error={errors.price}>
                 <input
                   id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  placeholder="0,00"
                   value={form.price}
                   onChange={(e) => {
-                    setForm({ ...form, price: e.target.value });
+                    let val = e.target.value;
+                    val = val.replace(/[^0-9,]/g, "");
+
+                    const parts = val.split(",");
+                    if (parts.length > 2) return;
+
+                    if (parts[1] && parts[1].length > 2) return;
+
+                    let integer = parts[0];
+                    if (integer.length > 1 && integer.startsWith("0")) {
+                      integer = integer.replace(/^0+/, "");
+                    }
+
+                    integer = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+                    const newVal =
+                      parts.length > 1 ? `${integer},${parts[1]}` : integer;
+
+                    setForm({ ...form, price: newVal });
                     if (errors.price) setErrors({ ...errors, price: null });
                   }}
                   required

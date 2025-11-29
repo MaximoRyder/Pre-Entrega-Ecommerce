@@ -36,7 +36,11 @@ export const validateProductTitle = (title) => {
 export const validatePrice = (price) => {
     if (price === "" || price === null || price === undefined)
         return "El precio es obligatorio";
-    const num = Number(price);
+
+    let str = String(price);
+    const normalized = str.replace(/\./g, "").replace(",", ".");
+    const num = Number(normalized);
+
     if (isNaN(num)) return "El precio debe ser un número válido";
     if (num <= 0) return "El precio debe ser mayor a 0";
     return null;
