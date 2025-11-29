@@ -371,7 +371,7 @@ const AdminProducts = () => {
         submitLabel={editing ? "Guardar cambios" : "Crear"}
         loading={saving}
       >
-        <form noValidate className="grid gap-4">
+        <div className="grid gap-4">
           <FormField label="Título" htmlFor="title" error={errors.title}>
             <input
               id="title"
@@ -499,7 +499,7 @@ const AdminProducts = () => {
               }`}
             />
           </FormField>
-        </form>
+        </div>
       </AdminEntityModal>
 
       <ConfirmModal
