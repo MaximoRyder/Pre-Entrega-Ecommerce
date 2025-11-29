@@ -24,3 +24,45 @@ export const validatePassword = (password, min = 4, max = 20) => {
         return `La contraseña no puede tener más de ${max} caracteres`;
     return null;
 };
+
+export const validateProductTitle = (title) => {
+    if (!title || title.trim() === "") return "El título es obligatorio";
+    if (title.length < 3) return "El título debe tener al menos 3 caracteres";
+    if (title.length > 100)
+        return "El título no puede tener más de 100 caracteres";
+    return null;
+};
+
+export const validatePrice = (price) => {
+    if (price === "" || price === null || price === undefined)
+        return "El precio es obligatorio";
+    const num = Number(price);
+    if (isNaN(num)) return "El precio debe ser un número válido";
+    if (num <= 0) return "El precio debe ser mayor a 0";
+    return null;
+};
+
+export const validateQuantity = (quantity) => {
+    if (quantity === "" || quantity === null || quantity === undefined)
+        return "La cantidad es obligatoria";
+    const num = Number(quantity);
+    if (isNaN(num)) return "La cantidad debe ser un número válido";
+    if (num <= 0) return "La cantidad debe ser mayor a 0";
+    if (!Number.isInteger(num)) return "La cantidad debe ser un número entero";
+    return null;
+};
+
+export const validateCategory = (category) => {
+    if (!category || category === "") return "La categoría es obligatoria";
+    return null;
+};
+
+export const validateUrl = (url) => {
+    if (!url || url.trim() === "") return "La URL de la imagen es obligatoria";
+    try {
+        new URL(url);
+        return null;
+    } catch {
+        return "Ingresa una URL válida";
+    }
+};

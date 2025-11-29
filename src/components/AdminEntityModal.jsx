@@ -43,6 +43,7 @@ const AdminEntityModal = ({
           </button>
         </div>
         <form
+          noValidate
           onSubmit={(e) => {
             e.preventDefault();
             onSubmit?.();

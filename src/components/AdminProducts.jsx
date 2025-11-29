@@ -5,8 +5,16 @@ import {
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { formatCurrency, parseNumber } from "../utils/format";
+import {
+  validateCategory,
+  validatePrice,
+  validateProductTitle,
+  validateQuantity,
+  validateUrl,
+} from "../utils/validators";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import FormField from "./FormField";
 import Pagination from "./Pagination";
 
 // Endpoint de productos: usa env si está definida, sino fallback al mockapi original
@@ -35,6 +43,7 @@ const AdminProducts = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyProduct);
+  const [errors, setErrors] = useState({});
   const [deleting, setDeleting] = useState(null);
   const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(1);
@@ -90,6 +99,7 @@ const AdminProducts = () => {
   const openNew = () => {
     setEditing(null);
     setForm(emptyProduct);
+    setErrors({});
     setModalOpen(true);
   };
 
@@ -107,11 +117,38 @@ const AdminProducts = () => {
       category: p.category || "",
       image: p.image || p.imageUrl || "",
     });
+    setErrors({});
     setModalOpen(true);
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    const titleError = validateProductTitle(form.title);
+    if (titleError) newErrors.title = titleError;
+
+    const priceError = validatePrice(form.price);
+    if (priceError) newErrors.price = priceError;
+
+    const qtyError = validateQuantity(form.quantity);
+    if (qtyError) newErrors.quantity = qtyError;
+
+    const catError = validateCategory(form.category);
+    if (catError) newErrors.category = catError;
+
+    const imgError = validateUrl(form.image);
+    if (imgError) newErrors.image = imgError;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+    setErrors({});
+    return true;
   };
 
   const save = async () => {
     if (!API) return;
+    if (!validate()) return;
     setSaving(true);
     try {
       const qty = parseInt(form.quantity || 0, 10);
@@ -338,56 +375,81 @@ const AdminProducts = () => {
         submitLabel={editing ? "Guardar cambios" : "Crear"}
         loading={saving}
       >
-        <div className="grid gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Título
-            </label>
+        <form noValidate className="grid gap-4">
+          <FormField label="Título" htmlFor="title" error={errors.title}>
             <input
+              id="title"
               value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, title: e.target.value });
+                if (errors.title) setErrors({ ...errors, title: null });
+              }}
               required
-              className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
+              className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                errors.title ? "border-red-500" : "border-border"
+              }`}
             />
-          </div>
+          </FormField>
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 flex flex-col gap-1">
-              <label className="text-xs font-medium text-sub uppercase">
-                Precio
-              </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-                required
-                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
-              />
+            <div className="flex-1">
+              <FormField label="Precio" htmlFor="price" error={errors.price}>
+                <input
+                  id="price"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.price}
+                  onChange={(e) => {
+                    setForm({ ...form, price: e.target.value });
+                    if (errors.price) setErrors({ ...errors, price: null });
+                  }}
+                  required
+                  className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                    errors.price ? "border-red-500" : "border-border"
+                  }`}
+                />
+              </FormField>
             </div>
-            <div className="flex-1 flex flex-col gap-1">
-              <label className="text-xs font-medium text-sub uppercase">
-                Cantidad
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                required
-                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
-              />
+            <div className="flex-1">
+              <FormField
+                label="Cantidad"
+                htmlFor="quantity"
+                error={errors.quantity}
+              >
+                <input
+                  id="quantity"
+                  type="number"
+                  min="0"
+                  value={form.quantity}
+                  onChange={(e) => {
+                    setForm({ ...form, quantity: e.target.value });
+                    if (errors.quantity)
+                      setErrors({ ...errors, quantity: null });
+                  }}
+                  required
+                  className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                    errors.quantity ? "border-red-500" : "border-border"
+                  }`}
+                />
+              </FormField>
             </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Categoría
-            </label>
+          <FormField
+            label="Categoría"
+            htmlFor="category"
+            error={errors.category}
+          >
             {categories.length > 0 ? (
               <select
+                id="category"
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
+                onChange={(e) => {
+                  setForm({ ...form, category: e.target.value });
+                  if (errors.category) setErrors({ ...errors, category: null });
+                }}
+                className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                  errors.category ? "border-red-500" : "border-border"
+                }`}
               >
                 <option value="">-- Seleccionar --</option>
                 {categories.map((c) => (
@@ -398,25 +460,33 @@ const AdminProducts = () => {
               </select>
             ) : (
               <input
+                id="category"
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, category: e.target.value });
+                  if (errors.category) setErrors({ ...errors, category: null });
+                }}
                 placeholder="Ingresar categoría"
-                className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
+                className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                  errors.category ? "border-red-500" : "border-border"
+                }`}
               />
             )}
-            {/* Mensaje de fallback de categorías eliminado a pedido del usuario */}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Imagen (URL)
-            </label>
+          </FormField>
+          <FormField label="Imagen (URL)" htmlFor="image" error={errors.image}>
             <input
+              id="image"
               value={form.image}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
+              onChange={(e) => {
+                setForm({ ...form, image: e.target.value });
+                if (errors.image) setErrors({ ...errors, image: null });
+              }}
+              className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                errors.image ? "border-red-500" : "border-border"
+              }`}
             />
-          </div>
-        </div>
+          </FormField>
+        </form>
       </AdminEntityModal>
 
       <ConfirmModal
