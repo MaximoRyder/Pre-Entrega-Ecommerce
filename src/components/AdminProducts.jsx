@@ -16,6 +16,7 @@ import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 import FormField from "./FormField";
 import Pagination from "./Pagination";
+import SearchForm from "./SearchForm";
 
 const API_ENV = import.meta.env.VITE_PRODUCTS_API;
 const API =
@@ -45,7 +46,15 @@ const AdminProducts = () => {
   const [deleting, setDeleting] = useState(null);
   const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const pageSize = 10;
+
+  const filteredProducts = products.filter((p) => {
+    if (!searchTerm) return true;
+    const lower = searchTerm.toLowerCase();
+    const title = p.title || p.name || "";
+    return title.toLowerCase().includes(lower);
+  });
 
   const load = async () => {
     if (!API) return;
@@ -208,6 +217,16 @@ const AdminProducts = () => {
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
       </div>
+
+      <SearchForm
+        onSearch={(term) => {
+          setSearchTerm(term);
+          setPage(1);
+        }}
+        initialValue={searchTerm}
+        placeholder="Buscar por título..."
+      />
+
       {/* Mensaje de endpoint por defecto removido a pedido del usuario */}
       {loading && <p className="text-sm text-muted">Cargando...</p>}
       {error && <p className="text-sm text-red-500">{error}</p>}
@@ -224,53 +243,58 @@ const AdminProducts = () => {
             </tr>
           </thead>
           <tbody>
-            {products.slice((page - 1) * pageSize, page * pageSize).map((p) => (
-              <tr key={p.id} className="border-b last:border-b-0 border-border">
-                <td
-                  className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[140px] truncate"
-                  title={p.title || p.name}
+            {filteredProducts
+              .slice((page - 1) * pageSize, page * pageSize)
+              .map((p) => (
+                <tr
+                  key={p.id}
+                  className="border-b last:border-b-0 border-border"
                 >
-                  {p.title || p.name}
-                </td>
-                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                  {formatCurrency(parseNumber(p.price))}
-                </td>
-                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                  {p.quantity ?? p.stock ?? "-"}
-                </td>
-                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                  {(() => {
-                    if (!categories.length) return p.category || "-";
-                    const match = categories.find(
-                      (c) =>
-                        c.id === p.category ||
-                        c.slug === p.category ||
-                        c.name === p.category
-                    );
-                    return match ? match.name : p.category || "-";
-                  })()}
-                </td>
-                <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openEdit(p)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
-                      aria-label="Editar"
-                    >
-                      <PencilSquareIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => confirmDelete(p)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
-                      aria-label="Eliminar"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {products.length === 0 && !loading && !error && (
+                  <td
+                    className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[140px] truncate"
+                    title={p.title || p.name}
+                  >
+                    {p.title || p.name}
+                  </td>
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                    {formatCurrency(parseNumber(p.price))}
+                  </td>
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                    {p.quantity ?? p.stock ?? "-"}
+                  </td>
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                    {(() => {
+                      if (!categories.length) return p.category || "-";
+                      const match = categories.find(
+                        (c) =>
+                          c.id === p.category ||
+                          c.slug === p.category ||
+                          c.name === p.category
+                      );
+                      return match ? match.name : p.category || "-";
+                    })()}
+                  </td>
+                  <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openEdit(p)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
+                        aria-label="Editar"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => confirmDelete(p)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
+                        aria-label="Eliminar"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            {filteredProducts.length === 0 && !loading && !error && (
               <tr>
                 <td
                   colSpan={5}
@@ -286,70 +310,77 @@ const AdminProducts = () => {
       <div className="hidden md:block mt-3">
         <Pagination
           page={page}
-          totalPages={Math.max(1, Math.ceil(products.length / pageSize))}
+          totalPages={Math.max(
+            1,
+            Math.ceil(filteredProducts.length / pageSize)
+          )}
           onPageChange={setPage}
         />
       </div>
 
       {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
-        {products.slice((page - 1) * pageSize, page * pageSize).map((p) => {
-          const catLabel = (() => {
-            if (!categories.length) return p.category || "-";
-            const match = categories.find(
-              (c) =>
-                c.id === p.category ||
-                c.slug === p.category ||
-                c.name === p.category
+        {filteredProducts
+          .slice((page - 1) * pageSize, page * pageSize)
+          .map((p) => {
+            const catLabel = (() => {
+              if (!categories.length) return p.category || "-";
+              const match = categories.find(
+                (c) =>
+                  c.id === p.category ||
+                  c.slug === p.category ||
+                  c.name === p.category
+              );
+              return match ? match.name : p.category || "-";
+            })();
+            return (
+              <div
+                key={p.id}
+                className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
+              >
+                <div className="space-y-1">
+                  <div className="flex">
+                    <span className="font-semibold mr-1">Título:</span>
+                    <span className="flex-1 truncate">{p.title || p.name}</span>
+                  </div>
+                  <div className="border-t border-border pt-1 flex">
+                    <span className="font-semibold mr-1">Precio:</span>
+                    <span className="flex-1">
+                      {formatCurrency(parseNumber(p.price))}
+                    </span>
+                  </div>
+                  <div className="border-t border-border pt-1 flex">
+                    <span className="font-semibold mr-1">Cantidad:</span>
+                    <span className="flex-1">
+                      {p.quantity ?? p.stock ?? "-"}
+                    </span>
+                  </div>
+                  <div className="border-t border-border pt-1 flex">
+                    <span className="font-semibold mr-1">Categoría:</span>
+                    <span className="flex-1">{catLabel}</span>
+                  </div>
+                </div>
+                <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
+                  <span className="font-semibold">Acciones:</span>
+                  <button
+                    onClick={() => openEdit(p)}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
+                    aria-label="Editar"
+                  >
+                    <PencilSquareIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => confirmDelete(p)}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
+                    aria-label="Eliminar"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             );
-            return match ? match.name : p.category || "-";
-          })();
-          return (
-            <div
-              key={p.id}
-              className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
-            >
-              <div className="space-y-1">
-                <div className="flex">
-                  <span className="font-semibold mr-1">Título:</span>
-                  <span className="flex-1 truncate">{p.title || p.name}</span>
-                </div>
-                <div className="border-t border-border pt-1 flex">
-                  <span className="font-semibold mr-1">Precio:</span>
-                  <span className="flex-1">
-                    {formatCurrency(parseNumber(p.price))}
-                  </span>
-                </div>
-                <div className="border-t border-border pt-1 flex">
-                  <span className="font-semibold mr-1">Cantidad:</span>
-                  <span className="flex-1">{p.quantity ?? p.stock ?? "-"}</span>
-                </div>
-                <div className="border-t border-border pt-1 flex">
-                  <span className="font-semibold mr-1">Categoría:</span>
-                  <span className="flex-1">{catLabel}</span>
-                </div>
-              </div>
-              <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
-                <span className="font-semibold">Acciones:</span>
-                <button
-                  onClick={() => openEdit(p)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
-                  aria-label="Editar"
-                >
-                  <PencilSquareIcon className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => confirmDelete(p)}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
-                  aria-label="Eliminar"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          );
-        })}
-        {products.length === 0 && !loading && !error && (
+          })}
+        {filteredProducts.length === 0 && !loading && !error && (
           <div className="text-center text-sm text-muted py-6 border border-dashed border-border rounded-md">
             Sin productos
           </div>
@@ -358,7 +389,10 @@ const AdminProducts = () => {
       <div className="md:hidden mt-2">
         <Pagination
           page={page}
-          totalPages={Math.max(1, Math.ceil(products.length / pageSize))}
+          totalPages={Math.max(
+            1,
+            Math.ceil(filteredProducts.length / pageSize)
+          )}
           onPageChange={setPage}
         />
       </div>
