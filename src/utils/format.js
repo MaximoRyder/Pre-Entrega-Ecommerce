@@ -35,6 +35,10 @@ export function parseNumber(input) {
         normalized = s.replace(/\./g, "").replace(",", ".");
     } else if (commaCount === 1 && dotCount === 0) {
         normalized = s.replace(",", ".");
+    } else if (commaCount === 0 && dotCount > 0) {
+        // Asumimos que los puntos son separadores de miles (formato es-AR/EU)
+        // Ej: 10.000 -> 10000
+        normalized = s.replace(/\./g, "");
     } else {
         // remove any thousands separators (commas) if dots used for decimals
         // or leave as-is

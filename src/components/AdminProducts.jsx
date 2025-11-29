@@ -431,11 +431,12 @@ const AdminProducts = () => {
               >
                 <input
                   id="quantity"
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   value={form.quantity}
                   onChange={(e) => {
-                    setForm({ ...form, quantity: e.target.value });
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    setForm({ ...form, quantity: val });
                     if (errors.quantity)
                       setErrors({ ...errors, quantity: null });
                   }}

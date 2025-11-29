@@ -4,11 +4,12 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import { validateCategoryName } from "../utils/validators";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import FormField from "./FormField";
 import Pagination from "./Pagination";
 
-// Endpoint de categorías: usa env si está, sino fallback al mockapi
 const API_ENV = import.meta.env.VITE_CATEGORIES_API;
 const API =
   API_ENV || "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/categories";
@@ -22,13 +23,14 @@ const AdminCategories = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyCategory);
+  const [errors, setErrors] = useState({});
   const [deleting, setDeleting] = useState(null);
   const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   const load = async () => {
-    if (!API) return; // silent if endpoint missing
+    if (!API) return;
     setLoading(true);
     setError(null);
     try {
@@ -50,12 +52,27 @@ const AdminCategories = () => {
   const openNew = () => {
     setEditing(null);
     setForm(emptyCategory);
+    setErrors({});
     setModalOpen(true);
   };
   const openEdit = (c) => {
     setEditing(c);
     setForm({ name: c.name || "" });
+    setErrors({});
     setModalOpen(true);
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    const catError = validateCategoryName(form.name);
+    if (catError) newErrors.name = catError;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+    setErrors({});
+    return true;
   };
 
   const slugify = (str) =>
@@ -69,6 +86,7 @@ const AdminCategories = () => {
 
   const save = async () => {
     if (!API) return;
+    if (!validate()) return;
     setSaving(true);
     try {
       const body = { name: form.name.trim(), slug: slugify(form.name.trim()) };
@@ -243,17 +261,20 @@ const AdminCategories = () => {
         loading={saving}
       >
         <div className="grid gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Nombre
-            </label>
+          <FormField label="Nombre" htmlFor="name" error={errors.name}>
             <input
+              id="name"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                if (errors.name) setErrors({ ...errors, name: null });
+              }}
               required
-              className="rounded-md border border-border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main"
+              className={`rounded-md border bg-surface px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 text-main ${
+                errors.name ? "border-red-500" : "border-border"
+              }`}
             />
-          </div>
+          </FormField>
           {/* Campo slug removido; se genera automáticamente */}
         </div>
       </AdminEntityModal>

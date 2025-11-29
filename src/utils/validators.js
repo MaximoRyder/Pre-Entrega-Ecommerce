@@ -51,13 +51,19 @@ export const validateQuantity = (quantity) => {
         return "La cantidad es obligatoria";
     const num = Number(quantity);
     if (isNaN(num)) return "La cantidad debe ser un número válido";
-    if (num <= 0) return "La cantidad debe ser mayor a 0";
     if (!Number.isInteger(num)) return "La cantidad debe ser un número entero";
     return null;
 };
 
 export const validateCategory = (category) => {
     if (!category || category === "") return "La categoría es obligatoria";
+    return null;
+};
+
+export const validateCategoryName = (name) => {
+    if (!name || name.trim() === "") return "El nombre de la categoría no puede estar vacío";
+    if (name.length < 3) return "El nombre debe tener al menos 3 caracteres";
+    if (name.length > 30) return "El nombre no puede tener más de 30 caracteres";
     return null;
 };
 
