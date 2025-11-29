@@ -3,28 +3,39 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { ToastContext } from "../context/ToastContext";
+import {
+  validateEmail,
+  validateName,
+  validatePassword,
+} from "../utils/validators";
+import FormField from "./FormField";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [errors, setErrors] = useState({});
   const { register, login } = useContext(AuthContext);
   const { showToast } = useContext(ToastContext);
   const navigate = useNavigate();
 
   const validate = () => {
-    if (!email || !password || !name) {
-      showToast("Por favor completa todos los campos", 1800, "info");
+    const newErrors = {};
+    const nameError = validateName(name, 5, 100);
+    if (nameError) newErrors.name = nameError;
+
+    const emailError = validateEmail(email, 5, 100);
+    if (emailError) newErrors.email = emailError;
+
+    const passwordError = validatePassword(password, 4, 20);
+    if (passwordError) newErrors.password = passwordError;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return false;
     }
-    if (!email.includes("@") || email.length < 5) {
-      showToast("Ingresa un email válido", 1800, "info");
-      return false;
-    }
-    if (password.length < 4) {
-      showToast("La contraseña debe tener al menos 4 caracteres", 1800, "info");
-      return false;
-    }
+
+    setErrors({});
     return true;
   };
 
@@ -35,7 +46,6 @@ const Register = () => {
       const created = await register({ email, password, name });
       if (created) {
         showToast("Registrado correctamente", 1400, "success");
-        // try auto-login
         const u = await login(email, password);
         if (u) {
           const to = u?.role === "admin" ? "/admin" : "/";
@@ -46,7 +56,7 @@ const Register = () => {
       } else {
         showToast("Error al registrarse", 1800, "error");
       }
-    } catch (err) {
+    } catch {
       showToast("Error al registrarse", 1800, "error");
     }
   };
@@ -55,64 +65,66 @@ const Register = () => {
     <main className="w-full max-w-md mx-auto py-10 sm:py-12">
       <form
         onSubmit={handleSubmit}
+        noValidate
         aria-label="form-register"
         className="bg-surface/90 backdrop-blur rounded-lg border border-border shadow-sm px-6 py-7 flex flex-col gap-5"
       >
         <h2 className="text-xl font-semibold text-main">Crear cuenta</h2>
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="name"
-            className="text-xs font-medium text-sub uppercase tracking-wide"
-          >
-            Nombre
-          </label>
+        <FormField label="Nombre" htmlFor="name" error={errors.name}>
           <input
             id="name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (errors.name) setErrors({ ...errors, name: null });
+            }}
             placeholder="Tu nombre"
             required
-            className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className={`rounded-md border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+              errors.name ? "border-red-500" : "border-border"
+            }`}
           />
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="email"
-            className="text-xs font-medium text-sub uppercase tracking-wide"
-          >
-            Email
-          </label>
+        <FormField label="Email" htmlFor="email" error={errors.email}>
           <input
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors({ ...errors, email: null });
+            }}
             placeholder="tu@ejemplo.com"
             required
-            className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className={`rounded-md border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+              errors.email ? "border-red-500" : "border-border"
+            }`}
           />
-        </div>
+        </FormField>
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="password"
-            className="text-xs font-medium text-sub uppercase tracking-wide"
-          >
-            Contraseña
-          </label>
+        <FormField
+          label="Contraseña"
+          htmlFor="password"
+          error={errors.password}
+        >
           <input
             id="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors({ ...errors, password: null });
+            }}
             placeholder="••••••••"
             required
-            className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className={`rounded-md border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+              errors.password ? "border-red-500" : "border-border"
+            }`}
           />
-        </div>
+        </FormField>
 
         <button
           type="submit"
