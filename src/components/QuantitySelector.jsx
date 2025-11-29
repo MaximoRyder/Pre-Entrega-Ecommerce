@@ -3,6 +3,8 @@ import {
   PlusSmallIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import "../styles/QuantitySelector.css";
+
 const QuantitySelector = ({
   value,
   onChange,
@@ -56,7 +58,7 @@ const QuantitySelector = ({
         }}
         disabled={disabled}
         aria-label="Cantidad"
-        className="w-16 rounded-md border border-border bg-surface px-2 py-1 text-center text-sm text-main shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="qs-input no-spinner w-16 rounded-md border border-border bg-surface px-2 py-1 text-center text-sm text-main shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <button
         type="button"

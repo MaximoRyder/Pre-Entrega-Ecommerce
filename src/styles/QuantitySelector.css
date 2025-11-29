@@ -23,6 +23,7 @@
   font-weight: var(--font-medium);
   font-size: var(--text-sm);
   font-family: var(--font-sans);
+  -webkit-appearance: none;
 }
 .qs-input:focus {
   outline: 2px solid var(--border-focus);
@@ -74,4 +75,28 @@
   background: var(--error-light);
   color: var(--error);
   border-color: var(--error);
+}
+
+input[type="number"].qs-input,
+input[type="number"].qs-input:focus {
+  -webkit-appearance: none !important;
+  appearance: textfield !important;
+  -moz-appearance: textfield !important;
+}
+
+input[type="number"].qs-input::-webkit-outer-spin-button,
+input[type="number"].qs-input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type="number"].qs-input::-moz-inner-spin-button,
+input[type="number"].qs-input::-moz-outer-spin-button {
+  display: none !important;
+}
+
+.qs-controls input[type="number"]::-webkit-outer-spin-button,
+.qs-controls input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
 }
