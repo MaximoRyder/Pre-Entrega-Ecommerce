@@ -25,9 +25,7 @@ export function parseNumber(input) {
     if (typeof input === "number") return input;
     let s = String(input).trim();
     if (!s) return 0;
-    // Remove currency symbols and spaces
     s = s.replace(/[^0-9,.-]+/g, "");
-    // If format is like 1.234,56 (thousand separator dot, decimal comma)
     const commaCount = (s.match(/,/g) || []).length;
     const dotCount = (s.match(/\./g) || []).length;
     let normalized = s;
@@ -36,12 +34,8 @@ export function parseNumber(input) {
     } else if (commaCount === 1 && dotCount === 0) {
         normalized = s.replace(",", ".");
     } else if (commaCount === 0 && dotCount > 0) {
-        // Asumimos que los puntos son separadores de miles (formato es-AR/EU)
-        // Ej: 10.000 -> 10000
         normalized = s.replace(/\./g, "");
     } else {
-        // remove any thousands separators (commas) if dots used for decimals
-        // or leave as-is
         normalized = s;
     }
     const n = Number(normalized);

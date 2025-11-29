@@ -118,7 +118,6 @@ const ProductsList = () => {
     );
   }, [searchTerm, activeCategory, products]);
 
-  // reset page when filter set changes
   useEffect(() => setPage(1), [filtered.length, activeCategory, searchTerm]);
 
   if (loading) return <p className="text-sm text-sub">Cargando productos...</p>;

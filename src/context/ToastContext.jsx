@@ -32,9 +32,9 @@ export const ToastProvider = ({ children }) => {
         <div
           className={[
             "fixed bottom-6 left-1/2 -translate-x-1/2 z-50",
-            "w-[min(90vw,560px)]", // responsive width
+            "w-[min(90vw,560px)]",
             "px-5 py-3 rounded-lg shadow-lg text-sm sm:text-base font-medium",
-            "backdrop-blur-sm border flex items-start gap-3", // layout
+            "backdrop-blur-sm border flex items-start gap-3",
             "leading-relaxed",
             toast.type === "error" && "bg-red-600 text-white border-red-500",
             toast.type === "success" &&

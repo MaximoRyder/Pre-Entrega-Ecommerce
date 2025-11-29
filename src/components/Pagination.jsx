@@ -10,7 +10,6 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
       return pages;
     }
-    // many pages: show compressed range
     if (page <= 4) {
       pages.push(1, 2, 3, 4, 5, "...", totalPages);
       return pages;

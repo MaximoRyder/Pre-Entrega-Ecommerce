@@ -2,7 +2,6 @@ import { createContext, useEffect, useReducer } from "react";
 
 const CartContext = createContext();
 
-// Funciones de localStorage
 const CART_STORAGE_KEY = "ecommerce_cart";
 
 const saveCartToStorage = (cart) => {
@@ -80,7 +79,6 @@ const cartReducer = (state, action) => {
       return state;
   }
 
-  // Guardar en localStorage después de cada cambio (excepto LOAD_CART)
   if (action.type !== "LOAD_CART") {
     saveCartToStorage(newState);
   }
@@ -91,7 +89,6 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const [cart, dispatch] = useReducer(cartReducer, []);
 
-  // Cargar datos del localStorage al inicializar
   useEffect(() => {
     const savedCart = loadCartFromStorage();
     if (savedCart.length > 0) {

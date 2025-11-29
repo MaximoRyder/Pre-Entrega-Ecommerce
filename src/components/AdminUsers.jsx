@@ -8,7 +8,6 @@ import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 import Pagination from "./Pagination";
 
-// Endpoint de usuarios (env o fallback)
 const USERS_API_ENV = import.meta.env.VITE_USERS_API;
 const API =
   USERS_API_ENV || "https://6928f88e9d311cddf347cd7f.mockapi.io/api/v1/users";
@@ -56,7 +55,7 @@ const AdminUsers = () => {
       name: u.name || "",
       email: u.email || "",
       role: u.role || "user",
-      password: "", // blank: optional change
+      password: "",
     });
     setModalOpen(true);
   };

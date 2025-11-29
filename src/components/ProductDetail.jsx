@@ -57,7 +57,6 @@ const ProductDetail = () => {
     }
   }, [remainingStock, existingInCart]);
 
-   Load product data
   useEffect(() => {
     let mounted = true;
     setLoading(true);
