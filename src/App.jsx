@@ -24,7 +24,7 @@ function App() {
       <CartProvider>
         <FilterProvider>
           <ToastProvider>
-            <BrowserRouter basename="/">
+            <BrowserRouter basename="/Pre-Entrega-Ecommerce/">
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Home />} />
