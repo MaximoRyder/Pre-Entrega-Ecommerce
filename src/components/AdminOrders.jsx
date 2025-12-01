@@ -24,6 +24,8 @@ const AdminOrders = () => {
   const [toDelete, setToDelete] = useState(null);
   const [restoreOrder, setRestoreOrder] = useState(null);
   const [restoreQuantities, setRestoreQuantities] = useState({});
+  const [restoreProcessing, setRestoreProcessing] = useState(false);
+  const [toDeleteProcessing, setToDeleteProcessing] = useState(false);
   const [editing, setEditing] = useState(null);
   const [editDraft, setEditDraft] = useState(null);
   const [productsList, setProductsList] = useState([]);
@@ -972,6 +974,7 @@ const AdminOrders = () => {
         }}
         onSubmit={async () => {
           if (!restoreOrder) return;
+          setRestoreProcessing(true);
           const PRODUCTS_API =
             import.meta.env.VITE_PRODUCTS_API ||
             "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
@@ -1013,11 +1016,14 @@ const AdminOrders = () => {
               "error"
             );
           } finally {
+            setRestoreProcessing(false);
             setRestoreOrder(null);
             setRestoreQuantities({});
           }
         }}
         submitLabel="Restaurar y eliminar"
+        loading={restoreProcessing}
+        loadingLabel="Procesando..."
       >
         <div className="flex flex-col gap-4">
           <p className="text-sm text-sub">
@@ -1066,10 +1072,25 @@ const AdminOrders = () => {
       <ConfirmModal
         open={!!toDelete}
         onClose={() => setToDelete(null)}
-        onConfirm={() => {
-          if (toDelete) deleteOrder(toDelete.id);
-          setToDelete(null);
+        onConfirm={async () => {
+          if (!toDelete) return;
+          try {
+            setToDeleteProcessing(true);
+            await deleteOrder(toDelete.id);
+            setToDelete(null);
+          } catch (err) {
+            console.error("Error eliminando pedido:", err);
+            toastCtx.showToast(
+              err.message || "Error eliminando pedido",
+              2200,
+              "error"
+            );
+          } finally {
+            setToDeleteProcessing(false);
+          }
         }}
+        confirmDisabled={toDeleteProcessing}
+        confirmLoading={toDeleteProcessing}
         title="Eliminar pedido"
         message={toDelete ? `Eliminar pedido #${toDelete.id}?` : ""}
         cancelText="Cancelar"

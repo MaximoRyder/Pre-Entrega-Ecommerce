@@ -1,4 +1,4 @@
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -10,6 +10,7 @@ const AdminEntityModal = ({
   onSubmit,
   submitLabel = "Guardar",
   loading = false,
+  loadingLabel = "Guardando...",
 }) => {
   useEffect(() => {
     if (!open) return;
@@ -63,9 +64,19 @@ const AdminEntityModal = ({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+              className={
+                "inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40 " +
+                (loading ? "cursor-not-allowed" : "")
+              }
             >
-              {loading ? "Guardando..." : submitLabel}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                  <span>{loadingLabel}</span>
+                </span>
+              ) : (
+                submitLabel
+              )}
             </button>
           </div>
         </form>
