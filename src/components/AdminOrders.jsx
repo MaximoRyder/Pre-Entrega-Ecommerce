@@ -3,11 +3,13 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
+import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatNumber, formatOrderDate } from "../utils/format";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 import Pagination from "./Pagination";
+import QuantitySelector from "./QuantitySelector";
 
 const API =
   import.meta.env.VITE_ORDERS_API ||
@@ -20,7 +22,10 @@ const AdminOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toDelete, setToDelete] = useState(null);
+  const [restoreOrder, setRestoreOrder] = useState(null);
+  const [restoreQuantities, setRestoreQuantities] = useState({});
   const [editing, setEditing] = useState(null);
+  const toastCtx = useContext(ToastContext);
   const [statusForm, setStatusForm] = useState("Pending");
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState({});
@@ -345,7 +350,9 @@ const AdminOrders = () => {
                           <PencilSquareIcon className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => setToDelete(o)}
+                          onClick={() =>
+                            o.local ? setToDelete(o) : setRestoreOrder(o)
+                          }
                           className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
                           aria-label="Eliminar"
                         >
@@ -400,7 +407,6 @@ const AdminOrders = () => {
         />
       </div>
 
-      {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
         {orders.slice((page - 1) * pageSize, page * pageSize).map((o) => {
           const itemCount = o.items?.reduce(
@@ -506,7 +512,9 @@ const AdminOrders = () => {
                   <PencilSquareIcon className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => setToDelete(o)}
+                  onClick={() =>
+                    o.local ? setToDelete(o) : setRestoreOrder(o)
+                  }
                   className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
                   aria-label="Eliminar"
                 >
@@ -530,7 +538,6 @@ const AdminOrders = () => {
         />
       </div>
 
-      {/* Edit Modal */}
       <AdminEntityModal
         open={!!editing}
         title={editing ? `Editar pedido #${editing.id}` : ""}
@@ -573,6 +580,102 @@ const AdminOrders = () => {
               <p>
                 <strong>Items:</strong> {editing.items?.length || 0}
               </p>
+            </div>
+          )}
+        </div>
+      </AdminEntityModal>
+
+      <AdminEntityModal
+        open={!!restoreOrder}
+        title={
+          restoreOrder ? `Restaurar stock - Pedido #${restoreOrder.id}` : ""
+        }
+        onClose={() => {
+          setRestoreOrder(null);
+          setRestoreQuantities({});
+        }}
+        onSubmit={async () => {
+          if (!restoreOrder) return;
+          const PRODUCTS_API =
+            import.meta.env.VITE_PRODUCTS_API ||
+            "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+          const items = restoreOrder.items || [];
+          const qmap = { ...restoreQuantities };
+
+          for (let i = 0; i < items.length; i++) {
+            const key = String(i);
+            if (qmap[key] == null) qmap[key] = Number(items[i].quantity) || 0;
+          }
+
+          try {
+            for (let i = 0; i < items.length; i++) {
+              const ret = Number(qmap[String(i)] || 0);
+              if (!ret || ret <= 0) continue;
+              const it = items[i];
+              const url = `${PRODUCTS_API}/${it.id}`;
+              const getRes = await fetch(url);
+              if (!getRes.ok)
+                throw new Error(`Error leyendo producto ${it.id}`);
+              const prod = await getRes.json();
+              const available = Number(
+                prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
+              );
+              const newCount = Math.max(0, available + Number(ret));
+              await updateQuantityWithRetry(url, newCount);
+            }
+            await deleteOrder(restoreOrder.id);
+            const { showToast } = toastCtx;
+            showToast("Stocks restaurados y pedido eliminado", 1800, "success");
+          } catch (err) {
+            console.error("Error restaurando stock:", err);
+            const { showToast } = toastCtx;
+            showToast(err.message || "Error restaurando stock", 2200, "error");
+          } finally {
+            setRestoreOrder(null);
+            setRestoreQuantities({});
+          }
+        }}
+        submitLabel="Restaurar y eliminar"
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-sub">
+            Ajusta la cantidad a devolver por cada producto. Por defecto se
+            rellena con la cantidad del pedido.
+          </p>
+          {restoreOrder && (restoreOrder.items || []).length === 0 && (
+            <p className="text-sm text-sub">Este pedido no tiene items.</p>
+          )}
+          {restoreOrder && (restoreOrder.items || []).length > 0 && (
+            <div className="space-y-3">
+              {(restoreOrder.items || []).map((it, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between gap-3 border border-border rounded-md p-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="truncate font-medium" title={it.name}>
+                      {it.name}
+                    </div>
+                    <div className="text-xs text-sub">
+                      Cantidad en pedido: {it.quantity}
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    <QuantitySelector
+                      value={
+                        (restoreQuantities[String(idx)] ??
+                          Number(it.quantity)) ||
+                        0
+                      }
+                      onChange={(v) =>
+                        setRestoreQuantities((prev) => ({ ...prev, [idx]: v }))
+                      }
+                      min={0}
+                      max={Number(it.quantity) || 0}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
