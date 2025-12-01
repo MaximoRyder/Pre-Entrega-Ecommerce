@@ -152,6 +152,7 @@ const CartPage = () => {
       })),
       subtotal: Number(subtotal || 0),
       status: "Pending",
+      createdAt: new Date().toISOString(),
     };
 
     const prevQuantities = {};

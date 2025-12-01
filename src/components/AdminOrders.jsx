@@ -4,7 +4,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Fragment, useEffect, useState } from "react";
-import { formatCurrency, formatNumber } from "../utils/format";
+import { formatCurrency, formatNumber, formatOrderDate } from "../utils/format";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 import Pagination from "./Pagination";
@@ -61,7 +61,7 @@ const AdminOrders = () => {
         if (!res.ok) throw new Error("Error al obtener pedidos");
         const data = await res.json();
         const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
-        const combined = [...local, ...data];
+        const combined = [...(local || []), ...(data || [])];
         if (mounted) setOrders(combined.reverse());
       } catch (err) {
         if (mounted) setError(err.message || "Error desconocido");
@@ -151,7 +151,7 @@ const AdminOrders = () => {
       const res = await fetch(API);
       const data = await res.json();
       const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
-      setOrders([...local, ...data].reverse());
+      setOrders([...(local || []), ...(data || [])].reverse());
     } catch (err) {
       setError(err.message || "Error desconocido");
     } finally {
@@ -173,12 +173,16 @@ const AdminOrders = () => {
           return;
         }
       }
-      const res = await fetch(`${API}/${id}`, {
+      const getRes = await fetch(`${API}/${id}`);
+      if (!getRes.ok) throw new Error("Error leyendo pedido para actualizar");
+      const current = await getRes.json();
+      const payload = { ...current, status };
+      const putRes = await fetch(`${API}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Error al actualizar");
+      if (!putRes.ok) throw new Error("Error al actualizar");
       await refresh();
     } catch (err) {
       console.error(err);
@@ -302,7 +306,7 @@ const AdminOrders = () => {
                       </div>
                     </td>
                     <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-sub whitespace-nowrap">
-                      {new Date(o.createdAt).toLocaleString()}
+                      {formatOrderDate(o.createdAt)}
                     </td>
                     <td className="px-2 py-1.5 sm:px-3 sm:py-2">
                       {itemCount || 0}
@@ -449,9 +453,7 @@ const AdminOrders = () => {
               </div>
               <div className="border-t border-border pt-1 flex">
                 <span className="font-semibold mr-1">Fecha:</span>
-                <span className="flex-1">
-                  {new Date(o.createdAt).toLocaleString()}
-                </span>
+                <span className="flex-1">{formatOrderDate(o.createdAt)}</span>
               </div>
               <div className="border-t border-border pt-1 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1">

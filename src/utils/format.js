@@ -42,4 +42,39 @@ export function parseNumber(input) {
     return isFinite(n) ? n : 0;
 }
 
-export default { formatNumber, formatCurrency, parseNumber };
+export function tryParseDate(val) {
+    if (!val && val !== 0) return null;
+    if (val instanceof Date && !isNaN(val)) return val;
+    if (typeof val === "number") {
+        const d = new Date(val);
+        if (!isNaN(d)) return d;
+    }
+    if (typeof val === "string") {
+        const s = val.trim();
+        const t = Date.parse(s);
+        if (!isNaN(t)) return new Date(t);
+        if (/^\d{10}$/.test(s)) {
+            const d = new Date(Number(s) * 1000);
+            if (!isNaN(d)) return d;
+        }
+        if (/^\d{13}$/.test(s)) {
+            const d = new Date(Number(s));
+            if (!isNaN(d)) return d;
+        }
+    }
+    return null;
+}
+
+export function formatOrderDate(value) {
+    if (!value && value !== 0) return "-";
+    const parsed = tryParseDate(value);
+    if (parsed) {
+        const d = parsed;
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+    if (typeof value === "string") return value;
+    return "-";
+}
+
+export default { formatNumber, formatCurrency, parseNumber, tryParseDate, formatOrderDate };
