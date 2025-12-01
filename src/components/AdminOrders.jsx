@@ -93,24 +93,23 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Pedidos</h1>
-        <div className="mt-4 grid grid-cols-2 gap-2">
+    <div className="space-y-4">
+      <div className="hidden md:flex items-center justify-between">
+        <h3 className="text-xl font-semibold tracking-tight">Pedidos</h3>
+        <div className="gap-2 flex">
           <button
             onClick={refresh}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm whitespace-nowrap"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-900 hover:bg-primary-800 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
             title="Refrescar lista"
           >
-            <ArrowPathIcon className="w-4 h-4" />
+            <ArrowPathIcon className="w-5 h-5" />
             Refrescar
           </button>
           <button
             onClick={() => setCreating(true)}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 text-white px-3 py-2 text-sm whitespace-nowrap"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
           >
-            <PlusIcon className="w-4 h-4" />
-            Agregar pedido
+            <PlusIcon className="w-5 h-5" /> Agregar
           </button>
         </div>
       </div>
