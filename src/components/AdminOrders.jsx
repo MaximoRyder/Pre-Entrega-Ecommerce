@@ -10,6 +10,7 @@ import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatOrderDate } from "../utils/format";
 import OrderEditor from "./OrderEditor";
 import Pagination from "./Pagination";
+import SearchForm from "./SearchForm";
 
 const API =
   import.meta.env.VITE_ORDERS_API ||
@@ -22,6 +23,15 @@ const AdminOrders = () => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  const [ordersSearch, setOrdersSearch] = useState("");
+
+  const filteredOrders = orders.filter((o) => {
+    if (!ordersSearch) return true;
+    const lower = ordersSearch.toLowerCase();
+    const email = (o.userEmail || "").toLowerCase();
+    const name = (o.userName || o.user?.name || "").toLowerCase();
+    return email.includes(lower) || name.includes(lower);
+  });
 
   const [editing, setEditing] = useState(null);
   const [creating, setCreating] = useState(false);
@@ -116,6 +126,16 @@ const AdminOrders = () => {
         </div>
       </div>
 
+      <SearchForm
+        onSearch={(term) => {
+          setOrdersSearch(term);
+          setPage(1);
+        }}
+        initialValue={ordersSearch}
+        placeholder="Buscar por usuario..."
+        className="mt-2"
+      />
+
       {/* Mobile actions: stacked buttons visible only on small screens */}
       <div className="md:hidden mt-3 px-0">
         <div className="grid grid-cols-1 gap-2">
@@ -159,7 +179,7 @@ const AdminOrders = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders
+                {filteredOrders
                   .slice((page - 1) * pageSize, page * pageSize)
                   .map((o) => {
                     const itemCount = o.items?.reduce(
@@ -294,127 +314,129 @@ const AdminOrders = () => {
             <div className="text-center text-sub py-6">Cargando pedidos...</div>
           ) : error ? (
             <div className="text-center text-red-500 py-6">{error}</div>
-          ) : orders.length === 0 ? (
+          ) : filteredOrders.length === 0 ? (
             <div className="text-center text-sub py-6">No hay pedidos</div>
           ) : (
-            orders.slice((page - 1) * pageSize, page * pageSize).map((o) => {
-              const itemCount = o.items?.reduce(
-                (s, it) => s + (Number(it.quantity) || 0),
-                0
-              );
-              const isExpanded = !!expanded[o.id];
-              return (
-                <div
-                  key={o.id}
-                  className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">ID:</span>
-                      <span>#{o.id}</span>
-                    </div>
-                    <span
-                      className={
-                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
-                        (o.status === "Pending"
-                          ? "bg-yellow-900/20 text-yellow-500"
-                          : o.status === "Processing"
-                          ? "bg-blue-900/20 text-blue-500"
-                          : o.status === "Shipped"
-                          ? "bg-green-900/20 text-green-500"
-                          : o.status === "Rejected"
-                          ? "bg-red-900/20 text-red-500"
-                          : "bg-surface-hover text-sub")
-                      }
-                    >
-                      {o.status || "-"}
-                    </span>
-                  </div>
-
-                  <div className="border-t border-border mt-2 pt-1 flex flex-col gap-2">
-                    <div className="flex">
-                      <span className="font-semibold mr-1">Usuario:</span>
-                      <span className="flex-1 truncate" title={o.userEmail}>
-                        {o.userEmail || "-"}
-                      </span>
-                    </div>
-                    <div className="flex">
-                      <span className="font-semibold mr-1">Fecha:</span>
-                      <span className="flex-1">
-                        {formatOrderDate(o.createdAt)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1">
-                        <span className="font-semibold">Items:</span>
-                        <span>{itemCount || 0}</span>
+            filteredOrders
+              .slice((page - 1) * pageSize, page * pageSize)
+              .map((o) => {
+                const itemCount = o.items?.reduce(
+                  (s, it) => s + (Number(it.quantity) || 0),
+                  0
+                );
+                const isExpanded = !!expanded[o.id];
+                return (
+                  <div
+                    key={o.id}
+                    className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">ID:</span>
+                        <span>#{o.id}</span>
                       </div>
-                      {o.items && o.items.length > 0 && (
-                        <button
-                          onClick={() =>
-                            setExpanded((prev) => ({
-                              ...prev,
-                              [o.id]: !prev[o.id],
-                            }))
-                          }
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover"
-                          aria-label={
-                            isExpanded ? "Ocultar items" : "Ver items"
-                          }
-                          aria-expanded={isExpanded}
-                        >
-                          <ChevronDownIcon
-                            className={
-                              "w-4 h-4 transform transition-transform " +
-                              (isExpanded ? "rotate-180" : "")
+                      <span
+                        className={
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
+                          (o.status === "Pending"
+                            ? "bg-yellow-900/20 text-yellow-500"
+                            : o.status === "Processing"
+                            ? "bg-blue-900/20 text-blue-500"
+                            : o.status === "Shipped"
+                            ? "bg-green-900/20 text-green-500"
+                            : o.status === "Rejected"
+                            ? "bg-red-900/20 text-red-500"
+                            : "bg-surface-hover text-sub")
+                        }
+                      >
+                        {o.status || "-"}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-border mt-2 pt-1 flex flex-col gap-2">
+                      <div className="flex">
+                        <span className="font-semibold mr-1">Usuario:</span>
+                        <span className="flex-1 truncate" title={o.userEmail}>
+                          {o.userEmail || "-"}
+                        </span>
+                      </div>
+                      <div className="flex">
+                        <span className="font-semibold mr-1">Fecha:</span>
+                        <span className="flex-1">
+                          {formatOrderDate(o.createdAt)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1">
+                          <span className="font-semibold">Items:</span>
+                          <span>{itemCount || 0}</span>
+                        </div>
+                        {o.items && o.items.length > 0 && (
+                          <button
+                            onClick={() =>
+                              setExpanded((prev) => ({
+                                ...prev,
+                                [o.id]: !prev[o.id],
+                              }))
                             }
-                          />
-                        </button>
-                      )}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover"
+                            aria-label={
+                              isExpanded ? "Ocultar items" : "Ver items"
+                            }
+                            aria-expanded={isExpanded}
+                          >
+                            <ChevronDownIcon
+                              className={
+                                "w-4 h-4 transform transition-transform " +
+                                (isExpanded ? "rotate-180" : "")
+                              }
+                            />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {isExpanded && o.items && o.items.length > 0 && (
+                      <ul className="mt-2 space-y-1 text-xs text-main border-t border-border pt-2">
+                        {o.items.map((it, idx) => (
+                          <li
+                            key={idx}
+                            className={
+                              "flex items-center gap-2 px-1 py-1 " +
+                              (idx % 2 === 0 ? "bg-gray-900" : "bg-gray-800")
+                            }
+                          >
+                            <span className="truncate" title={it.name}>
+                              {it.name}
+                            </span>
+                            <span className="whitespace-nowrap ml-1">
+                              x{it.quantity}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
+                      <span className="font-semibold">Acciones:</span>
+                      <button
+                        onClick={() => setEditing(o)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
+                        aria-label="Editar"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setToDelete(o)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
+                        aria-label="Eliminar"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-
-                  {isExpanded && o.items && o.items.length > 0 && (
-                    <ul className="mt-2 space-y-1 text-xs text-main border-t border-border pt-2">
-                      {o.items.map((it, idx) => (
-                        <li
-                          key={idx}
-                          className={
-                            "flex items-center gap-2 px-1 py-1 " +
-                            (idx % 2 === 0 ? "bg-gray-900" : "bg-gray-800")
-                          }
-                        >
-                          <span className="truncate" title={it.name}>
-                            {it.name}
-                          </span>
-                          <span className="whitespace-nowrap ml-1">
-                            x{it.quantity}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
-                    <span className="font-semibold">Acciones:</span>
-                    <button
-                      onClick={() => setEditing(o)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
-                      aria-label="Editar"
-                    >
-                      <PencilSquareIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setToDelete(o)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
-                      aria-label="Eliminar"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })
+                );
+              })
           )}
         </div>
       </div>
@@ -422,14 +444,14 @@ const AdminOrders = () => {
       <div className="hidden md:block mt-3">
         <Pagination
           page={page}
-          totalPages={Math.max(1, Math.ceil(orders.length / pageSize))}
+          totalPages={Math.max(1, Math.ceil(filteredOrders.length / pageSize))}
           onPageChange={setPage}
         />
       </div>
       <div className="md:hidden mt-2">
         <Pagination
           page={page}
-          totalPages={Math.max(1, Math.ceil(orders.length / pageSize))}
+          totalPages={Math.max(1, Math.ceil(filteredOrders.length / pageSize))}
           onPageChange={setPage}
         />
       </div>
