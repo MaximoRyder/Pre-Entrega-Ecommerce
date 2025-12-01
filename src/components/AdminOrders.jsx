@@ -99,7 +99,7 @@ const AdminOrders = () => {
         <div className="gap-2 flex">
           <button
             onClick={refresh}
-            className="inline-flex items-center gap-2 rounded-md bg-primary-900 hover:bg-primary-800 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm"
             title="Refrescar lista"
           >
             <ArrowPathIcon className="w-5 h-5" />
@@ -107,9 +107,31 @@ const AdminOrders = () => {
           </button>
           <button
             onClick={() => setCreating(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2"
           >
-            <PlusIcon className="w-5 h-5" /> Agregar
+            <PlusIcon className="w-5 h-5" />
+            Agregar
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile actions: stacked buttons visible only on small screens */}
+      <div className="md:hidden mt-3 px-0">
+        <div className="grid grid-cols-1 gap-2">
+          <button
+            onClick={refresh}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-sm"
+            title="Refrescar lista"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            Refrescar
+          </button>
+          <button
+            onClick={() => setCreating(true)}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 text-white px-3 py-2 text-sm"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Agregar
           </button>
         </div>
       </div>
