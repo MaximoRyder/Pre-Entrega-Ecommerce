@@ -8,6 +8,7 @@ import { useContext, useEffect, useState } from "react";
 import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatOrderDate } from "../utils/format";
 import OrderEditor from "./OrderEditor";
+import Pagination from "./Pagination";
 
 const API =
   import.meta.env.VITE_ORDERS_API ||
@@ -18,6 +19,8 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const [editing, setEditing] = useState(null);
   const [creating, setCreating] = useState(false);
@@ -113,7 +116,6 @@ const AdminOrders = () => {
       </div>
 
       <div className="bg-surface border border-border rounded-md overflow-hidden">
-        {/* Desktop table */}
         <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm hidden md:block">
           {loading ? (
             <div className="p-6 text-center text-sub">Cargando pedidos...</div>
@@ -135,78 +137,84 @@ const AdminOrders = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => {
-                  const itemCount = o.items?.reduce(
-                    (s, it) => s + (Number(it.quantity) || 0),
-                    0
-                  );
-                  return (
-                    <tr key={o.id} className="align-top border-b border-border">
-                      <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
-                        #{o.id}
-                      </td>
-                      <td
-                        className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[180px]"
-                        title={o.userEmail}
+                {orders
+                  .slice((page - 1) * pageSize, page * pageSize)
+                  .map((o) => {
+                    const itemCount = o.items?.reduce(
+                      (s, it) => s + (Number(it.quantity) || 0),
+                      0
+                    );
+                    return (
+                      <tr
+                        key={o.id}
+                        className="align-top border-b border-border"
                       >
-                        <div className="flex flex-col">
-                          <span className="truncate">{o.userEmail || "-"}</span>
-                        </div>
-                      </td>
-                      <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-sub whitespace-nowrap">
-                        {formatOrderDate(o.createdAt)}
-                      </td>
-                      <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                        {itemCount || 0}
-                      </td>
-                      <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
-                        {formatCurrency(o.subtotal)}
-                      </td>
-                      <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                        <span
-                          className={
-                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
-                            (o.status === "Pending"
-                              ? "bg-yellow-900/20 text-yellow-500"
-                              : o.status === "Processing"
-                              ? "bg-blue-900/20 text-blue-500"
-                              : o.status === "Shipped"
-                              ? "bg-green-900/20 text-green-500"
-                              : o.status === "Rejected"
-                              ? "bg-red-900/20 text-red-500"
-                              : "bg-surface-hover text-sub")
-                          }
+                        <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
+                          #{o.id}
+                        </td>
+                        <td
+                          className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[180px]"
+                          title={o.userEmail}
                         >
-                          {o.status || "-"}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setEditing(o)}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
-                            aria-label="Editar"
+                          <div className="flex flex-col">
+                            <span className="truncate">
+                              {o.userEmail || "-"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-sub whitespace-nowrap">
+                          {formatOrderDate(o.createdAt)}
+                        </td>
+                        <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                          {itemCount || 0}
+                        </td>
+                        <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
+                          {formatCurrency(o.subtotal)}
+                        </td>
+                        <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                          <span
+                            className={
+                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
+                              (o.status === "Pending"
+                                ? "bg-yellow-900/20 text-yellow-500"
+                                : o.status === "Processing"
+                                ? "bg-blue-900/20 text-blue-500"
+                                : o.status === "Shipped"
+                                ? "bg-green-900/20 text-green-500"
+                                : o.status === "Rejected"
+                                ? "bg-red-900/20 text-red-500"
+                                : "bg-surface-hover text-sub")
+                            }
                           >
-                            <PencilSquareIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setToDelete(o)}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
-                            aria-label="Eliminar"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                            {o.status || "-"}
+                          </span>
+                        </td>
+                        <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setEditing(o)}
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
+                              aria-label="Editar"
+                            >
+                              <PencilSquareIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setToDelete(o)}
+                              className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
+                              aria-label="Eliminar"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           )}
         </div>
 
-        {/* Mobile cards */}
         <div className="md:hidden space-y-3 p-3">
           {loading ? (
             <div className="text-center text-sub py-6">Cargando pedidos...</div>
@@ -215,7 +223,7 @@ const AdminOrders = () => {
           ) : orders.length === 0 ? (
             <div className="text-center text-sub py-6">No hay pedidos</div>
           ) : (
-            orders.map((o) => {
+            orders.slice((page - 1) * pageSize, page * pageSize).map((o) => {
               const itemCount = o.items?.reduce(
                 (s, it) => s + (Number(it.quantity) || 0),
                 0
@@ -320,6 +328,21 @@ const AdminOrders = () => {
             })
           )}
         </div>
+      </div>
+
+      <div className="hidden md:block mt-3">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(orders.length / pageSize))}
+          onPageChange={setPage}
+        />
+      </div>
+      <div className="md:hidden mt-2">
+        <Pagination
+          page={page}
+          totalPages={Math.max(1, Math.ceil(orders.length / pageSize))}
+          onPageChange={setPage}
+        />
       </div>
 
       <OrderEditor
