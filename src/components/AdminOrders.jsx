@@ -166,69 +166,118 @@ const AdminOrders = () => {
                       0
                     );
                     return (
-                      <tr
-                        key={o.id}
-                        className="align-top border-b border-border"
-                      >
-                        <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
-                          #{o.id}
-                        </td>
-                        <td
-                          className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[180px]"
-                          title={o.userEmail}
+                      <>
+                        <tr
+                          key={o.id}
+                          className="align-top border-b border-border"
                         >
-                          <div className="flex flex-col">
-                            <span className="truncate">
-                              {o.userEmail || "-"}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-sub whitespace-nowrap">
-                          {formatOrderDate(o.createdAt)}
-                        </td>
-                        <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                          {itemCount || 0}
-                        </td>
-                        <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
-                          {formatCurrency(o.subtotal)}
-                        </td>
-                        <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                          <span
-                            className={
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
-                              (o.status === "Pending"
-                                ? "bg-yellow-900/20 text-yellow-500"
-                                : o.status === "Processing"
-                                ? "bg-blue-900/20 text-blue-500"
-                                : o.status === "Shipped"
-                                ? "bg-green-900/20 text-green-500"
-                                : o.status === "Rejected"
-                                ? "bg-red-900/20 text-red-500"
-                                : "bg-surface-hover text-sub")
-                            }
+                          <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
+                            #{o.id}
+                          </td>
+                          <td
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[180px]"
+                            title={o.userEmail}
                           >
-                            {o.status || "-"}
-                          </span>
-                        </td>
-                        <td className="px-2 py-1.5 sm:px-3 sm:py-2">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => setEditing(o)}
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
-                              aria-label="Editar"
+                            <div className="flex flex-col">
+                              <span className="truncate">
+                                {o.userEmail || "-"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-xs text-sub whitespace-nowrap">
+                            {formatOrderDate(o.createdAt)}
+                          </td>
+                          <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                            {itemCount || 0}
+                          </td>
+                          <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-medium">
+                            {formatCurrency(o.subtotal)}
+                          </td>
+                          <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                            <span
+                              className={
+                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold " +
+                                (o.status === "Pending"
+                                  ? "bg-yellow-900/20 text-yellow-500"
+                                  : o.status === "Processing"
+                                  ? "bg-blue-900/20 text-blue-500"
+                                  : o.status === "Shipped"
+                                  ? "bg-green-900/20 text-green-500"
+                                  : o.status === "Rejected"
+                                  ? "bg-red-900/20 text-red-500"
+                                  : "bg-surface-hover text-sub")
+                              }
                             >
-                              <PencilSquareIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => setToDelete(o)}
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
-                              aria-label="Eliminar"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                              {o.status || "-"}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 sm:px-3 sm:py-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() =>
+                                  setExpanded((prev) => ({
+                                    ...prev,
+                                    [o.id]: !prev[o.id],
+                                  }))
+                                }
+                                className="inline-flex items-center justify-center px-2 py-1 rounded-md border border-border text-xs hover:bg-surface-hover"
+                                aria-label={
+                                  expanded[o.id] ? "Ocultar items" : "Ver items"
+                                }
+                              >
+                                {expanded[o.id] ? "Ocultar" : "Ver"}
+                              </button>
+                              <button
+                                onClick={() => setEditing(o)}
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
+                                aria-label="Editar"
+                              >
+                                <PencilSquareIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setToDelete(o)}
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
+                                aria-label="Eliminar"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        {expanded[o.id] && o.items && o.items.length > 0 && (
+                          <tr className="bg-surface">
+                            <td colSpan={7} className="px-3 py-2">
+                              <ul className="space-y-1 text-sm">
+                                {o.items.map((it, idx) => (
+                                  <li
+                                    key={idx}
+                                    className={
+                                      "flex items-center gap-2 px-2 py-1 " +
+                                      (idx % 2 === 0
+                                        ? "bg-green-900"
+                                        : "bg-green-800")
+                                    }
+                                  >
+                                    <span
+                                      className="truncate max-w-[70%]"
+                                      title={it.name}
+                                    >
+                                      {it.name}
+                                    </span>
+                                    <span
+                                      className="flex-1 border-b border-dotted border-border mx-2"
+                                      aria-hidden="true"
+                                    ></span>
+                                    <span className="whitespace-nowrap ml-1">
+                                      x{it.quantity}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     );
                   })}
               </tbody>
@@ -315,11 +364,21 @@ const AdminOrders = () => {
                   {isExpanded && o.items && o.items.length > 0 && (
                     <ul className="mt-2 space-y-1 text-xs text-main border-t border-border pt-2">
                       {o.items.map((it, idx) => (
-                        <li key={idx} className="flex justify-between gap-2">
+                        <li
+                          key={idx}
+                          className={
+                            "flex items-center gap-2 px-1 py-1 " +
+                            (idx % 2 === 0 ? "bg-gray-900" : "bg-gray-800")
+                          }
+                        >
                           <span className="truncate" title={it.name}>
                             {it.name}
                           </span>
-                          <span className="whitespace-nowrap">
+                          <span
+                            className="flex-1 border-b border-dotted border-border mx-2"
+                            aria-hidden="true"
+                          ></span>
+                          <span className="whitespace-nowrap ml-1">
                             x{it.quantity}
                           </span>
                         </li>
