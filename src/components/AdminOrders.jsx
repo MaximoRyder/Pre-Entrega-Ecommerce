@@ -751,7 +751,7 @@ const AdminOrders = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <QuantitySelector
-                        value={Number(it.quantity) || 0}
+                        value={Number(it.quantity) || 1}
                         onChange={(v) => {
                           setEditDraft((prev) => {
                             const next = JSON.parse(JSON.stringify(prev));
@@ -766,7 +766,7 @@ const AdminOrders = () => {
                             return next;
                           });
                         }}
-                        min={0}
+                        min={1}
                         max={(() => {
                           try {
                             const prod = productsList.find(
