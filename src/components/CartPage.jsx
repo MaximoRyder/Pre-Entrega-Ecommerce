@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, parseNumber } from "../utils/format";
+import { updateQuantityWithRetry } from "../utils/stock";
 import ConfirmModal from "./ConfirmModal";
 import QuantitySelector from "./QuantitySelector";
 
@@ -25,32 +26,6 @@ const CartPage = () => {
   const PRODUCTS_API =
     import.meta.env.VITE_PRODUCTS_API ||
     "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
-
-  async function updateQuantityWithRetry(productUrl, quantity, attempts = 3) {
-    let lastErr = null;
-    for (let i = 0; i < attempts; i++) {
-      try {
-        const getRes = await fetch(productUrl);
-        if (!getRes.ok) throw new Error(`GET ${getRes.status}`);
-        const prod = await getRes.json();
-        prod.quantity = quantity;
-        const putRes = await fetch(productUrl, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(prod),
-        });
-        if (!putRes.ok) {
-          const text = await putRes.text().catch(() => null);
-          throw new Error(`PUT ${putRes.status} ${text || ""}`);
-        }
-        return putRes;
-      } catch (e) {
-        lastErr = e;
-        await new Promise((r) => setTimeout(r, 250 * Math.pow(2, i)));
-      }
-    }
-    throw lastErr;
-  }
 
   const subtotal = cart.reduce((s, item) => {
     const price = parseNumber(item.price);
