@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 import Pagination from "./Pagination";
+import SearchForm from "./SearchForm";
 
 const USERS_API_ENV = import.meta.env.VITE_USERS_API;
 const API =
@@ -24,7 +25,21 @@ const AdminUsers = () => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const pageSize = 10;
+
+  const filteredUsers = users.filter((u) => {
+    if (!searchTerm) return true;
+    const lower = searchTerm.toLowerCase();
+    const name = (u.name || "").toLowerCase();
+    const email = (u.email || "").toLowerCase();
+    return name.includes(lower) || email.includes(lower);
+  });
+
+  const showingAllMatches = !!searchTerm;
+  const displayedUsers = showingAllMatches
+    ? filteredUsers
+    : users.slice((page - 1) * pageSize, page * pageSize);
 
   const load = async () => {
     setLoading(true);
@@ -121,6 +136,15 @@ const AdminUsers = () => {
         </button>
       </div>
 
+      <SearchForm
+        onSearch={(term) => {
+          setSearchTerm(term);
+          setPage(1);
+        }}
+        initialValue={searchTerm}
+        placeholder="Buscar por nombre o email..."
+      />
+
       <div className="md:hidden flex justify-end">
         <button
           onClick={openNew}
@@ -143,7 +167,7 @@ const AdminUsers = () => {
             </tr>
           </thead>
           <tbody>
-            {users.slice((page - 1) * pageSize, page * pageSize).map((u) => (
+            {displayedUsers.map((u) => (
               <tr key={u.id} className="border-b last:border-b-0 border-border">
                 <td
                   className="px-2 py-1.5 sm:px-3 sm:py-2 max-w-[140px] truncate"
@@ -180,7 +204,7 @@ const AdminUsers = () => {
                 </td>
               </tr>
             ))}
-            {users.length === 0 && !loading && !error && (
+            {filteredUsers.length === 0 && !loading && !error && (
               <tr>
                 <td
                   colSpan={4}
@@ -193,16 +217,18 @@ const AdminUsers = () => {
           </tbody>
         </table>
       </div>
-      <div className="hidden md:block mt-3">
-        <Pagination
-          page={page}
-          totalPages={Math.max(1, Math.ceil(users.length / pageSize))}
-          onPageChange={setPage}
-        />
-      </div>
+      {!showingAllMatches && (
+        <div className="hidden md:block mt-3">
+          <Pagination
+            page={page}
+            totalPages={Math.max(1, Math.ceil(filteredUsers.length / pageSize))}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
 
       <div className="md:hidden space-y-3">
-        {users.slice((page - 1) * pageSize, page * pageSize).map((u) => (
+        {displayedUsers.map((u) => (
           <div
             key={u.id}
             className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
@@ -242,19 +268,21 @@ const AdminUsers = () => {
             </div>
           </div>
         ))}
-        {users.length === 0 && !loading && !error && (
+        {filteredUsers.length === 0 && !loading && !error && (
           <div className="text-center text-sm text-muted py-6 border border-dashed border-border rounded-md">
             Sin usuarios
           </div>
         )}
       </div>
-      <div className="md:hidden mt-2">
-        <Pagination
-          page={page}
-          totalPages={Math.max(1, Math.ceil(users.length / pageSize))}
-          onPageChange={setPage}
-        />
-      </div>
+      {!showingAllMatches && (
+        <div className="md:hidden mt-2">
+          <Pagination
+            page={page}
+            totalPages={Math.max(1, Math.ceil(filteredUsers.length / pageSize))}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
 
       <AdminEntityModal
         open={modalOpen}

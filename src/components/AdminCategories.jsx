@@ -225,7 +225,10 @@ const AdminCategories = () => {
       <div className="hidden md:block mt-3">
         <Pagination
           page={page}
-          totalPages={Math.max(1, Math.ceil(categories.length / pageSize))}
+          totalPages={Math.max(
+            1,
+            Math.ceil(filteredCategories.length / pageSize)
+          )}
           onPageChange={setPage}
         />
       </div>
