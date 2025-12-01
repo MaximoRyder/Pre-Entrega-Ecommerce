@@ -131,12 +131,6 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
                 onDelete={() => setShowConfirm(true)}
                 deleteLabel="Eliminar producto"
               />
-              <button
-                onClick={() => setShowConfirm(true)}
-                className="text-xs text-red-500 hover:text-red-600"
-              >
-                Quitar
-              </button>
             </div>
           ) : (
             <button

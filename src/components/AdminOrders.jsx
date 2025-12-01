@@ -812,9 +812,10 @@ const AdminOrders = () => {
                             return next;
                           });
                         }}
-                        className="text-sm text-red-500"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
+                        aria-label="Eliminar item"
                       >
-                        Eliminar
+                        <TrashIcon className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -825,14 +826,14 @@ const AdminOrders = () => {
                 <label className="text-xs font-medium text-sub">
                   Agregar producto
                 </label>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="mt-2">
                   <select
                     value={selectedProductId}
                     onChange={(e) => {
                       setSelectedProductId(e.target.value);
                       setSelectedProductQuantity(1);
                     }}
-                    className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm flex-1"
+                    className="w-full rounded-md border border-border bg-surface text-main px-3 py-2 text-sm"
                   >
                     <option value="">Seleccionar producto...</option>
                     {(() => {
@@ -863,8 +864,8 @@ const AdminOrders = () => {
                       ));
                     })()}
                   </select>
-                  <div className="flex items-center gap-2">
-                    {/* Quantity selector for the product to add */}
+
+                  <div className="mt-2 flex items-center gap-2">
                     <QuantitySelector
                       value={selectedProductQuantity}
                       onChange={(v) =>
@@ -887,65 +888,71 @@ const AdminOrders = () => {
                         );
                       })()}
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!selectedProductId) return;
-                        const prod = productsList.find(
-                          (p) => String(p.id) === String(selectedProductId)
-                        );
-                        if (!prod) return;
-                        const available = Number(
-                          prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
-                        );
-                        const addQty = Number(selectedProductQuantity) || 0;
-                        if (addQty <= 0) return;
-                        if (addQty > available) {
-                          toastCtx.showToast(
-                            `No hay suficiente stock. Disponible: ${available}`,
-                            2200,
-                            "error"
+
+                    <div className="ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!selectedProductId) return;
+                          const prod = productsList.find(
+                            (p) => String(p.id) === String(selectedProductId)
                           );
-                          return;
-                        }
-                        setEditDraft((prev) => {
-                          const next = JSON.parse(
-                            JSON.stringify(prev || { items: [] })
+                          if (!prod) return;
+                          const available = Number(
+                            prod.quantity ??
+                              prod.stock ??
+                              prod.rating?.count ??
+                              0
                           );
-                          next.items = next.items || [];
-                          const existingIdx = next.items.findIndex(
-                            (i) => String(i.id) === String(prod.id)
-                          );
-                          if (existingIdx !== -1) {
+                          const addQty = Number(selectedProductQuantity) || 0;
+                          if (addQty <= 0) return;
+                          if (addQty > available) {
                             toastCtx.showToast(
-                              "El producto ya está en el pedido. Modifica la cantidad existente.",
+                              `No hay suficiente stock. Disponible: ${available}`,
                               2200,
-                              "info"
+                              "error"
                             );
-                            return prev;
+                            return;
                           }
-                          next.items.push({
-                            id: prod.id,
-                            name: prod.title || prod.name,
-                            price: Number(prod.price) || 0,
-                            quantity: addQty,
+                          setEditDraft((prev) => {
+                            const next = JSON.parse(
+                              JSON.stringify(prev || { items: [] })
+                            );
+                            next.items = next.items || [];
+                            const existingIdx = next.items.findIndex(
+                              (i) => String(i.id) === String(prod.id)
+                            );
+                            if (existingIdx !== -1) {
+                              toastCtx.showToast(
+                                "El producto ya está en el pedido. Modifica la cantidad existente.",
+                                2200,
+                                "info"
+                              );
+                              return prev;
+                            }
+                            next.items.push({
+                              id: prod.id,
+                              name: prod.title || prod.name,
+                              price: Number(prod.price) || 0,
+                              quantity: addQty,
+                            });
+                            next.subtotal = (next.items || []).reduce(
+                              (s, it2) =>
+                                s +
+                                (Number(it2.price) || 0) *
+                                  (Number(it2.quantity) || 0),
+                              0
+                            );
+                            return next;
                           });
-                          next.subtotal = (next.items || []).reduce(
-                            (s, it2) =>
-                              s +
-                              (Number(it2.price) || 0) *
-                                (Number(it2.quantity) || 0),
-                            0
-                          );
-                          return next;
-                        });
-                        setSelectedProductId("");
-                        setSelectedProductQuantity(1);
-                      }}
-                      className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2"
-                    >
-                      Agregar
-                    </button>
+                          setSelectedProductId("");
+                          setSelectedProductQuantity(1);
+                        }}
+                        className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2"
+                      >
+                        Agregar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
