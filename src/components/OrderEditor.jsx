@@ -128,7 +128,6 @@ export default function OrderEditor({
     return () => (mounted = false);
   }, [creating]);
 
-  // Edit submit
   const handleEditSubmit = async () => {
     if (!editing || !editDraft) return;
     setSaving(true);
@@ -165,7 +164,6 @@ export default function OrderEditor({
       const prevItems = editing.items || [];
       const newItems = editDraft.items || [];
 
-      // Prevent saving an order without products
       if (!newItems || newItems.length === 0) {
         toastCtx.showToast(
           "No se puede guardar un pedido sin productos",
@@ -183,7 +181,6 @@ export default function OrderEditor({
         ])
       );
 
-      // Build product map for all affected ids, then run updates with limited concurrency
       const PRODUCTS_API =
         import.meta.env.VITE_PRODUCTS_API ||
         "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
@@ -281,7 +278,6 @@ export default function OrderEditor({
     }
   };
 
-  // Create submit
   const handleCreateSubmit = async () => {
     if (!createDraft) return;
     setCreateSaving(true);
@@ -328,7 +324,6 @@ export default function OrderEditor({
         return;
       }
 
-      // Prepare tasks to update product quantities concurrently, reusing fetched products
       const updateTasks = [];
       for (const it of createDraft.items) {
         const prod = (productsList || []).find(
@@ -425,7 +420,6 @@ export default function OrderEditor({
     }
   };
 
-  // Restore submit
   const handleRestoreSubmit = async () => {
     if (!restoreOrder) return;
     setRestoreProcessing(true);
@@ -441,7 +435,6 @@ export default function OrderEditor({
     }
 
     try {
-      // Fetch all products involved and run restores with concurrency
       const fetchTasks = items.map((it) => async () => {
         const url = `${PRODUCTS_API}/${it.id}`;
         const res = await fetch(url);
@@ -1155,7 +1148,6 @@ export default function OrderEditor({
         onClose={() => setToDelete(null)}
         onConfirm={() => {
           if (!toDelete) return;
-          // Prefill restore modal with quantities from the order and open it
           try {
             const items = toDelete.items || [];
             const qmap = {};
@@ -1164,7 +1156,6 @@ export default function OrderEditor({
             }
             setRestoreQuantities(qmap);
             setRestoreOrder(toDelete);
-            // close the simple confirm
             setToDelete(null);
           } catch (err) {
             console.error("Error preparando restauración:", err);

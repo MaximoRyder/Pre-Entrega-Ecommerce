@@ -90,7 +90,6 @@ export const AuthProvider = ({ children }) => {
       if (!user || !user.id) throw new Error("Usuario no autenticado");
       try {
         const url = `${USERS_API}/${user.id}`;
-        // Fetch current record, merge and PUT to avoid PATCH CORS/preflight issues
         const getRes = await fetch(url);
         if (!getRes.ok)
           throw new Error(`Error leyendo usuario: ${getRes.status}`);
@@ -134,11 +133,9 @@ export const AuthProvider = ({ children }) => {
         if (!res.ok)
           throw new Error(`Error consultando usuario: ${res.status}`);
         const record = await res.json();
-        // Simple check against stored password (mock API stores password in plain text)
         if (!record || record.password !== currentPassword) {
           return { ok: false, message: "Contraseña actual incorrecta" };
         }
-        // Merge and PUT updated record (avoid PATCH to prevent CORS preflight issues)
         const payload = { ...record, password: newPassword };
         const put = await fetch(url, {
           method: "PUT",

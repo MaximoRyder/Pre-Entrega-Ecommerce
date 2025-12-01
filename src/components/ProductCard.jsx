@@ -69,9 +69,23 @@ const ProductCard = ({ id, name, price, imageUrl, fullProduct }) => {
           <h3 className="text-sm font-semibold text-main line-clamp-2 min-h-[2.5rem]">
             {name}
           </h3>
-          <div className="text-xs text-primary-500 font-medium">
-            {product?.category}
-          </div>
+          {(() => {
+            const cat =
+              product?.category ||
+              fullProduct?.category ||
+              fullProduct?.categories ||
+              fullProduct?.category_name ||
+              fullProduct?.categoria ||
+              null;
+            if (!cat) return null;
+            return (
+              <div className="inline-block">
+                <span className="text-[11px] font-medium text-primary-500 bg-surface-hover border border-border px-2 py-0.5 rounded-md">
+                  {cat}
+                </span>
+              </div>
+            );
+          })()}
         </div>
         <div className="mt-auto space-y-2">
           <div className="flex items-baseline justify-between">
