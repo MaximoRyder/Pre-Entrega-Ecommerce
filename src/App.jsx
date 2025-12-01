@@ -15,6 +15,7 @@ import Profile from "./components/Profile";
 import Register from "./components/Register";
 import RequireAdmin from "./components/RequireAdmin";
 import RequireAuth from "./components/RequireAuth";
+import ThankYou from "./components/ThankYou";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { FilterProvider } from "./context/FilterProvider";
@@ -50,6 +51,7 @@ function App() {
                   <Route path="faq" element={<FAQ />} />
                   <Route path="product/:id" element={<ProductDetail />} />
                   <Route path="cart" element={<CartPage />} />
+                  <Route path="thank-you" element={<ThankYou />} />
                   <Route
                     path="profile"
                     element={

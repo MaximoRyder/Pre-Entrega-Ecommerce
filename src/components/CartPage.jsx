@@ -200,6 +200,7 @@ const CartPage = () => {
       return;
     }
 
+    let shouldNavigate = false;
     try {
       const res = await fetch(API, {
         method: "POST",
@@ -222,6 +223,7 @@ const CartPage = () => {
       await res.json();
       showToast("Pedido creado correctamente", 3000, "success");
       clearCart();
+      shouldNavigate = true;
     } catch (err) {
       console.error(err);
       try {
@@ -238,6 +240,7 @@ const CartPage = () => {
         localStorage.setItem("local_orders", JSON.stringify(existing));
         clearCart();
         showToast("Pedido guardado localmente (fallback)", 3500, "info");
+        shouldNavigate = true;
       } catch (e) {
         console.error("No se pudo guardar pedido localmente", e);
         showToast(
@@ -249,6 +252,7 @@ const CartPage = () => {
     } finally {
       setFinalizeProcessing(false);
       setFinalizeConfirm(false);
+      if (shouldNavigate) navigate("/thank-you");
     }
   };
 
