@@ -5,7 +5,7 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { ToastContext } from "../context/ToastContext";
 import { formatCurrency, formatOrderDate } from "../utils/format";
 import OrderEditor from "./OrderEditor";
@@ -186,11 +186,8 @@ const AdminOrders = () => {
                       0
                     );
                     return (
-                      <>
-                        <tr
-                          key={o.id}
-                          className="align-top border-b border-border"
-                        >
+                      <Fragment key={o.id}>
+                        <tr className="align-top border-b border-border">
                           <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-[11px] sm:text-sm font-medium">
                             #{o.id}
                           </td>
@@ -271,7 +268,7 @@ const AdminOrders = () => {
                           </td>
                         </tr>
                         {expanded[o.id] && o.items && o.items.length > 0 && (
-                          <tr className="">
+                          <tr key={`${o.id}-items`} className="">
                             <td colSpan={7} className="px-0 py-0">
                               <ul className="space-y-0 text-sm divide-y divide-border">
                                 {o.items.map((it, idx) => (
@@ -300,7 +297,7 @@ const AdminOrders = () => {
                             </td>
                           </tr>
                         )}
-                      </>
+                      </Fragment>
                     );
                   })}
               </tbody>

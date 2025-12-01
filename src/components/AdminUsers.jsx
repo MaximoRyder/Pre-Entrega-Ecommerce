@@ -4,8 +4,14 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import {
+  validateEmail,
+  validateName,
+  validatePassword,
+} from "../utils/validators";
 import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
+import FormField from "./FormField";
 import Pagination from "./Pagination";
 import SearchForm from "./SearchForm";
 
@@ -24,6 +30,7 @@ const AdminUsers = () => {
   const [form, setForm] = useState(emptyUser);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [errors, setErrors] = useState({});
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const pageSize = 10;
@@ -75,8 +82,33 @@ const AdminUsers = () => {
     setModalOpen(true);
   };
 
+  const validate = () => {
+    const newErrors = {};
+    const nameError = validateName(form.name, 5, 100);
+    if (nameError) newErrors.name = nameError;
+
+    const emailError = validateEmail(form.email, 5, 100);
+    if (emailError) newErrors.email = emailError;
+
+    if (!editing) {
+      const passwordError = validatePassword(form.password, 4, 20);
+      if (passwordError) newErrors.password = passwordError;
+    } else if (form.password && form.password.trim() !== "") {
+      const passwordError = validatePassword(form.password, 4, 20);
+      if (passwordError) newErrors.password = passwordError;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
   const save = async () => {
     if (!API) return;
+    if (!validate()) return;
     setSaving(true);
     try {
       const body = {
@@ -84,7 +116,9 @@ const AdminUsers = () => {
         email: form.email.trim(),
         role: form.role,
       };
-      if (!editing) body.password = form.password.trim();
+      if (form.password && form.password.trim() !== "") {
+        body.password = form.password.trim();
+      }
       let res;
       if (editing) {
         res = await fetch(`${API}/${editing.id}`, {
@@ -293,34 +327,41 @@ const AdminUsers = () => {
         loading={saving}
       >
         <div className="grid gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Nombre
-            </label>
+          <FormField label="Nombre" htmlFor="admin-name" error={errors.name}>
             <input
+              id="admin-name"
+              type="text"
               value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                if (errors.name) setErrors({ ...errors, name: null });
+              }}
               required
-              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className={`rounded-md border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                errors.name ? "border-red-500" : "border-border"
+              }`}
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Email
-            </label>
+          </FormField>
+
+          <FormField label="Email" htmlFor="admin-email" error={errors.email}>
             <input
+              id="admin-email"
               type="email"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, email: e.target.value });
+                if (errors.email) setErrors({ ...errors, email: null });
+              }}
               required
-              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className={`rounded-md border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                errors.email ? "border-red-500" : "border-border"
+              }`}
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-sub uppercase">
-              Rol
-            </label>
+          </FormField>
+
+          <FormField label="Rol" htmlFor="admin-role">
             <select
+              id="admin-role"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
               className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -328,21 +369,32 @@ const AdminUsers = () => {
               <option value="user">Usuario</option>
               <option value="admin">Admin</option>
             </select>
-          </div>
-          {!editing && (
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-sub uppercase">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                required
-                className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-          )}
+          </FormField>
+
+          <FormField
+            label="Contraseña"
+            htmlFor="admin-password"
+            error={errors.password}
+          >
+            <input
+              id="admin-password"
+              type="password"
+              value={form.password}
+              onChange={(e) => {
+                setForm({ ...form, password: e.target.value });
+                if (errors.password) setErrors({ ...errors, password: null });
+              }}
+              required={!editing}
+              placeholder={
+                editing
+                  ? "(Opcional, dejar en blanco para no cambiar)"
+                  : undefined
+              }
+              className={`rounded-md border bg-surface px-3 py-2 text-sm text-main placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                errors.password ? "border-red-500" : "border-border"
+              }`}
+            />
+          </FormField>
         </div>
       </AdminEntityModal>
 
