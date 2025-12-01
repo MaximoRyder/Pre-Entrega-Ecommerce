@@ -8,5 +8,5 @@ import { defineConfig } from 'vite'
 // }
 export default defineConfig({
   plugins: [react()],
-  base: '/Pre-Entrega-Ecommerce/',
+  base: '/Entrega-Ecommerce',
 })

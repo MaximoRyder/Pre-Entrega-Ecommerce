@@ -1,13 +1,15 @@
-# Pre-Entrega-Ecommerce
+# Entrega-Ecommerce
 
-Repositorio: https://github.com/MaximoRyder/Pre-Entrega-Ecommerce
+Repositorio: https://github.com/MaximoRyder/Entrega-Ecommerce
 
 Última actualización: 2025-10-23
 
 ## Descripción
-Pre-Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) creada con React y Vite. Implementa el listado de productos, la interacción con un carrito de compras y rutas de navegación (react-router-dom). El proyecto contiene estilos CSS y la lógica en JavaScript/React.
+
+Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) creada con React y Vite. Implementa el listado de productos, la interacción con un carrito de compras y rutas de navegación (react-router-dom). El proyecto contiene estilos CSS y la lógica en JavaScript/React.
 
 ## Tecnologías principales
+
 - React ^19.1.1
 - React DOM ^19.1.1
 - React Router DOM ^6.14.1
@@ -18,6 +20,7 @@ Pre-Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) c
 (Estas dependencias están definidas en package.json del proyecto.)
 
 ## Características
+
 - Listado y visualización de productos.
 - Añadir / quitar productos del carrito.
 - Persistencia local del carrito con localStorage.
@@ -25,18 +28,22 @@ Pre-Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) c
 - Desarrollo con Vite.
 
 ## Requisitos
+
 - Node.js (>= 16 recomendado)
 - pnpm
 - Navegador moderno
 
 ## Instalación y ejecución (desarrollo)
+
 1. Clona el repositorio:
+
    ```bash
-   git clone https://github.com/MaximoRyder/Pre-Entrega-Ecommerce.git
-   cd Pre-Entrega-Ecommerce
+   git clone https://github.com/MaximoRyder/Entrega-Ecommerce.git
+   cd Entrega-Ecommerce
    ```
 
 2. Instala dependencias:
+
    ```bash
    npm install
    pnpm install
@@ -49,16 +56,17 @@ Pre-Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) c
    Abre la URL que muestre Vite (por defecto http://localhost:5173).
 
 ## Scripts disponibles
+
 - pnpm run dev — Inicia Vite en modo desarrollo.
 
 ## Estructura típica del proyecto
+
 (Esta estructura puede variar según la carpeta real)
 
- 
 - /src
   - /components
   - /context
-  - /styles  
+  - /styles
   - main.jsx
   - App.jsx
 - index.html
@@ -67,9 +75,11 @@ Pre-Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) c
 - README.md
 
 ## Notas y recomendaciones
+
 - El proyecto está configurado para React + Vite (ver package.json y @vitejs/plugin-react).
 - Si hay problemas con importaciones relativas o módulos ES al abrir archivos directamente desde el sistema de ficheros, usar el servidor de desarrollo (pnpm run dev).
 
 ## Contacto
+
 - Autor / Mantenedor: MaximoRyder
-- Repo: https://github.com/MaximoRyder/Pre-Entrega-Ecommerce
+- Repo: https://github.com/MaximoRyder/Entrega-Ecommerce
