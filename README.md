@@ -6,7 +6,7 @@ Repositorio: https://github.com/MaximoRyder/Entrega-Ecommerce
 
 ## Descripción
 
-Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) creada con React y Vite. Implementa el listado de productos, la interacción con un carrito de compras y rutas de navegación (react-router-dom). El proyecto contiene estilos CSS y la lógica en JavaScript/React.
+Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) creada con React y Vite. Implementa el listado de productos, la interacción con un carrito de compras y rutas de navegación (react-router-dom). El proyecto contiene estilos hechos con Tailwind y la lógica en JavaScript/React.
 
 ## Tecnologías principales
 
@@ -53,15 +53,13 @@ Entrega-Ecommerce es una aplicación frontend de tienda online (ecommerce) cread
    ```bash
    pnpm run dev
    ```
-   Abre la URL que muestre Vite (por defecto http://localhost:5173).
+   Abre la URL que muestre Vite (por defecto http://localhost:5173/Entrega-Ecommerce).
 
 ## Scripts disponibles
 
 - pnpm run dev — Inicia Vite en modo desarrollo.
 
 ## Estructura típica del proyecto
-
-(Esta estructura puede variar según la carpeta real)
 
 - /src
   - /components
