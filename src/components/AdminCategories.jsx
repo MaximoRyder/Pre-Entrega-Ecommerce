@@ -143,7 +143,7 @@ const AdminCategories = () => {
         <h3 className="text-xl font-semibold tracking-tight">Categorías</h3>
         <button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
         >
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
@@ -160,7 +160,7 @@ const AdminCategories = () => {
       <div className="md:hidden flex justify-end">
         <button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
         >
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
