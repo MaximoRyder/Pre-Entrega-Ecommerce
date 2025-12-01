@@ -31,7 +31,7 @@ export const ToastProvider = ({ children }) => {
       {toast.visible && (
         <div
           className={[
-            "fixed bottom-6 left-1/2 -translate-x-1/2 z-50",
+            "fixed bottom-6 left-1/2 -translate-x-1/2",
             "w-[min(90vw,560px)]",
             "px-5 py-3 rounded-lg shadow-lg text-sm sm:text-base font-medium",
             "backdrop-blur-sm border flex items-start gap-3",
@@ -45,6 +45,7 @@ export const ToastProvider = ({ children }) => {
           ]
             .filter(Boolean)
             .join(" ")}
+          style={{ zIndex: 999 }}
           role="status"
           aria-live="polite"
         >
