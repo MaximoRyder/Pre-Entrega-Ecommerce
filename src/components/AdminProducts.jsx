@@ -227,10 +227,17 @@ const AdminProducts = () => {
         placeholder="Buscar por título..."
       />
 
-      {/* Mensaje de endpoint por defecto removido a pedido del usuario */}
+      <div className="md:hidden flex justify-end">
+        <button
+          onClick={openNew}
+          className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+        >
+          <PlusIcon className="w-5 h-5" /> Agregar
+        </button>
+      </div>
+
       {loading && <p className="text-sm text-muted">Cargando...</p>}
       {error && <p className="text-sm text-red-500">{error}</p>}
-      {/* Vista tabla (desktop) */}
       <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm hidden md:block">
         <table className="w-full text-xs sm:text-sm min-w-[520px]">
           <thead>
@@ -318,7 +325,6 @@ const AdminProducts = () => {
         />
       </div>
 
-      {/* Vista móvil tipo tarjeta/lista */}
       <div className="md:hidden space-y-3">
         {filteredProducts
           .slice((page - 1) * pageSize, page * pageSize)

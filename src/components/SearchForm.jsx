@@ -21,7 +21,7 @@ const SearchForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`flex flex-col sm:flex-row gap-3 ${className}`}
+      className={`flex flex-row gap-3 ${className}`}
     >
       <input
         type="text"
@@ -33,7 +33,7 @@ const SearchForm = ({
       />
       <button
         type="submit"
-        className="inline-flex items-center justify-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+        className="inline-flex items-center justify-center rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2 sm:px-4 sm:py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
       >
         <MagnifyingGlassIcon className="w-5 h-5" />
         Buscar
