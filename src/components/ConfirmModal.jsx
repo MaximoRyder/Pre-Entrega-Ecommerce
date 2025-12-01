@@ -1,3 +1,4 @@
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -9,6 +10,8 @@ const ConfirmModal = ({
   message = "¿Deseas eliminar este producto de tu carrito? Esta acción no se puede deshacer.",
   cancelText = "Cancelar",
   confirmText = "Eliminar",
+  confirmDisabled = false,
+  confirmLoading = false,
 }) => {
   useEffect(() => {
     if (!open) return;
@@ -48,9 +51,22 @@ const ConfirmModal = ({
           <button
             type="button"
             onClick={() => onConfirm && onConfirm()}
-            className="inline-flex items-center justify-center rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/50"
+            disabled={confirmDisabled || confirmLoading}
+            className={
+              "inline-flex items-center justify-center rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 transition-colors focus:outline-none focus-visible:ring focus-visible:ring-red-500/50 " +
+              (confirmDisabled || confirmLoading
+                ? "opacity-60 cursor-not-allowed"
+                : "")
+            }
           >
-            {confirmText}
+            {confirmLoading ? (
+              <span className="inline-flex items-center gap-2">
+                <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                <span>Procesando...</span>
+              </span>
+            ) : (
+              confirmText
+            )}
           </button>
         </div>
       </div>

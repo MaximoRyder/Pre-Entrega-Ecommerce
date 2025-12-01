@@ -18,6 +18,8 @@ const CartPage = () => {
   const [toDelete, setToDelete] = useState(null);
   const [loginPrompt, setLoginPrompt] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [finalizeConfirm, setFinalizeConfirm] = useState(false);
+  const [finalizeProcessing, setFinalizeProcessing] = useState(false);
   const [productStocks, setProductStocks] = useState({});
 
   const PRODUCTS_API =
@@ -87,7 +89,7 @@ const CartPage = () => {
     };
   }, [cart, PRODUCTS_API]);
 
-  const handleFinalize = async () => {
+  const handleFinalize = () => {
     if (cart.length === 0) {
       showToast("No hay productos en el carrito", 1800, "info");
       return;
@@ -96,7 +98,11 @@ const CartPage = () => {
       setLoginPrompt(true);
       return;
     }
+    setFinalizeConfirm(true);
+  };
 
+  const confirmFinalize = async () => {
+    setFinalizeProcessing(true);
     const API =
       import.meta.env.VITE_ORDERS_API ||
       "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/orders";
@@ -130,6 +136,7 @@ const CartPage = () => {
           )
           .join(", ");
         showToast(`Stock insuficiente: ${names}`, 5000, "error");
+        setFinalizeProcessing(false);
         return;
       }
     } catch (err) {
@@ -139,6 +146,7 @@ const CartPage = () => {
         3000,
         "error"
       );
+      setFinalizeProcessing(false);
       return;
     }
 
@@ -188,6 +196,7 @@ const CartPage = () => {
         4500,
         "error"
       );
+      setFinalizeProcessing(false);
       return;
     }
 
@@ -237,6 +246,9 @@ const CartPage = () => {
           "error"
         );
       }
+    } finally {
+      setFinalizeProcessing(false);
+      setFinalizeConfirm(false);
     }
   };
 
@@ -389,6 +401,17 @@ const CartPage = () => {
         message="Si vacías el carrito se eliminarán todos los productos seleccionados. Esta acción no se puede deshacer."
         cancelText="Cancelar"
         confirmText="Vaciar"
+      />
+      <ConfirmModal
+        open={finalizeConfirm}
+        onClose={() => setFinalizeConfirm(false)}
+        onConfirm={confirmFinalize}
+        title="Confirmar orden de compra"
+        message="¿Deseas confirmar la creación de la orden y reservar el stock disponible? Al confirmar se procederá a crear la orden y actualizar los stocks."
+        cancelText="Cancelar"
+        confirmText="Confirmar pedido"
+        confirmDisabled={finalizeProcessing}
+        confirmLoading={finalizeProcessing}
       />
     </div>
   );
