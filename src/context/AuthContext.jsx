@@ -85,11 +85,90 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
+  const updateProfile = useCallback(
+    async (data = {}) => {
+      if (!user || !user.id) throw new Error("Usuario no autenticado");
+      try {
+        const url = `${USERS_API}/${user.id}`;
+        // Fetch current record, merge and PUT to avoid PATCH CORS/preflight issues
+        const getRes = await fetch(url);
+        if (!getRes.ok)
+          throw new Error(`Error leyendo usuario: ${getRes.status}`);
+        const current = await getRes.json();
+        const payload = { ...current, ...data };
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!putRes.ok)
+          throw new Error(`Error actualizando perfil: ${putRes.status}`);
+        const updated = await putRes.json();
+        const saved = {
+          id: updated.id,
+          email: updated.email,
+          role: updated.role || user.role || "user",
+          name: updated.name,
+        };
+        try {
+          localStorage.setItem("authUser", JSON.stringify(saved));
+        } catch (e) {
+          console.error("Error guardando sesión local:", e);
+        }
+        setUser(saved);
+        return saved;
+      } catch (e) {
+        console.error("Error actualizando perfil:", e);
+        throw e;
+      }
+    },
+    [user]
+  );
+
+  const changePassword = useCallback(
+    async (currentPassword, newPassword) => {
+      if (!user || !user.id) throw new Error("Usuario no autenticado");
+      try {
+        const url = `${USERS_API}/${user.id}`;
+        const res = await fetch(url);
+        if (!res.ok)
+          throw new Error(`Error consultando usuario: ${res.status}`);
+        const record = await res.json();
+        // Simple check against stored password (mock API stores password in plain text)
+        if (!record || record.password !== currentPassword) {
+          return { ok: false, message: "Contraseña actual incorrecta" };
+        }
+        // Merge and PUT updated record (avoid PATCH to prevent CORS preflight issues)
+        const payload = { ...record, password: newPassword };
+        const put = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!put.ok)
+          throw new Error(`Error actualizando contraseña: ${put.status}`);
+        return { ok: true };
+      } catch (e) {
+        console.error("Error cambiando contraseña:", e);
+        throw e;
+      }
+    },
+    [user]
+  );
+
   const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register }}
+      value={{
+        user,
+        isAuthenticated,
+        login,
+        logout,
+        register,
+        updateProfile,
+        changePassword,
+      }}
     >
       {children}
     </AuthContext.Provider>
