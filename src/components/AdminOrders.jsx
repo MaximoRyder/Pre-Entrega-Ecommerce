@@ -27,6 +27,8 @@ const AdminOrders = () => {
   const [editing, setEditing] = useState(null);
   const [editDraft, setEditDraft] = useState(null);
   const [productsList, setProductsList] = useState([]);
+  const [usersList, setUsersList] = useState([]);
+  const [userEmailError, setUserEmailError] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedProductQuantity, setSelectedProductQuantity] = useState(1);
   const toastCtx = useContext(ToastContext);
@@ -184,6 +186,19 @@ const AdminOrders = () => {
         if (!res.ok) throw new Error("No se pudieron cargar productos");
         const prods = await res.json();
         if (mounted) setProductsList(prods || []);
+
+        const USERS_API =
+          import.meta.env.VITE_USERS_API ||
+          "https://6928f88e9d311cddf347cd7f.mockapi.io/api/v1/users";
+        try {
+          const ures = await fetch(USERS_API);
+          if (!ures.ok) throw new Error("No se pudieron cargar usuarios");
+          const us = await ures.json();
+          if (mounted) setUsersList(Array.isArray(us) ? us : []);
+        } catch (ue) {
+          console.warn("No se cargaron users para el editor de pedidos", ue);
+          if (mounted) setUsersList([]);
+        }
       } catch (e) {
         console.warn("No se cargaron products para el editor de pedidos", e);
         if (mounted) setProductsList([]);
@@ -546,7 +561,38 @@ const AdminOrders = () => {
         onSubmit={async () => {
           if (!editing || !editDraft) return;
           setSaving(true);
+          let saved = false;
           try {
+            const email = (editDraft.userEmail || "").trim();
+            if (!email) {
+              setUserEmailError("El usuario no puede quedar vacío");
+              setSaving(false);
+              return;
+            }
+            if (!usersList || usersList.length === 0) {
+              try {
+                const USERS_API =
+                  import.meta.env.VITE_USERS_API ||
+                  "https://6928f88e9d311cddf347cd7f.mockapi.io/api/v1/users";
+                const ures = await fetch(USERS_API);
+                if (ures.ok) {
+                  const us = await ures.json();
+                  setUsersList(Array.isArray(us) ? us : []);
+                }
+              } catch (e) {
+                console.warn("No se pudo validar usuario:", e);
+              }
+            }
+            const found = (usersList || []).some(
+              (u) => String(u.email || "").toLowerCase() === email.toLowerCase()
+            );
+            if (!found) {
+              setUserEmailError(
+                "El email no corresponde a un usuario registrado"
+              );
+              setSaving(false);
+              return;
+            }
             const PRODUCTS_API =
               import.meta.env.VITE_PRODUCTS_API ||
               "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
@@ -581,7 +627,12 @@ const AdminOrders = () => {
               await updateQuantityWithRetry(url, newCount);
             }
 
-            const payload = { ...editing, items: newItems };
+            const payload = {
+              ...editing,
+              ...editDraft,
+              items: newItems,
+              status: statusForm,
+            };
             payload.subtotal = (payload.items || []).reduce(
               (s, it) =>
                 s + (Number(it.price) || 0) * (Number(it.quantity) || 0),
@@ -612,6 +663,7 @@ const AdminOrders = () => {
               await refresh();
             }
 
+            saved = true;
             toastCtx.showToast("Pedido actualizado", 1500, "success");
           } catch (err) {
             console.error("Error actualizando pedido:", err);
@@ -622,8 +674,10 @@ const AdminOrders = () => {
             );
           } finally {
             setSaving(false);
-            setEditing(null);
-            setEditDraft(null);
+            if (saved) {
+              setEditing(null);
+              setEditDraft(null);
+            }
           }
         }}
         submitLabel="Guardar cambios"
@@ -650,9 +704,28 @@ const AdminOrders = () => {
           {editDraft && (
             <div className="space-y-3">
               <div className="text-xs text-sub space-y-1">
-                <p>
-                  <strong>Usuario:</strong> {editDraft.userEmail || "-"}
-                </p>
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-sub">
+                    Usuario (email)
+                  </label>
+                  <input
+                    type="text"
+                    value={editDraft.userEmail || ""}
+                    onChange={(e) => {
+                      setEditDraft((prev) => ({
+                        ...prev,
+                        userEmail: e.target.value,
+                      }));
+                      setUserEmailError("");
+                    }}
+                    className="mt-1 rounded-md border border-border bg-surface text-main px-3 py-2 text-sm"
+                  />
+                  {userEmailError && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {userEmailError}
+                    </p>
+                  )}
+                </div>
                 <p>
                   <strong>Subtotal:</strong>{" "}
                   {formatCurrency(editDraft.subtotal || 0)}
@@ -764,10 +837,15 @@ const AdminOrders = () => {
                     <option value="">Seleccionar producto...</option>
                     {(() => {
                       const availableProducts = (productsList || []).filter(
-                        (p) =>
-                          !(editDraft?.items || []).some(
+                        (p) => {
+                          const alreadyInDraft = (editDraft?.items || []).some(
                             (it) => String(it.id) === String(p.id)
-                          )
+                          );
+                          const available = Number(
+                            p.quantity ?? p.stock ?? p.rating?.count ?? 0
+                          );
+                          return !alreadyInDraft && available > 0;
+                        }
                       );
                       if (availableProducts.length === 0) {
                         return (
