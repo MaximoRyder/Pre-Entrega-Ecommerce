@@ -254,7 +254,8 @@ const AdminOrders = () => {
           )}
           <button
             onClick={refresh}
-            className="inline-flex items-center gap-2 rounded-md border border-gray-300 hover:bg-gray-100 text-gray-700 text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
+            title="Refrescar"
+            className="inline-flex items-center gap-2 rounded-md border border-border hover:bg-surface-hover bg-surface text-main text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-primary-500/40"
           >
             <ArrowPathIcon className="w-5 h-5" /> Refrescar
           </button>
