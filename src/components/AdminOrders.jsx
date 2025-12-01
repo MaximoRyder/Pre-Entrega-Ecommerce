@@ -25,6 +25,10 @@ const AdminOrders = () => {
   const [restoreOrder, setRestoreOrder] = useState(null);
   const [restoreQuantities, setRestoreQuantities] = useState({});
   const [editing, setEditing] = useState(null);
+  const [editDraft, setEditDraft] = useState(null);
+  const [productsList, setProductsList] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedProductQuantity, setSelectedProductQuantity] = useState(1);
   const toastCtx = useContext(ToastContext);
   const [statusForm, setStatusForm] = useState("Pending");
   const [saving, setSaving] = useState(false);
@@ -136,10 +140,6 @@ const AdminOrders = () => {
       }
       if (allOk) {
         localStorage.removeItem("local_orders");
-      } else {
-        setError(
-          "Algunos stocks no se pudieron actualizar. Reintenta sincronizar desde Admin."
-        );
       }
       await refresh();
     } catch (err) {
@@ -164,36 +164,34 @@ const AdminOrders = () => {
     }
   };
 
-  const updateStatus = async (id, status) => {
-    try {
-      if (String(id).startsWith("local-")) {
-        const local = JSON.parse(localStorage.getItem("local_orders") || "[]");
-        const idx = local.findIndex((o) => o.id === id);
-        if (idx !== -1) {
-          local[idx].status = status;
-          localStorage.setItem("local_orders", JSON.stringify(local));
-          setOrders((prev) =>
-            prev.map((o) => (o.id === id ? { ...o, status } : o))
-          );
-          return;
-        }
+  useEffect(() => {
+    let mounted = true;
+    async function prepare() {
+      if (!editing) {
+        setEditDraft(null);
+        setProductsList([]);
+        setSelectedProductId("");
+        return;
       }
-      const getRes = await fetch(`${API}/${id}`);
-      if (!getRes.ok) throw new Error("Error leyendo pedido para actualizar");
-      const current = await getRes.json();
-      const payload = { ...current, status };
-      const putRes = await fetch(`${API}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!putRes.ok) throw new Error("Error al actualizar");
-      await refresh();
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Error desconocido");
+      const draft = JSON.parse(JSON.stringify(editing));
+      if (mounted) setEditDraft(draft);
+
+      try {
+        const PRODUCTS_API =
+          import.meta.env.VITE_PRODUCTS_API ||
+          "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+        const res = await fetch(PRODUCTS_API);
+        if (!res.ok) throw new Error("No se pudieron cargar productos");
+        const prods = await res.json();
+        if (mounted) setProductsList(prods || []);
+      } catch (e) {
+        console.warn("No se cargaron products para el editor de pedidos", e);
+        if (mounted) setProductsList([]);
+      }
     }
-  };
+    prepare();
+    return () => (mounted = false);
+  }, [editing]);
 
   const deleteOrder = async (id) => {
     try {
@@ -541,13 +539,92 @@ const AdminOrders = () => {
       <AdminEntityModal
         open={!!editing}
         title={editing ? `Editar pedido #${editing.id}` : ""}
-        onClose={() => setEditing(null)}
-        onSubmit={async () => {
-          if (!editing) return;
-          setSaving(true);
-          await updateStatus(editing.id, statusForm);
-          setSaving(false);
+        onClose={() => {
           setEditing(null);
+          setEditDraft(null);
+        }}
+        onSubmit={async () => {
+          if (!editing || !editDraft) return;
+          setSaving(true);
+          try {
+            const PRODUCTS_API =
+              import.meta.env.VITE_PRODUCTS_API ||
+              "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+
+            const prevItems = editing.items || [];
+            const newItems = editDraft.items || [];
+
+            const ids = Array.from(
+              new Set([
+                ...prevItems.map((i) => String(i.id)),
+                ...newItems.map((i) => String(i.id)),
+              ])
+            );
+
+            for (const id of ids) {
+              const prevQty = prevItems
+                .filter((i) => String(i.id) === id)
+                .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+              const newQty = newItems
+                .filter((i) => String(i.id) === id)
+                .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+              const delta = prevQty - newQty;
+              if (delta === 0) continue;
+              const url = `${PRODUCTS_API}/${id}`;
+              const getRes = await fetch(url);
+              if (!getRes.ok) throw new Error(`Error leyendo producto ${id}`);
+              const prod = await getRes.json();
+              const available = Number(
+                prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
+              );
+              const newCount = Math.max(0, available + Number(delta));
+              await updateQuantityWithRetry(url, newCount);
+            }
+
+            const payload = { ...editing, items: newItems };
+            payload.subtotal = (payload.items || []).reduce(
+              (s, it) =>
+                s + (Number(it.price) || 0) * (Number(it.quantity) || 0),
+              0
+            );
+
+            if (String(editing.id).startsWith("local-")) {
+              const local = JSON.parse(
+                localStorage.getItem("local_orders") || "[]"
+              );
+              const idx = local.findIndex((o) => o.id === editing.id);
+              if (idx !== -1) {
+                local[idx] = { ...local[idx], ...payload };
+                localStorage.setItem("local_orders", JSON.stringify(local));
+                setOrders((prev) =>
+                  prev.map((o) =>
+                    o.id === editing.id ? { ...o, ...payload } : o
+                  )
+                );
+              }
+            } else {
+              const putRes = await fetch(`${API}/${editing.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              if (!putRes.ok) throw new Error("Error al guardar pedido");
+              await refresh();
+            }
+
+            toastCtx.showToast("Pedido actualizado", 1500, "success");
+          } catch (err) {
+            console.error("Error actualizando pedido:", err);
+            toastCtx.showToast(
+              err.message || "Error actualizando pedido",
+              2200,
+              "error"
+            );
+          } finally {
+            setSaving(false);
+            setEditing(null);
+            setEditDraft(null);
+          }
         }}
         submitLabel="Guardar cambios"
         loading={saving}
@@ -569,17 +646,231 @@ const AdminOrders = () => {
               ))}
             </select>
           </div>
-          {editing && (
-            <div className="text-xs text-sub space-y-1">
-              <p>
-                <strong>Usuario:</strong> {editing.userEmail || "-"}
-              </p>
-              <p>
-                <strong>Subtotal:</strong> {formatCurrency(editing.subtotal)}
-              </p>
-              <p>
-                <strong>Items:</strong> {editing.items?.length || 0}
-              </p>
+
+          {editDraft && (
+            <div className="space-y-3">
+              <div className="text-xs text-sub space-y-1">
+                <p>
+                  <strong>Usuario:</strong> {editDraft.userEmail || "-"}
+                </p>
+                <p>
+                  <strong>Subtotal:</strong>{" "}
+                  {formatCurrency(editDraft.subtotal || 0)}
+                </p>
+                <p>
+                  <strong>Items:</strong> {(editDraft.items || []).length || 0}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {(editDraft.items || []).map((it, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between gap-3 border border-border rounded-md p-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate font-medium" title={it.name}>
+                        {it.name}
+                      </div>
+                      <div className="text-xs text-sub">
+                        Precio unitario: {formatCurrency(it.price)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <QuantitySelector
+                        value={Number(it.quantity) || 0}
+                        onChange={(v) => {
+                          setEditDraft((prev) => {
+                            const next = JSON.parse(JSON.stringify(prev));
+                            next.items[idx].quantity = v;
+                            next.subtotal = (next.items || []).reduce(
+                              (s, it2) =>
+                                s +
+                                (Number(it2.price) || 0) *
+                                  (Number(it2.quantity) || 0),
+                              0
+                            );
+                            return next;
+                          });
+                        }}
+                        min={0}
+                        max={(() => {
+                          try {
+                            const prod = productsList.find(
+                              (p) => String(p.id) === String(it.id)
+                            );
+                            const available = Number(
+                              prod?.quantity ??
+                                prod?.stock ??
+                                prod?.rating?.count ??
+                                0
+                            );
+                            const prevQty = (editing?.items || [])
+                              .filter((x) => String(x.id) === String(it.id))
+                              .reduce(
+                                (s, it2) => s + (Number(it2.quantity) || 0),
+                                0
+                              );
+                            const allowed = Math.max(
+                              0,
+                              available + Number(prevQty || 0)
+                            );
+                            return Math.max(allowed, Number(prevQty || 0));
+                          } catch {
+                            return 99999;
+                          }
+                        })()}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditDraft((prev) => {
+                            const next = JSON.parse(JSON.stringify(prev));
+                            next.items = (next.items || []).filter(
+                              (_, i) => i !== idx
+                            );
+                            next.subtotal = (next.items || []).reduce(
+                              (s, it2) =>
+                                s +
+                                (Number(it2.price) || 0) *
+                                  (Number(it2.quantity) || 0),
+                              0
+                            );
+                            return next;
+                          });
+                        }}
+                        className="text-sm text-red-500"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <label className="text-xs font-medium text-sub">
+                  Agregar producto
+                </label>
+                <div className="flex items-center gap-2 mt-2">
+                  <select
+                    value={selectedProductId}
+                    onChange={(e) => {
+                      setSelectedProductId(e.target.value);
+                      setSelectedProductQuantity(1);
+                    }}
+                    className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm flex-1"
+                  >
+                    <option value="">Seleccionar producto...</option>
+                    {(() => {
+                      const availableProducts = (productsList || []).filter(
+                        (p) =>
+                          !(editDraft?.items || []).some(
+                            (it) => String(it.id) === String(p.id)
+                          )
+                      );
+                      if (availableProducts.length === 0) {
+                        return (
+                          <option value="" disabled>
+                            No hay productos disponibles
+                          </option>
+                        );
+                      }
+                      return availableProducts.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {(p.title || p.name) +
+                            " - " +
+                            formatCurrency(Number(p.price) || 0)}
+                        </option>
+                      ));
+                    })()}
+                  </select>
+                  <div className="flex items-center gap-2">
+                    {/* Quantity selector for the product to add */}
+                    <QuantitySelector
+                      value={selectedProductQuantity}
+                      onChange={(v) =>
+                        setSelectedProductQuantity(Number(v) || 0)
+                      }
+                      min={1}
+                      max={(() => {
+                        const prod = productsList.find(
+                          (p) => String(p.id) === String(selectedProductId)
+                        );
+                        if (!prod) return 1;
+                        return Math.max(
+                          0,
+                          Number(
+                            prod.quantity ??
+                              prod.stock ??
+                              prod.rating?.count ??
+                              0
+                          )
+                        );
+                      })()}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!selectedProductId) return;
+                        const prod = productsList.find(
+                          (p) => String(p.id) === String(selectedProductId)
+                        );
+                        if (!prod) return;
+                        const available = Number(
+                          prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
+                        );
+                        const addQty = Number(selectedProductQuantity) || 0;
+                        if (addQty <= 0) return;
+                        if (addQty > available) {
+                          toastCtx.showToast(
+                            `No hay suficiente stock. Disponible: ${available}`,
+                            2200,
+                            "error"
+                          );
+                          return;
+                        }
+                        setEditDraft((prev) => {
+                          const next = JSON.parse(
+                            JSON.stringify(prev || { items: [] })
+                          );
+                          next.items = next.items || [];
+                          const existingIdx = next.items.findIndex(
+                            (i) => String(i.id) === String(prod.id)
+                          );
+                          if (existingIdx !== -1) {
+                            toastCtx.showToast(
+                              "El producto ya está en el pedido. Modifica la cantidad existente.",
+                              2200,
+                              "info"
+                            );
+                            return prev;
+                          }
+                          next.items.push({
+                            id: prod.id,
+                            name: prod.title || prod.name,
+                            price: Number(prod.price) || 0,
+                            quantity: addQty,
+                          });
+                          next.subtotal = (next.items || []).reduce(
+                            (s, it2) =>
+                              s +
+                              (Number(it2.price) || 0) *
+                                (Number(it2.quantity) || 0),
+                            0
+                          );
+                          return next;
+                        });
+                        setSelectedProductId("");
+                        setSelectedProductQuantity(1);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2"
+                    >
+                      Agregar
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -624,12 +915,18 @@ const AdminOrders = () => {
               await updateQuantityWithRetry(url, newCount);
             }
             await deleteOrder(restoreOrder.id);
-            const { showToast } = toastCtx;
-            showToast("Stocks restaurados y pedido eliminado", 1800, "success");
+            toastCtx.showToast(
+              "Stocks restaurados y pedido eliminado",
+              1800,
+              "success"
+            );
           } catch (err) {
             console.error("Error restaurando stock:", err);
-            const { showToast } = toastCtx;
-            showToast(err.message || "Error restaurando stock", 2200, "error");
+            toastCtx.showToast(
+              err.message || "Error restaurando stock",
+              2200,
+              "error"
+            );
           } finally {
             setRestoreOrder(null);
             setRestoreQuantities({});
