@@ -240,7 +240,6 @@ const CartPage = () => {
           content="Revisa los productos en tu carrito y finaliza tu compra de forma segura."
         />
       </Helmet>
-      {/* Left: Items */}
       <div className="lg:col-span-2 space-y-6">
         <h2 className="text-2xl font-semibold tracking-tight text-main">
           Tu Carrito ({cart.reduce((s, i) => s + (i.quantity || 1), 0)})
@@ -298,7 +297,6 @@ const CartPage = () => {
         )}
       </div>
 
-      {/* Right: Summary */}
       <aside className="space-y-6">
         <div className="rounded-lg border border-border bg-surface shadow-sm p-6 space-y-4">
           <h3 className="text-lg font-semibold text-main">
@@ -336,7 +334,6 @@ const CartPage = () => {
         </div>
       </aside>
 
-      {/* Modals */}
       <ConfirmModal
         open={!!toDelete}
         onClose={() => setToDelete(null)}

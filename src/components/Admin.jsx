@@ -74,7 +74,6 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Sidebar desktop */}
       <aside className="hidden md:flex w-60 bg-surface border-r border-border p-4 flex-col gap-4">
         <h2 className="text-lg font-semibold tracking-tight text-main">
           Administración
@@ -82,7 +81,6 @@ const Admin = () => {
         {navLinks}
       </aside>
       <div className="flex-1 flex flex-col">
-        {/* Top bar mobile */}
         <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-surface sticky top-0 z-30">
           <button
             onClick={() => setOpen((o) => !o)}
@@ -99,7 +97,6 @@ const Admin = () => {
             {currentTitle}
           </h2>
         </div>
-        {/* Dropdown panel mobile */}
         {open && (
           <div className="md:hidden px-4 py-3 border-b border-border bg-surface shadow-sm animate-fade-in">
             {navLinks}

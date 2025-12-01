@@ -69,7 +69,6 @@ const Header = () => {
             </ul>
           </nav>
 
-          {/* Mobile simplified nav trigger (optional future) */}
           <div className="flex items-center gap-3">
             <button
               onClick={goToCart}

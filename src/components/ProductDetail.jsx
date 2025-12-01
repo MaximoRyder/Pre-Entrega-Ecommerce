@@ -112,7 +112,6 @@ const ProductDetail = () => {
         <title>{product.title} | Mi Tienda</title>
         <meta name="description" content={product.description} />
       </Helmet>
-      {/* Left column */}
       <div className="space-y-6">
         <div className="aspect-[4/5] w-full overflow-hidden rounded-xl bg-surface border border-border shadow-sm flex items-center justify-center p-4">
           <img
@@ -134,9 +133,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Right column */}
       <div className="flex flex-col gap-6">
-        {/* Price / stock */}
         <div className="rounded-lg border border-border bg-surface shadow-sm p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-sub">
@@ -158,7 +155,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Quantity */}
         <div className="rounded-lg border border-border bg-surface shadow-sm p-5 space-y-3">
           <div className="text-sm font-medium text-sub">Cantidad:</div>
           <div>
@@ -200,7 +196,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Total */}
         <div className="rounded-lg border border-border bg-surface shadow-sm p-5 flex items-center justify-between">
           <span className="text-sm font-medium text-sub">Total:</span>
           <div className="text-xl font-semibold text-main">
