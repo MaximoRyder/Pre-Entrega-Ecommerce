@@ -1,6 +1,7 @@
 import {
   ArrowPathIcon,
   PencilSquareIcon,
+  PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { Fragment, useContext, useEffect, useState } from "react";
@@ -33,6 +34,13 @@ const AdminOrders = () => {
   const [userEmailError, setUserEmailError] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedProductQuantity, setSelectedProductQuantity] = useState(1);
+  const [creating, setCreating] = useState(false);
+  const [createDraft, setCreateDraft] = useState(null);
+  const [createSelectedProductId, setCreateSelectedProductId] = useState("");
+  const [createSelectedProductQuantity, setCreateSelectedProductQuantity] =
+    useState(1);
+  const [createSaving, setCreateSaving] = useState(false);
+  const [createUserEmailError, setCreateUserEmailError] = useState("");
   const toastCtx = useContext(ToastContext);
   const [statusForm, setStatusForm] = useState("Pending");
   const [saving, setSaving] = useState(false);
@@ -210,6 +218,47 @@ const AdminOrders = () => {
     return () => (mounted = false);
   }, [editing]);
 
+  useEffect(() => {
+    let mounted = true;
+    async function prepareCreate() {
+      if (!creating) {
+        setCreateDraft(null);
+        setCreateSelectedProductId("");
+        return;
+      }
+      const draft = { userEmail: "", items: [], subtotal: 0 };
+      if (mounted) setCreateDraft(draft);
+
+      try {
+        const PRODUCTS_API =
+          import.meta.env.VITE_PRODUCTS_API ||
+          "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+        const pres = await fetch(PRODUCTS_API);
+        if (pres.ok) {
+          const prods = await pres.json();
+          if (mounted) setProductsList(prods || []);
+        }
+
+        const USERS_API =
+          import.meta.env.VITE_USERS_API ||
+          "https://6928f88e9d311cddf347cd7f.mockapi.io/api/v1/users";
+        try {
+          const ures = await fetch(USERS_API);
+          if (ures.ok) {
+            const us = await ures.json();
+            if (mounted) setUsersList(Array.isArray(us) ? us : []);
+          }
+        } catch (ue) {
+          console.warn("No se cargaron users para crear pedido", ue);
+        }
+      } catch (e) {
+        console.warn("No se cargaron products para crear pedido", e);
+      }
+    }
+    prepareCreate();
+    return () => (mounted = false);
+  }, [creating]);
+
   const deleteOrder = async (id) => {
     try {
       if (String(id).startsWith("local-")) {
@@ -244,6 +293,12 @@ const AdminOrders = () => {
       <div className="hidden md:flex items-center justify-between">
         <h3 className="text-xl font-semibold tracking-tight">Pedidos</h3>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCreating(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-3 py-2 focus:outline-none focus-visible:ring focus-visible:ring-emerald-500/40"
+          >
+            <PlusIcon className="w-5 h-5" /> Agregar pedido
+          </button>
           {localCount > 0 && (
             <button
               onClick={syncLocalOrders}
@@ -950,6 +1005,425 @@ const AdminOrders = () => {
                           });
                           setSelectedProductId("");
                           setSelectedProductQuantity(1);
+                        }}
+                        className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2"
+                      >
+                        Agregar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </AdminEntityModal>
+
+      <AdminEntityModal
+        open={!!creating}
+        title={creating ? `Crear nuevo pedido` : ""}
+        onClose={() => {
+          setCreating(false);
+          setCreateDraft(null);
+          setCreateUserEmailError("");
+        }}
+        onSubmit={async () => {
+          if (!createDraft) return;
+          setCreateSaving(true);
+          let saved = false;
+          let prevQuantities = {};
+          let updatedIds = [];
+          const PRODUCTS_API =
+            import.meta.env.VITE_PRODUCTS_API ||
+            "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+          try {
+            const email = (createDraft.userEmail || "").trim();
+            if (!email) {
+              setCreateUserEmailError("El usuario no puede quedar vacío");
+              setCreateSaving(false);
+              return;
+            }
+            if (!usersList || usersList.length === 0) {
+              try {
+                const USERS_API =
+                  import.meta.env.VITE_USERS_API ||
+                  "https://6928f88e9d311cddf347cd7f.mockapi.io/api/v1/users";
+                const ures = await fetch(USERS_API);
+                if (ures.ok) {
+                  const us = await ures.json();
+                  setUsersList(Array.isArray(us) ? us : []);
+                }
+              } catch (e) {
+                console.warn("No se pudo validar usuario:", e);
+              }
+            }
+            const found = (usersList || []).some(
+              (u) => String(u.email || "").toLowerCase() === email.toLowerCase()
+            );
+            if (!found) {
+              setCreateUserEmailError(
+                "El email no corresponde a un usuario registrado"
+              );
+              setCreateSaving(false);
+              return;
+            }
+
+            if (!createDraft.items || createDraft.items.length === 0) {
+              toastCtx.showToast("Agrega al menos un item", 1800, "info");
+              setCreateSaving(false);
+              return;
+            }
+
+            for (const it of createDraft.items) {
+              const prod = (productsList || []).find(
+                (p) => String(p.id) === String(it.id)
+              );
+              if (!prod) throw new Error(`Producto no encontrado: ${it.name}`);
+              const available = Number(
+                prod.quantity ?? prod.stock ?? prod.rating?.count ?? 0
+              );
+              const desired = Number(it.quantity || 1);
+              if (desired > available)
+                throw new Error(`Stock insuficiente para ${it.name}`);
+              const newCount = Math.max(0, available - desired);
+              prevQuantities[it.id] = available;
+              await updateQuantityWithRetry(
+                `${PRODUCTS_API}/${it.id}`,
+                newCount
+              );
+              updatedIds.push(it.id);
+            }
+
+            const payload = {
+              userEmail: String(createDraft.userEmail || "").trim(),
+              items: (createDraft.items || []).map((it) => ({
+                id: String(it.id || ""),
+                name: String(it.name || ""),
+                price: Number(it.price || 0),
+                quantity: Number(it.quantity || 1),
+              })),
+              subtotal: Number(createDraft.subtotal || 0),
+              status: createDraft.status || "Pending",
+              createdAt: new Date().toISOString(),
+            };
+
+            if (!import.meta.env.VITE_ORDERS_API) {
+              const existing = JSON.parse(
+                localStorage.getItem("local_orders") || "[]"
+              );
+              const id = `local-${Date.now()}`;
+              existing.push({ ...payload, id, local: true });
+              localStorage.setItem("local_orders", JSON.stringify(existing));
+              setOrders((prev) => [
+                { ...existing[existing.length - 1] },
+                ...prev,
+              ]);
+              toastCtx.showToast("Pedido guardado localmente", 1800, "info");
+            } else {
+              const res = await fetch(API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              if (!res.ok) {
+                const text = await res.text().catch(() => null);
+                throw new Error(text || "Error creando pedido");
+              }
+              await res.json();
+              toastCtx.showToast(
+                "Pedido creado correctamente",
+                1500,
+                "success"
+              );
+              await refresh();
+            }
+
+            saved = true;
+          } catch (err) {
+            console.error("Error creando pedido:", err);
+            try {
+              const PRODUCTS_API =
+                import.meta.env.VITE_PRODUCTS_API ||
+                "https://692842d6b35b4ffc5014e50a.mockapi.io/api/v1/products";
+              for (const id of Object.keys(prevQuantities || {})) {
+                try {
+                  const prev = prevQuantities[id];
+                  await updateQuantityWithRetry(`${PRODUCTS_API}/${id}`, prev);
+                } catch (rbErr) {
+                  console.error("Rollback failed for", id, rbErr);
+                }
+              }
+            } catch (e) {
+              console.error("Error during rollback:", e);
+            }
+            toastCtx.showToast(
+              err.message || "Error creando pedido",
+              2200,
+              "error"
+            );
+          } finally {
+            setCreateSaving(false);
+            if (saved) {
+              setCreating(false);
+              setCreateDraft(null);
+              setCreateSelectedProductId("");
+              setCreateSelectedProductQuantity(1);
+              setCreateUserEmailError("");
+            }
+          }
+        }}
+        submitLabel="Crear pedido"
+        loading={createSaving}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-sub uppercase">
+              Estado
+            </label>
+            <select
+              value={createDraft?.status || "Pending"}
+              onChange={(e) =>
+                setCreateDraft((prev) => ({
+                  ...(prev || {}),
+                  status: e.target.value,
+                }))
+              }
+              className="rounded-md border border-border bg-surface text-main px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-main"
+            >
+              {statusOptions.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {createDraft && (
+            <div className="space-y-3">
+              <div className="text-xs text-sub space-y-1">
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-sub">
+                    Usuario (email)
+                  </label>
+                  <input
+                    type="text"
+                    value={createDraft.userEmail || ""}
+                    onChange={(e) => {
+                      setCreateDraft((prev) => ({
+                        ...(prev || {}),
+                        userEmail: e.target.value,
+                      }));
+                      setCreateUserEmailError("");
+                    }}
+                    className="mt-1 rounded-md border border-border bg-surface text-main px-3 py-2 text-sm"
+                  />
+                  {createUserEmailError && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {createUserEmailError}
+                    </p>
+                  )}
+                </div>
+                <p>
+                  <strong>Subtotal:</strong>{" "}
+                  {formatCurrency(createDraft.subtotal || 0)}
+                </p>
+                <p>
+                  <strong>Items:</strong>{" "}
+                  {(createDraft.items || []).length || 0}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {(createDraft.items || []).map((it, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between gap-3 border border-border rounded-md p-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate font-medium" title={it.name}>
+                        {it.name}
+                      </div>
+                      <div className="text-xs text-sub">
+                        Precio unitario: {formatCurrency(it.price)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <QuantitySelector
+                        value={Number(it.quantity) || 1}
+                        onChange={(v) => {
+                          setCreateDraft((prev) => {
+                            const next = JSON.parse(
+                              JSON.stringify(prev || { items: [] })
+                            );
+                            next.items[idx].quantity = v;
+                            next.subtotal = (next.items || []).reduce(
+                              (s, it2) =>
+                                s +
+                                (Number(it2.price) || 0) *
+                                  (Number(it2.quantity) || 0),
+                              0
+                            );
+                            return next;
+                          });
+                        }}
+                        min={1}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCreateDraft((prev) => {
+                            const next = JSON.parse(JSON.stringify(prev));
+                            next.items = (next.items || []).filter(
+                              (_, i) => i !== idx
+                            );
+                            next.subtotal = (next.items || []).reduce(
+                              (s, it2) =>
+                                s +
+                                (Number(it2.price) || 0) *
+                                  (Number(it2.quantity) || 0),
+                              0
+                            );
+                            return next;
+                          });
+                        }}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-red-300 hover:bg-red-900/20 text-red-500"
+                        aria-label="Eliminar item"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <label className="text-xs font-medium text-sub">
+                  Agregar producto
+                </label>
+                <div className="mt-2">
+                  <select
+                    value={createSelectedProductId}
+                    onChange={(e) => {
+                      setCreateSelectedProductId(e.target.value);
+                      setCreateSelectedProductQuantity(1);
+                    }}
+                    className="w-full rounded-md border border-border bg-surface text-main px-3 py-2 text-sm"
+                  >
+                    <option value="">Seleccionar producto...</option>
+                    {(() => {
+                      const availableProducts = (productsList || []).filter(
+                        (p) => {
+                          const alreadyInDraft = (
+                            createDraft?.items || []
+                          ).some((it) => String(it.id) === String(p.id));
+                          const available = Number(
+                            p.quantity ?? p.stock ?? p.rating?.count ?? 0
+                          );
+                          return !alreadyInDraft && available > 0;
+                        }
+                      );
+                      if (availableProducts.length === 0) {
+                        return (
+                          <option value="" disabled>
+                            No hay productos disponibles
+                          </option>
+                        );
+                      }
+                      return availableProducts.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {(p.title || p.name) +
+                            " - " +
+                            formatCurrency(Number(p.price) || 0)}
+                        </option>
+                      ));
+                    })()}
+                  </select>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <QuantitySelector
+                      value={createSelectedProductQuantity}
+                      onChange={(v) =>
+                        setCreateSelectedProductQuantity(Number(v) || 0)
+                      }
+                      min={1}
+                      max={(() => {
+                        const prod = productsList.find(
+                          (p) =>
+                            String(p.id) === String(createSelectedProductId)
+                        );
+                        if (!prod) return 1;
+                        return Math.max(
+                          0,
+                          Number(
+                            prod.quantity ??
+                              prod.stock ??
+                              prod.rating?.count ??
+                              0
+                          )
+                        );
+                      })()}
+                    />
+
+                    <div className="ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!createSelectedProductId) return;
+                          const prod = productsList.find(
+                            (p) =>
+                              String(p.id) === String(createSelectedProductId)
+                          );
+                          if (!prod) return;
+                          const available = Number(
+                            prod.quantity ??
+                              prod.stock ??
+                              prod.rating?.count ??
+                              0
+                          );
+                          const addQty =
+                            Number(createSelectedProductQuantity) || 0;
+                          if (addQty <= 0) return;
+                          if (addQty > available) {
+                            toastCtx.showToast(
+                              `No hay suficiente stock. Disponible: ${available}`,
+                              2200,
+                              "error"
+                            );
+                            return;
+                          }
+                          setCreateDraft((prev) => {
+                            const next = JSON.parse(
+                              JSON.stringify(prev || { items: [] })
+                            );
+                            next.items = next.items || [];
+                            const existingIdx = next.items.findIndex(
+                              (i) => String(i.id) === String(prod.id)
+                            );
+                            if (existingIdx !== -1) {
+                              toastCtx.showToast(
+                                "El producto ya está en el pedido. Modifica la cantidad existente.",
+                                2200,
+                                "info"
+                              );
+                              return prev;
+                            }
+                            next.items.push({
+                              id: prod.id,
+                              name: prod.title || prod.name,
+                              price: Number(prod.price) || 0,
+                              quantity: addQty,
+                            });
+                            next.subtotal = (next.items || []).reduce(
+                              (s, it2) =>
+                                s +
+                                (Number(it2.price) || 0) *
+                                  (Number(it2.quantity) || 0),
+                              0
+                            );
+                            return next;
+                          });
+                          setCreateSelectedProductId("");
+                          setCreateSelectedProductQuantity(1);
                         }}
                         className="inline-flex items-center gap-2 rounded-md bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-3 py-2"
                       >
