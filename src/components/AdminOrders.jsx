@@ -1,5 +1,6 @@
 import {
   ArrowPathIcon,
+  ChevronDownIcon,
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
@@ -220,12 +221,18 @@ const AdminOrders = () => {
                                     [o.id]: !prev[o.id],
                                   }))
                                 }
-                                className="inline-flex items-center justify-center px-2 py-1 rounded-md border border-border text-xs hover:bg-surface-hover"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover"
                                 aria-label={
                                   expanded[o.id] ? "Ocultar items" : "Ver items"
                                 }
+                                aria-expanded={!!expanded[o.id]}
                               >
-                                {expanded[o.id] ? "Ocultar" : "Ver"}
+                                <ChevronDownIcon
+                                  className={
+                                    "w-4 h-4 transform transition-transform " +
+                                    (expanded[o.id] ? "rotate-180" : "")
+                                  }
+                                />
                               </button>
                               <button
                                 onClick={() => setEditing(o)}
@@ -245,17 +252,17 @@ const AdminOrders = () => {
                           </td>
                         </tr>
                         {expanded[o.id] && o.items && o.items.length > 0 && (
-                          <tr className="bg-surface">
-                            <td colSpan={7} className="px-3 py-2">
-                              <ul className="space-y-1 text-sm">
+                          <tr className="">
+                            <td colSpan={7} className="px-0 py-0">
+                              <ul className="space-y-0 text-sm divide-y divide-border">
                                 {o.items.map((it, idx) => (
                                   <li
                                     key={idx}
                                     className={
-                                      "flex items-center gap-2 px-2 py-1 " +
+                                      "flex items-center gap-2 px-3 py-2 " +
                                       (idx % 2 === 0
-                                        ? "bg-green-900"
-                                        : "bg-green-800")
+                                        ? "bg-gray-900"
+                                        : "bg-gray-800")
                                     }
                                   >
                                     <span
@@ -264,10 +271,7 @@ const AdminOrders = () => {
                                     >
                                       {it.name}
                                     </span>
-                                    <span
-                                      className="flex-1 border-b border-dotted border-border mx-2"
-                                      aria-hidden="true"
-                                    ></span>
+
                                     <span className="whitespace-nowrap ml-1">
                                       x{it.quantity}
                                     </span>
@@ -353,9 +357,18 @@ const AdminOrders = () => {
                               [o.id]: !prev[o.id],
                             }))
                           }
-                          className="text-xs font-medium px-2 py-1 rounded-md border border-border hover:bg-surface-hover"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover"
+                          aria-label={
+                            isExpanded ? "Ocultar items" : "Ver items"
+                          }
+                          aria-expanded={isExpanded}
                         >
-                          {isExpanded ? "Ocultar" : "Ver"}
+                          <ChevronDownIcon
+                            className={
+                              "w-4 h-4 transform transition-transform " +
+                              (isExpanded ? "rotate-180" : "")
+                            }
+                          />
                         </button>
                       )}
                     </div>
@@ -374,10 +387,6 @@ const AdminOrders = () => {
                           <span className="truncate" title={it.name}>
                             {it.name}
                           </span>
-                          <span
-                            className="flex-1 border-b border-dotted border-border mx-2"
-                            aria-hidden="true"
-                          ></span>
                           <span className="whitespace-nowrap ml-1">
                             x{it.quantity}
                           </span>
