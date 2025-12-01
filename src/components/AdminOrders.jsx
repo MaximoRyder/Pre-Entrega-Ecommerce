@@ -313,7 +313,7 @@ const AdminOrders = () => {
                   </div>
 
                   {isExpanded && o.items && o.items.length > 0 && (
-                    <ul className="mt-2 space-y-1 text-xs text-main">
+                    <ul className="mt-2 space-y-1 text-xs text-main border-t border-border pt-2">
                       {o.items.map((it, idx) => (
                         <li key={idx} className="flex justify-between gap-2">
                           <span className="truncate" title={it.name}>
