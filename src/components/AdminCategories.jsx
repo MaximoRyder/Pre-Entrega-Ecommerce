@@ -9,6 +9,7 @@ import AdminEntityModal from "./AdminEntityModal";
 import ConfirmModal from "./ConfirmModal";
 import FormField from "./FormField";
 import Pagination from "./Pagination";
+import SearchForm from "./SearchForm";
 
 const API_ENV = import.meta.env.VITE_CATEGORIES_API;
 const API =
@@ -27,7 +28,14 @@ const AdminCategories = () => {
   const [deleting, setDeleting] = useState(null);
   const [saving, setSaving] = useState(false);
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const pageSize = 10;
+
+  const filteredCategories = categories.filter((c) => {
+    if (!searchTerm) return true;
+    const lower = searchTerm.toLowerCase();
+    return (c.name || "").toLowerCase().includes(lower);
+  });
 
   const load = async () => {
     if (!API) return;
@@ -140,6 +148,15 @@ const AdminCategories = () => {
           <PlusIcon className="w-5 h-5" /> Agregar
         </button>
       </div>
+      <SearchForm
+        onSearch={(term) => {
+          setSearchTerm(term);
+          setPage(1);
+        }}
+        initialValue={searchTerm}
+        placeholder="Buscar por nombre..."
+      />
+
       <div className="md:hidden flex justify-end">
         <button
           onClick={openNew}
@@ -159,7 +176,7 @@ const AdminCategories = () => {
             </tr>
           </thead>
           <tbody>
-            {categories
+            {filteredCategories
               .slice((page - 1) * pageSize, page * pageSize)
               .map((c) => (
                 <tr
@@ -192,7 +209,7 @@ const AdminCategories = () => {
                   </td>
                 </tr>
               ))}
-            {categories.length === 0 && !loading && !error && (
+            {filteredCategories.length === 0 && !loading && !error && (
               <tr>
                 <td
                   colSpan={2}
@@ -214,37 +231,39 @@ const AdminCategories = () => {
       </div>
 
       <div className="md:hidden space-y-3">
-        {categories.slice((page - 1) * pageSize, page * pageSize).map((c) => (
-          <div
-            key={c.id}
-            className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
-          >
-            <div className="flex">
-              <span className="font-semibold mr-1">Nombre:</span>
-              <span className="flex-1 truncate" title={c.name}>
-                {c.name}
-              </span>
+        {filteredCategories
+          .slice((page - 1) * pageSize, page * pageSize)
+          .map((c) => (
+            <div
+              key={c.id}
+              className="border border-border rounded-md bg-surface shadow-sm px-3 py-2 text-sm"
+            >
+              <div className="flex">
+                <span className="font-semibold mr-1">Nombre:</span>
+                <span className="flex-1 truncate" title={c.name}>
+                  {c.name}
+                </span>
+              </div>
+              <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
+                <span className="font-semibold">Acciones:</span>
+                <button
+                  onClick={() => openEdit(c)}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
+                  aria-label="Editar"
+                >
+                  <PencilSquareIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => confirmDelete(c)}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
+                  aria-label="Eliminar"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <div className="border-t border-border mt-2 pt-2 flex items-center gap-2">
-              <span className="font-semibold">Acciones:</span>
-              <button
-                onClick={() => openEdit(c)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border hover:bg-surface-hover text-sub"
-                aria-label="Editar"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => confirmDelete(c)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-border text-red-500 hover:bg-red-500/10"
-                aria-label="Eliminar"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        ))}
-        {categories.length === 0 && !loading && !error && (
+          ))}
+        {filteredCategories.length === 0 && !loading && !error && (
           <div className="text-center text-sm text-muted py-6 border border-dashed border-border rounded-md">
             Sin categorías
           </div>
@@ -253,7 +272,10 @@ const AdminCategories = () => {
       <div className="md:hidden mt-2">
         <Pagination
           page={page}
-          totalPages={Math.max(1, Math.ceil(categories.length / pageSize))}
+          totalPages={Math.max(
+            1,
+            Math.ceil(filteredCategories.length / pageSize)
+          )}
           onPageChange={setPage}
         />
       </div>
