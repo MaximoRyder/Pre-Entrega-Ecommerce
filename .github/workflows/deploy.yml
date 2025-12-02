@@ -28,10 +28,10 @@ jobs:
           cache: 'npm'
         
       - name: Force dependencies
-        run: npm ci --legacy-peer-deps
+        run: pnpm ci --legacy-peer-deps
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
