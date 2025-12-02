@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+    <title>Mi Tienda — Tech</title>
+
+    <!-- Background rounded square (black) -->
+    <rect width="64" height="64" rx="10" fill="#000000" />
+
+    <defs>
+        <linearGradient id="chipGrad" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#34D399" />
+            <stop offset="100%" stop-color="#059669" />
+        </linearGradient>
+    </defs>
+
+    <!-- Large chip shape (green) centered, bigger to emphasize tech store -->
+    <rect x="12" y="12" width="40" height="40" rx="6" fill="url(#chipGrad)" stroke="#047857" stroke-width="1" />
+
+    <!-- Chip pins: top and bottom small rectangles -->
+    <!-- top pins -->
+    <rect x="18" y="8" width="4" height="6" rx="1" fill="#034022" />
+    <rect x="26" y="8" width="4" height="6" rx="1" fill="#034022" />
+    <rect x="34" y="8" width="4" height="6" rx="1" fill="#034022" />
+    <rect x="42" y="8" width="4" height="6" rx="1" fill="#034022" />
+    <!-- bottom pins -->
+    <rect x="18" y="50" width="4" height="6" rx="1" fill="#034022" />
+    <rect x="26" y="50" width="4" height="6" rx="1" fill="#034022" />
+    <rect x="34" y="50" width="4" height="6" rx="1" fill="#034022" />
+    <rect x="42" y="50" width="4" height="6" rx="1" fill="#034022" />
+
+    <!-- Left and right pins -->
+    <rect x="8" y="18" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="8" y="26" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="8" y="34" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="8" y="42" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="50" y="18" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="50" y="26" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="50" y="34" width="6" height="4" rx="1" fill="#034022" />
+    <rect x="50" y="42" width="6" height="4" rx="1" fill="#034022" />
+
+    <!-- Center 'T' monogram in black to indicate 'Tienda' / Tech -->
+    <rect x="28" y="22" width="8" height="4" rx="1" fill="#000000" />
+    <rect x="30" y="26" width="4" height="12" rx="1" fill="#000000" />
+
+    <!-- Subtle inner highlight to add depth -->
+    <rect x="18" y="18" width="28" height="28" rx="4" fill="none" stroke="#0f5132" stroke-opacity="0.25" />
+
+</svg>
