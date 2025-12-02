@@ -21,15 +21,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node (with pnpm cache)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable corepack (pnpm)
         run: corepack enable || true
+
+      - name: Ensure pnpm available (corepack fallback)
+        run: corepack prepare pnpm@8 --activate || true
 
       - name: Setup pnpm (official)
         uses: pnpm/action-setup@v2
